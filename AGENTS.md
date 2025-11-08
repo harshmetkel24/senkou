@@ -1,38 +1,71 @@
-# Repository Guidelines
+# Senkou Agent Manual
 
-## Project Structure & Module Organization
-- App code lives in `src/` with feature folders:
-  - `src/routes/` (TanStack Router routes), `src/components/`, `src/lib/`, `src/data/`.
-- Static assets are in `public/` (served as-is). Build output goes to `.output/` and `dist/`.
-- Config files: `vite.config.ts`, `tsconfig.json`, `components.json`.
-- Generated files like `src/routeTree.gen.ts` should not be edited directly.
+## Mission & Pillars
+- Craft a cinematic, IMDB-style AniList browser with buttery infinite scroll, URL-driven filters, and delightful micro-interactions.
+- Maintain strict performance (TTFB < 200 ms cached, LCP < 2.5 s, CLS < 0.05) and resilience against AniList rate limits.
+- Architecture must scale toward authenticated watchlists, recommendations, and social features without rewrites.
 
-## Build, Test, and Development Commands
-- `pnpm dev` — start Vite dev server on `http://localhost:3000`.
-- `pnpm build` — production build via Vite.
-- `pnpm serve` — preview the built app locally.
-- `pnpm test` — run unit tests with Vitest in CI mode.
+## Delivery Stages
+### Stage 1 — MVP “Beautiful Infinite Scroll”
+- Routes: Anime, Characters, Manga, Staff inside a sidebar-first layout with sticky filter/search bar.
+- Initial data loads in RSC loaders; client hydration continues pagination via `useInfiniteQuery` + IntersectionObserver sentinel per grid.
+- URLSearchParams are the single source of truth for search/sort/filter; syncing is mandatory before fetching.
+- Card grids require skeletons, responsive breakpoints, lazy images, empty + error states with retry/backoff messaging.
+- Detail pages reuse cached list data when possible and prefetch staff/character info.
 
-## Coding Style & Naming Conventions
-- Language: TypeScript + React 19. Use functional components and hooks.
-- Indentation: 2 spaces. Filenames are `kebab-case.tsx` for components and `kebab-case.ts` for utilities.
-- Components: export a default UI component; colocate small helpers next to usage.
-- Imports: prefer absolute paths resolved by `tsconfig` (e.g., `import { Button } from "src/components/button"`).
-- Styling: Tailwind CSS (v4). Keep class lists readable; extract variants with `class-variance-authority` where helpful.
-- Lint/format: use Prettier defaults (run your editor integration before committing).
+### Stage 2 — Auth + Watchlists
+- Auth.js OAuth (GitHub, Google) + optional magic link; edge-safe cookies only.
+- Watchlist Server Actions (add/remove/toggle) must be optimistic, rate-limited, and CSRF-protected.
+- “My Library” page mirrors list UX with filters/pagination; include profile (avatar, display name, theme, content rating filter).
 
-## Testing Guidelines
-- Framework: Vitest with `@testing-library/react` and `jsdom`.
-- Place tests adjacent to code as `*.test.ts(x)` (e.g., `button.test.tsx`).
-- Aim for meaningful unit tests of components, hooks, and route loaders. Prefer queries by role/text.
-- Run `pnpm test` locally; keep tests deterministic and DOM-focused.
+### Stage 3 — Advanced Features
+- Collections/lists with shareable slugs, ratings & reviews (with moderation + helpful votes), activity feed, recommendations using co-occurrence data.
+- Offline/PWA caching (install prompt, background sync) and faceted advanced search (year/season/format/studios/tags) with debounced URL syncing.
+- CDN/blobs for cover art, i18n routing, admin tooling (feature flags, moderation queue).
 
-## Commit & Pull Request Guidelines
-- Commits: concise imperative subject (max ~72 chars). Example: `feat(routes): add dashboard loader`.
-- Scope changes narrowly; commit generated files only if necessary.
-- PRs must include: summary, screenshots for UI changes, steps to test, and linked issues.
-- Ensure `pnpm build` and `pnpm test` pass; mention any follow-ups.
+## Architecture & Module Organization
+- App code lives in `src/` with feature folders: `src/routes/`, `src/components/`, `src/lib/`, `src/data/`.
+- Place AniList GraphQL operations/fragments in `src/data/queries` and keep them typed via generated artifacts or `graphql-request` helpers.
+- Static assets → `public/`. Build outputs → `.output/`, `dist/`. Generated files like `src/routeTree.gen.ts` stay untouched.
+- Use absolute imports (TS path aliases). Files follow kebab-case; hooks/utilities colocated near usage when feasible.
 
-## Security & Configuration Tips
-- Do not commit secrets. Use environment variables and local `.env` files ignored by Git.
-- Validate route loader inputs and sanitize any user-provided data before rendering.
+## API & Data Guidance
+- Primary datasource: AniList GraphQL (`https://graphql.anilist.co`). Reference https://docs.anilist.co/guide/introduction for schema and rate limits.
+- Always validate loader inputs with zod/valibot before hitting AniList; guard against injection in GraphQL variables.
+- Implement exponential backoff + jitter for HTTP 429/5xx responses and surface helpful UI messaging.
+- Cache-aware design: RSC loaders fetch the first page, then pass cursors to client queries for infinite scroll; keep fragments reusable across list/detail routes.
+- Prepare for future internal APIs (watchlists, reviews) exposed via TanStack Start server actions—structure handlers in `src/server/`.
+
+## UI & Experience Conventions
+- Sidebar shell persists across routes; highlight active route, collapse gracefully on narrow viewports.
+- Filter bar is sticky, keyboard-accessible, and mirrors URL state; include quick toggles for format/season/year.
+- Cards follow shadcn tokens, include aspect-ratio-safe images, CTA chips (format, episodes, popularity).
+- Empty and error states are bespoke illustrations/messages; rate-limit errors should suggest retry timing.
+- Accessibility: all interactive elements need focus styles, `prefers-reduced-motion` fallbacks, and semantic headings.
+
+## Styling & Components
+- Tailwind CSS (v4) with design tokens documented in `src/lib/theme`.
+- Use shadcn/ui primitives; extend via `class-variance-authority` when variants grow.
+- Theme-ready from Day 1 (light/dark), but default is dark cinematic palette.
+
+## Testing & Quality
+- Vitest + @testing-library/react (jsdom). Tests colocated as `*.test.ts(x)`.
+- Cover: loader param parsing, intersection observer pagination, optimistic watchlist toggles, search URL syncing, and accessibility regressions.
+- Snapshot tests are discouraged unless guarding critical layouts.
+- Always run `pnpm test` and `pnpm build` before submitting work.
+
+## Tooling & Commands
+- `pnpm dev` – Vite dev server (`http://localhost:3000`).
+- `pnpm build` – production build (must stay warning-free).
+- `pnpm serve` – preview built output.
+- `pnpm test` – Vitest CI mode.
+
+## Process, Git, & Reviews
+- Commits: short imperative subject (≤72 chars). Example: `feat(routes): add anime infinite scroll`.
+- PRs require summary, screenshots of UI changes, test plan, linked issues. Mention perf impact if relevant.
+- Keep scope tight; avoid mixing generated files unless necessary.
+
+## Security & Observability
+- No secrets checked in; use `.env` ignored by git. Server actions must sanitize and authorize inputs.
+- Hook Sentry (client/server) and trace AniList queries to identify slow terms or rate-limit patterns.
+- Ensure CSRF protection and mutation rate-limiting before launching Stage 2.

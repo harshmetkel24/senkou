@@ -1,299 +1,98 @@
-Welcome to your new TanStack app! 
+<div align="center">
+  <img src="./public/senkou-circle-logo.png" width="150" alt="Senkou logo" />
+  <h1>Senkou</h1>
+  <p><strong>A beautifully designed, infinite-scrolling AniList library built with TanStack Start.</strong></p>
+  <p><a href="https://docs.anilist.co/guide/introduction">AniList API Guide</a> · <a href="https://tanstack.com/start/latest">TanStack Start</a></p>
+  <p>
+    <a href="https://tanstack.com/start/latest">
+      <img src="./public/tanstack-circle-logo.png" height="56" alt="TanStack Start logo" />
+    </a>
+    &nbsp;&nbsp;
+    <a href="https://react.dev/">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" height="56" alt="React logo" />
+    </a>
+    &nbsp;&nbsp;
+    <a href="https://tailwindcss.com/">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/d/d5/Tailwind_CSS_Logo.svg" height="56" alt="Tailwind CSS logo" />
+    </a>
+    &nbsp;&nbsp;
+    <a href="https://ui.shadcn.com/">
+      <img src="https://avatars.githubusercontent.com/u/139895814?s=200&v=4" height="56" alt="shadcn/ui logo" />
+    </a>
+    &nbsp;&nbsp;
+    <a href="https://anilist.co/">
+      <img src="https://anilist.co/img/icons/icon.svg" height="56" alt="AniList logo" />
+    </a>
+  </p>
+</div>
 
-# Getting Started
+## Vision
+Senkou (線光) is an IMDB-style experience for anime, manga, characters, and staff. Stage 1 focuses on a best-in-class browsing experience powered by TanStack Router RSC + React Query, with a sidebar-first layout, sticky filter bar, and buttery-smooth infinite scroll. Later stages add auth, watchlists, recommendations, and social features while preserving the cinematic feel and strict performance targets (TTFB < 200 ms cached, LCP < 2.5 s, CLS < 0.05).
 
-To run this application:
+## Roadmap
+- **Stage 1 — MVP “Beautiful Infinite Scroll” (current)**  
+  - Server components fetch AniList GraphQL data for fast first paint; client components hydrate infinite lists via `useInfiniteQuery` + IntersectionObserver sentinels.  
+  - Sidebar routes: Anime, Characters, Manga, Staff. Each route keeps search/sort/filter state in URL params for shareable state.  
+  - Card grid with skeletons, responsive breakpoints, lazy-loaded art, and empty/error states that handle AniList rate limits with retry/backoff.  
+  - Details pages reuse cached query data when possible; images are prepared for future CDN offloading.
+- **Stage 2 — Auth + Watchlists**  
+  - Auth.js OAuth (GitHub, Google) plus optional email magic links.  
+  - Server Actions mutate watchlists with optimistic React Query updates, CSRF protection, and rate-limited mutations.  
+  - “My Library” view with filters/pagination, user profile (avatar, display name, theme/content rating prefs).
+- **Stage 3 — Advanced Features**  
+  - Collections & shareable slugs, ratings/reviews with moderation, activity feed/follow graph, recommendations (“Because you watched …”), offline/PWA caching, advanced faceted search, Vercel image caching, i18n routing, and admin tooling for feature flags + moderation queues.
 
+## Tech Stack
+- **Framework**: TanStack Start (React 19, Vite, File-based routing).
+- **Data**: AniList GraphQL API; loaders for RSC, React Query for client pagination, URLSearchParams for filter state.
+- **Styling**: Tailwind CSS + shadcn/ui; responsive grid tokens and sensible typography scale.
+- **State & Utilities**: TanStack Query/Store, class-variance-authority, zod for loader validation.
+- **Tooling**: PNPM, TypeScript strict mode, Vitest + Testing Library, Sentry (client & server) for observability.
+
+## Layout & UX Notes
+- Sidebar-first shell with a sticky filter/search bar. Keep navigation persistent and highlight the active route.
+- Lists must render skeleton cards immediately, stream first data chunk from RSC, then hydrate and continue infinite scroll.
+- Use IntersectionObserver sentinels per grid; pause fetching when filters/search change until new params resolve.
+- Detail routes share typography, include staff/cast tabs, and reuse cached queries when revisiting the list.
+
+## Non-Functional Requirements
+- Respect AniList rate limits with exponential backoff + jitter. Surface graceful error states (`Retry`, `Report issue`) and empty-state illustrations.
+- Track performance budgets via Web Vitals, and instrument AniList GraphQL requests for tracing.
+- Edge-safe cookies for future auth; no secrets in the repo. All user input validated & sanitized before rendering.
+
+## Getting Started
 ```bash
-pnpm install
-pnpm start
+pnpm install        # install deps
+pnpm dev            # Vite dev server (http://localhost:3000)
+pnpm start          # TanStack Start preview (if configured)
 ```
 
-# Building For Production
-
-To build this application for production:
-
+## Build & Test
 ```bash
-pnpm build
+pnpm build          # production build
+pnpm serve          # preview dist build
+pnpm test           # Vitest suite (jsdom + @testing-library/react)
 ```
 
-## Testing
-
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
-
-```bash
-pnpm test
-```
-
-## Styling
-
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-
-
-## Shadcn
-
-Add components using the latest version of [Shadcn](https://ui.shadcn.com/).
-
-```bash
-pnpx shadcn@latest add button
-```
-
-
-
-## Routing
-This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add another a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-
-import { Link } from "@tanstack/react-router";
-
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      </header>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
-})
-```
-
-The `<TanStackRouterDevtools />` component is not required so you can remove it if you don't want it in your layout.
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-const peopleRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/people",
-  loader: async () => {
-    const response = await fetch("https://swapi.dev/api/people");
-    return response.json() as Promise<{
-      results: {
-        name: string;
-      }[];
-    }>;
-  },
-  component: () => {
-    const data = peopleRoute.useLoaderData();
-    return (
-      <ul>
-        {data.results.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    );
-  },
-});
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-### React-Query
-
-React-Query is an excellent addition or alternative to route loading and integrating it into you application is a breeze.
-
-First add your dependencies:
-
-```bash
-pnpm add @tanstack/react-query @tanstack/react-query-devtools
-```
-
-Next we'll need to create a query client and provider. We recommend putting those in `main.tsx`.
-
-```tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-// ...
-
-const queryClient = new QueryClient();
-
-// ...
-
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
-
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  );
-}
-```
-
-You can also add TanStack Query Devtools to the root route (optional).
-
-```tsx
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <ReactQueryDevtools buttonPosition="top-right" />
-      <TanStackRouterDevtools />
-    </>
-  ),
-});
-```
-
-Now you can use `useQuery` to fetch your data.
-
-```tsx
-import { useQuery } from "@tanstack/react-query";
-
-import "./App.css";
-
-function App() {
-  const { data } = useQuery({
-    queryKey: ["people"],
-    queryFn: () =>
-      fetch("https://swapi.dev/api/people")
-        .then((res) => res.json())
-        .then((data) => data.results as { name: string }[]),
-    initialData: [],
-  });
-
-  return (
-    <div>
-      <ul>
-        {data.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default App;
-```
-
-You can find out everything you need to know on how to use React-Query in the [React-Query documentation](https://tanstack.com/query/latest/docs/framework/react/overview).
-
-## State Management
-
-Another common requirement for React applications is state management. There are many options for state management in React. TanStack Store provides a great starting point for your project.
-
-First you need to add TanStack Store as a dependency:
-
-```bash
-pnpm add @tanstack/store
-```
-
-Now let's create a simple counter in the `src/App.tsx` file as a demonstration.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-function App() {
-  const count = useStore(countStore);
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-    </div>
-  );
-}
-
-export default App;
-```
-
-One of the many nice features of TanStack Store is the ability to derive state from other state. That derived state will update when the base state updates.
-
-Let's check this out by doubling the count using derived state.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store, Derived } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-const doubledStore = new Derived({
-  fn: () => countStore.state * 2,
-  deps: [countStore],
-});
-doubledStore.mount();
-
-function App() {
-  const count = useStore(countStore);
-  const doubledCount = useStore(doubledStore);
-
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-      <div>Doubled - {doubledCount}</div>
-    </div>
-  );
-}
-
-export default App;
-```
-
-We use the `Derived` class to create a new store that is derived from another store. The `Derived` class has a `mount` method that will start the derived store updating.
-
-Once we've created the derived store we can use it in the `App` component just like we would any other store using the `useStore` hook.
-
-You can find out everything you need to know on how to use TanStack Store in the [TanStack Store documentation](https://tanstack.com/store/latest).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+## Component Library
+- Generate shadcn/ui components with `pnpx shadcn@latest add <component>`. Keep tokens aligned with the Senkou theme (dark-leaning, cinematic color palette).
+
+## Data & Query Guidelines
+- Prefer route loaders for initial render and `@tanstack/react-query` for client pagination/mutations.
+- Search, filters, and sorting persist in the URL (`?query=...&sort=POPULARITY_DESC`), and loaders must parse/validate these params.
+- When hitting AniList GraphQL, keep fragments reusable across routes and document them in `src/data/queries`.
+
+## Testing & Quality
+- Place route/component tests beside their files as `*.test.ts(x)`.  
+- Add integration tests for infinite scroll boundaries, filter URL syncing, and optimistic watchlist updates once Stage 2 begins.
+- Run `pnpm test` before commits; ensure `pnpm build` stays green to catch RSC regressions.
+
+## Observability
+- Wire Sentry (client + server) and trace slow AniList queries. Log rate-limit hits and retries for future tuning.
+- Consider feature flag hooks early for Stage 3 admin tooling.
+
+## Resources
+- AniList Docs: https://docs.anilist.co/guide/introduction  
+- TanStack Start: https://tanstack.com/start/latest  
+- TanStack Router & Query: https://tanstack.com/router · https://tanstack.com/query  
+- shadcn/ui: https://ui.shadcn.com
