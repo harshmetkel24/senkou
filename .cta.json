@@ -1,0 +1,19 @@
+{
+  "initialized": true,
+  "mode": "file-router",
+  "projectName": "senkou",
+  "typescript": true,
+  "tailwind": true,
+  "git": true,
+  "addOnOptions": {},
+  "packageManager": "pnpm",
+  "version": 1,
+  "framework": "react-cra",
+  "chosenAddOns": [
+    "compiler",
+    "shadcn",
+    "start",
+    "tanstack-query",
+    "nitro"
+  ]
+}
