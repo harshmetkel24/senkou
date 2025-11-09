@@ -47,6 +47,10 @@
 - Tailwind CSS (v4) with design tokens documented in `src/lib/theme`.
 - Use shadcn/ui primitives; extend via `class-variance-authority` when variants grow.
 - Theme-ready from Day 1 (light/dark), but default is dark cinematic palette.
+- Palette values must come from Radix UI Colors via `@radix-ui/colors`; import the official scales into `src/styles.css` (per the Radix usage guide) before aliasing them to our semantic tokens.
+- Color palette lives in `src/styles.css`: consume tokens via the exposed CSS variables/utility classes (or Tailwind `theme()` helpers) instead of hard-coding hex/oklch values. Toggle palettes by switching the `data-theme` attribute (default `senkou-dark`) and define new variables there before using them anywhere else.
+- When adding another palette, extend the existing `data-theme` blocks in `src/styles.css` so every theme keeps the same token names available to components and Tailwind.
+- When changing a theme at runtime, update both `document.documentElement.dataset.theme` and the matching Radix class (`.dark` / `.light`) so the imported scales provide the correct primitive tokens.
 
 ## Testing & Quality
 - Vitest + @testing-library/react (jsdom). Tests colocated as `*.test.ts(x)`.

@@ -1,17 +1,18 @@
 import { Link } from "@tanstack/react-router";
-
 import { Home, Menu, X } from "lucide-react";
 import { useState } from "react";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const navLinkBaseClasses =
+    "flex items-center gap-3 p-3 rounded-lg transition-colors mb-2 text-sidebar-foreground hover:bg-sidebar-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring";
 
   return (
     <>
-      <header className="p-4 flex items-center bg-gray-800 text-white shadow-lg">
+      <header className="p-4 flex items-center bg-sidebar text-sidebar-foreground shadow-lg">
         <button
           onClick={() => setIsOpen(true)}
-          className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+          className="p-2 rounded-lg transition-colors hover:bg-sidebar-accent"
           aria-label="Open menu"
         >
           <Menu size={24} />
@@ -28,15 +29,15 @@ export default function Header() {
       </header>
 
       <aside
-        className={`fixed top-0 left-0 h-full w-80 bg-gray-900 text-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`fixed top-0 left-0 h-full w-80 bg-sidebar text-sidebar-foreground shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col border-r border-sidebar-border ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+        <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
           <h2 className="text-xl font-bold">先光</h2>
           <button
             onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-2 rounded-lg transition-colors hover:bg-sidebar-accent"
             aria-label="Close menu"
           >
             <X size={24} />
@@ -47,10 +48,10 @@ export default function Header() {
           <Link
             to="/"
             onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+            className={navLinkBaseClasses}
             activeProps={{
               className:
-                "flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
+                `${navLinkBaseClasses} bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90`,
             }}
           >
             <Home size={20} />
