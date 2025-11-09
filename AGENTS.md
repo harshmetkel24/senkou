@@ -68,6 +68,7 @@
 - Commits: short imperative subject (≤72 chars). Example: `feat(routes): add anime infinite scroll`.
 - PRs require summary, screenshots of UI changes, test plan, linked issues. Mention perf impact if relevant.
 - Keep scope tight; avoid mixing generated files unless necessary.
+- After any substantial code or UX change, check whether README needs a minimal, targeted update and apply it immediately.
 
 ## Security & Observability
 - No secrets checked in; use `.env` ignored by git. Server actions must sanitize and authorize inputs.
