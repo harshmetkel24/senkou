@@ -139,3 +139,40 @@ code {
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes starfield-pan {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    background-position: 0% 0%;
+  }
+  50% {
+    transform: translate3d(-2%, -4%, 0) scale(1.05);
+    background-position: 80% 40%;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    background-position: 160% 80%;
+  }
+}
+
+@keyframes starfield-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  70% {
+    opacity: 0.45;
+  }
+}
+
+@layer utilities {
+  .starfield-pan {
+    animation: starfield-pan 90s linear infinite alternate;
+    background-size: 200% 200%;
+    will-change: transform;
+  }
+
+  .starfield-twinkle {
+    animation: starfield-twinkle 12s ease-in-out infinite;
+  }
+}

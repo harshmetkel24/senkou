@@ -18,8 +18,8 @@ export default function Header() {
 
   return (
     <header className="border-b border-border bg-background/90 px-4 py-4 backdrop-blur md:px-6">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 md:grid md:grid-cols-[auto_minmax(320px,1fr)_auto] md:items-center md:gap-6">
-        <div className="flex items-center justify-between gap-4">
+      <div className="mx-auto flex items-center justify-between w-full max-w-7xl flex-col gap-3 md:grid md:grid-cols-[auto_minmax(320px,1fr)_auto] md:items-center md:gap-6">
+        <div className="flex gap-4">
           <Link to="/" className="flex items-center gap-3">
             <img
               src="/senkou-circle-logo.png"
@@ -44,16 +44,11 @@ export default function Header() {
             <div className="h-0.5 w-6 bg-foreground"></div>
           </Button>
         </div>
-
         <form
           role="search"
-          className="order-3 flex w-full items-center gap-3 rounded-2xl border border-border bg-card/80 px-4 py-2 text-sm shadow-sm focus-within:ring-2 focus-within:ring-ring/60 md:order-none"
+          className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card/80 px-4 py-2 text-sm shadow-sm focus-within:ring-2 focus-within:ring-ring/60 md:order-none"
           onSubmit={(event) => event.preventDefault()}
         >
-          <Search
-            className="h-5 w-5 text-muted-foreground"
-            aria-hidden="true"
-          />
           <input
             type="search"
             name="q"
@@ -63,14 +58,14 @@ export default function Header() {
           />
           <Button
             type="submit"
-            size="sm"
+            size="icon"
             className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/80"
           >
-            Search
+            <Search aria-hidden="true" />
           </Button>
         </form>
 
-        <nav className="order-2 flex justify-end gap-2 md:order-none">
+        <nav className="flex justify-end gap-2 md:order-none">
           {navItems.map(({ to, label, icon: Icon }) => {
             const isActive = pathname === to || pathname.startsWith(`${to}/`);
             return (
