@@ -165,6 +165,17 @@ code {
   }
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @layer utilities {
   .starfield-pan {
     animation: starfield-pan 90s linear infinite alternate;
@@ -174,5 +185,9 @@ code {
 
   .starfield-twinkle {
     animation: starfield-twinkle 12s ease-in-out infinite;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 1s ease-out;
   }
 }

@@ -10,6 +10,9 @@ export type MediaCardData = {
   format?: string;
   status?: string;
   episodes?: number;
+  episodeLabel?: string;
+  episodeUnit?: string;
+  duration?: number;
   averageScore?: number;
   popularity?: number;
   genres?: string[];
@@ -81,7 +84,7 @@ export function MediaCard({ media, onSelect }: MediaCardProps) {
           {media.episodes ? (
             <span className="inline-flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              {media.episodes} ep
+              {media.episodes} {media.episodeUnit ?? "ep"}
             </span>
           ) : null}
 

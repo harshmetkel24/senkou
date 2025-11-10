@@ -1,5 +1,7 @@
 import { fetchAniList } from "@/lib/anilist-client";
 
+import { sanitizeDescription } from "./utils";
+
 const TRENDING_ANIME_QUERY = /* GraphQL */ `
   query TrendingAnime($page: Int!, $perPage: Int!) {
     Page(page: $page, perPage: $perPage) {
@@ -99,6 +101,8 @@ export type AnimeListItem = {
   format?: string;
   status?: string;
   episodes?: number;
+  episodeLabel?: string;
+  episodeUnit?: string;
   duration?: number;
   averageScore?: number;
   popularity?: number;
@@ -112,14 +116,6 @@ export type AnimeListItem = {
 export type AnimeListPage = {
   items: AnimeListItem[];
   pageInfo: TrendingAnimeQueryResult["Page"]["pageInfo"];
-};
-
-const sanitizeDescription = (value?: string | null) => {
-  if (!value) return undefined;
-  return value
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/?[^>]+(>|$)/g, "")
-    .trim();
 };
 
 const normalizeAnime = (media: AnimeMedia): AnimeListItem => ({
@@ -147,6 +143,8 @@ const normalizeAnime = (media: AnimeMedia): AnimeListItem => ({
   genres: media.genres?.filter(Boolean) ?? [],
   studios: media.studios?.nodes.map((studio) => studio.name) ?? [],
   description: sanitizeDescription(media.description),
+  episodeLabel: "Episodes",
+  episodeUnit: "ep",
 });
 
 export const fetchTrendingAnime = async (

@@ -1,7 +1,6 @@
 import { keepPreviousData, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Activity, Film, RefreshCw, Sparkles, Wand2 } from "lucide-react";
-import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 
 import {
@@ -9,6 +8,7 @@ import {
   type MediaDetailData,
 } from "@/components/media/media-detail-panel";
 import { MediaGrid } from "@/components/media/media-grid";
+import { HighlightCard } from "@/components/media/highlight-card";
 import { Button } from "@/components/ui/button";
 import { fetchTrendingAnime } from "@/data/queries/anime";
 
@@ -174,23 +174,5 @@ function AnimeRoute() {
         onClose={closePanel}
       />
     </main>
-  );
-}
-
-type HighlightCardProps = {
-  label: string;
-  value: string;
-  icon: ReactNode;
-};
-
-function HighlightCard({ label, value, icon }: HighlightCardProps) {
-  return (
-    <div className="rounded-3xl border border-white/15 bg-black/35 p-4 text-left text-white/90 backdrop-blur">
-      <div className="flex items-center gap-3 text-xs uppercase tracking-[0.35em] text-white/70">
-        {icon}
-        {label}
-      </div>
-      <p className="mt-3 text-2xl font-semibold">{value}</p>
-    </div>
   );
 }

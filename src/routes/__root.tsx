@@ -7,6 +7,8 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
 import Header from "../components/Header";
+import Sidebar from "../components/Sidebar";
+import { SidebarProvider, useSidebar } from "../components/SidebarContext";
 
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
@@ -43,6 +45,15 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   shellComponent: RootDocument,
 });
 
+function MainContent({ children }: { children: React.ReactNode }) {
+  const { collapsed } = useSidebar();
+  return (
+    <main className={`transition-all duration-300 ${collapsed ? 'md:ml-16' : 'md:ml-64'}`}>
+      {children}
+    </main>
+  );
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-theme="senkou-dark" className="dark">
@@ -50,8 +61,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <Header />
-        {children}
+        <SidebarProvider>
+          <Sidebar />
+          <Header />
+          <MainContent>{children}</MainContent>
+        </SidebarProvider>
         <TanStackDevtools
           config={{
             position: "bottom-right",
@@ -69,3 +83,5 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     </html>
   );
 }
+
+

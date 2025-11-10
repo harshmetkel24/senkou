@@ -7,7 +7,7 @@ import {
   Star,
   X,
 } from "lucide-react";
-import { useMemo } from "react";
+import { type ComponentType, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,19 +27,28 @@ type MediaDetailPanelProps = {
   onClose: () => void;
 };
 
-const detailStats = [
+type DetailStat = {
+  key: string;
+  icon: ComponentType<{ className?: string }>;
+  getLabel: (media: MediaDetailData) => string;
+  formatter: (media: MediaDetailData) => string | undefined;
+};
+
+const detailStats: DetailStat[] = [
   {
-    label: "Score",
+    key: "score",
     icon: Star,
-    formatter: (media: MediaDetailData) =>
+    getLabel: () => "Score",
+    formatter: (media) =>
       media.averageScore
         ? `${Math.round(media.averageScore)}% Audience`
         : undefined,
   },
   {
-    label: "Popularity",
+    key: "popularity",
     icon: Flame,
-    formatter: (media: MediaDetailData) =>
+    getLabel: () => "Popularity",
+    formatter: (media) =>
       media.popularity
         ? Intl.NumberFormat("en", { notation: "compact" }).format(
             media.popularity,
@@ -47,15 +56,17 @@ const detailStats = [
         : undefined,
   },
   {
-    label: "Episodes",
+    key: "length",
     icon: Play,
-    formatter: (media: MediaDetailData) =>
+    getLabel: (media) => media.episodeLabel ?? "Episodes",
+    formatter: (media) =>
       media.episodes ? `${media.episodes} total` : undefined,
   },
   {
-    label: "Runtime",
+    key: "runtime",
     icon: Clock,
-    formatter: (media: MediaDetailData) =>
+    getLabel: () => "Runtime",
+    formatter: (media) =>
       media.duration ? `${media.duration} min` : undefined,
   },
 ];
@@ -161,17 +172,17 @@ export function MediaDetailPanel({
 
           <section className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
-              {detailStats.map(({ label, icon: Icon, formatter }) => {
+              {detailStats.map(({ key, getLabel, icon: Icon, formatter }) => {
                 const value = formatter(media);
                 if (!value) return null;
                 return (
                   <div
-                    key={label}
+                    key={key}
                     className="rounded-3xl border border-border/60 bg-card/60 px-4 py-3 text-sm text-foreground"
                   >
                     <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
                       <Icon className="h-4 w-4 text-primary" />
-                      {label}
+                      {getLabel(media)}
                     </div>
                     <p className="mt-2 text-lg font-semibold">{value}</p>
                   </div>
