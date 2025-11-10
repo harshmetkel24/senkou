@@ -11,7 +11,7 @@
 - Initial data loads in RSC loaders; client hydration continues pagination via `useInfiniteQuery` + IntersectionObserver sentinel per grid.
 - URLSearchParams are the single source of truth for search/sort/filter; syncing is mandatory before fetching.
 - Card grids require skeletons, responsive breakpoints, lazy images, empty + error states with retry/backoff messaging.
-- Detail pages reuse cached list data when possible and prefetch staff/character info.
+- Detail pages reuse cached list data when possible and prefetch character info.
 
 ### Stage 2 — Auth + Watchlists
 - Auth.js OAuth (GitHub, Google) + optional magic link; edge-safe cookies only.

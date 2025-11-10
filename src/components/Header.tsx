@@ -1,66 +1,66 @@
-import { Link } from "@tanstack/react-router";
-import { Home, Menu, X } from "lucide-react";
-import { useState } from "react";
+"use client";
+
+import { Link, useRouterState } from "@tanstack/react-router";
+import { BookOpen, Film, Users } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+
+const navItems = [
+  { to: "/anime", label: "Anime", icon: Film },
+  { to: "/manga", label: "Manga", icon: BookOpen },
+  { to: "/characters", label: "Characters", icon: Users },
+];
 
 export default function Header() {
-  const [isOpen, setIsOpen] = useState(false);
-  const navLinkBaseClasses =
-    "flex items-center gap-3 p-3 rounded-lg transition-colors mb-2 text-sidebar-foreground hover:bg-sidebar-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring";
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  });
 
   return (
-    <>
-      <header className="p-4 flex items-center bg-sidebar text-sidebar-foreground shadow-lg">
-        <button
-          onClick={() => setIsOpen(true)}
-          className="p-2 rounded-lg transition-colors hover:bg-sidebar-accent"
-          aria-label="Open menu"
-        >
-          <Menu size={24} />
-        </button>
-        <h1 className="ml-4 text-xl font-semibold">
-          <Link to="/">
-            <img
-              src="/senkou-circle-logo.png"
-              alt="Senkou Logo"
-              className="w-16 h-16"
-            />
-          </Link>
-        </h1>
-      </header>
+    <header className="bg-accent-foreground border-b border-border px-6 py-4">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-3">
+          <img
+            src="/senkou-circle-logo.png"
+            alt="Senkou Logo"
+            className="w-10 h-10"
+          />
+          <span className="text-xl font-bold uppercase">senkō!</span>
+        </Link>
 
-      <aside
-        className={`fixed top-0 left-0 h-full w-80 bg-sidebar text-sidebar-foreground shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col border-r border-sidebar-border ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
-          <h2 className="text-xl font-bold">先光</h2>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="p-2 rounded-lg transition-colors hover:bg-sidebar-accent"
-            aria-label="Close menu"
-          >
-            <X size={24} />
-          </button>
-        </div>
-
-        <nav className="flex-1 p-4 overflow-y-auto">
-          <Link
-            to="/"
-            onClick={() => setIsOpen(false)}
-            className={navLinkBaseClasses}
-            activeProps={{
-              className:
-                `${navLinkBaseClasses} bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90`,
-            }}
-          >
-            <Home size={20} />
-            <span className="font-medium">Home</span>
-          </Link>
-
-          {/* Demo Links End */}
+        <nav className="hidden md:flex items-center gap-3">
+          {navItems.map(({ to, label, icon: Icon }) => {
+            const isActive = pathname === to || pathname.startsWith(`${to}/`);
+            return (
+              <Button
+                key={to}
+                asChild
+                variant={isActive ? "outline" : "ghost"}
+                size="sm"
+                className="flex items-center gap-2 rounded-lg px-3"
+              >
+                <Link to={to}>
+                  <Icon size={18} />
+                  <span>{label}</span>
+                </Link>
+              </Button>
+            );
+          })}
         </nav>
-      </aside>
-    </>
+
+        {/* Mobile menu button - simplified */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden rounded-lg hover:bg-muted"
+          aria-label="Menu"
+        >
+          <span className="sr-only">Menu</span>
+          <div className="w-6 h-0.5 bg-foreground mb-1"></div>
+          <div className="w-6 h-0.5 bg-foreground mb-1"></div>
+          <div className="w-6 h-0.5 bg-foreground"></div>
+        </Button>
+      </div>
+    </header>
   );
 }

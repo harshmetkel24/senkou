@@ -27,20 +27,20 @@
 </div>
 
 ## Vision
-Senkou (線光) is an IMDB-style experience for anime, manga, characters, and staff. Stage 1 focuses on a best-in-class browsing experience powered by TanStack Router RSC + React Query, with a sidebar-first layout, sticky filter bar, and buttery-smooth infinite scroll. Later stages add auth, watchlists, recommendations, and social features while preserving the cinematic feel and strict performance targets (TTFB < 200 ms cached, LCP < 2.5 s, CLS < 0.05).
+Senkou (線光) is an IMDB-style experience for anime, manga, characters. Stage 1 focuses on a best-in-class browsing experience powered by TanStack Router RSC + React Query, with a sidebar-first layout, sticky filter bar, and buttery-smooth infinite scroll. Later stages add auth, watchlists, recommendations, and social features while preserving the cinematic feel and strict performance targets (TTFB < 200 ms cached, LCP < 2.5 s, CLS < 0.05).
 
 ## Roadmap
-- **Stage 1 — MVP “Beautiful Infinite Scroll” (current)**  
-  - Server components fetch AniList GraphQL data for fast first paint; client components hydrate infinite lists via `useInfiniteQuery` + IntersectionObserver sentinels.  
-  - Sidebar routes: Anime, Characters, Manga, Staff. Each route keeps search/sort/filter state in URL params for shareable state.  
-  - Card grid with skeletons, responsive breakpoints, lazy-loaded art, and empty/error states that handle AniList rate limits with retry/backoff.  
+- **Stage 1 — MVP “Beautiful Infinite Scroll” (current)**
+  - Server components fetch AniList GraphQL data for fast first paint; client components hydrate infinite lists via `useInfiniteQuery` + IntersectionObserver sentinels.
+  - Sidebar routes: Anime, Characters, Manga. Each route keeps search/sort/filter state in URL params for shareable state.
+  - Card grid with skeletons, responsive breakpoints, lazy-loaded art, and empty/error states that handle AniList rate limits with retry/backoff.
   - Details pages reuse cached query data when possible; images are prepared for future CDN offloading.
-- **Stage 2 — Auth + Watchlists**  
-  - Auth.js OAuth (GitHub, Google) plus optional email magic links.  
-  - Server Actions mutate watchlists with optimistic React Query updates, CSRF protection, and rate-limited mutations.  
+- **Stage 2 — Auth + Watchlists**
+  - Auth.js OAuth (GitHub, Google) plus optional email magic links.
+  - Server Actions mutate watchlists with optimistic React Query updates, CSRF protection, and rate-limited mutations.
   - “My Library” view with filters/pagination, user profile (avatar, display name, theme/content rating prefs).
-- **Stage 3 — Advanced Features**  
-  - Collections & shareable slugs, ratings/reviews with moderation, activity feed/follow graph, recommendations (“Because you watched …”), offline/PWA caching, advanced faceted search, Vercel image caching, i18n routing, and admin tooling for feature flags + moderation queues.
+- **Stage 3 — Advanced Features**
+  - Collections & shareable slugs, ratings/reviews with moderation, popular searches, activity feed/follow graph, recommendations (“Because you watched …”), offline/PWA caching, advanced faceted search, Vercel image caching, i18n routing, and admin tooling for feature flags + moderation queues.
 
 ## Tech Stack
 - **Framework**: TanStack Start (React 19, Vite, File-based routing).
@@ -53,7 +53,7 @@ Senkou (線光) is an IMDB-style experience for anime, manga, characters, and st
 - Sidebar-first shell with a sticky filter/search bar. Keep navigation persistent and highlight the active route.
 - Lists must render skeleton cards immediately, stream first data chunk from RSC, then hydrate and continue infinite scroll.
 - Use IntersectionObserver sentinels per grid; pause fetching when filters/search change until new params resolve.
-- Detail routes share typography, include staff/cast tabs, and reuse cached queries when revisiting the list.
+- Detail routes share typography, include cast tabs, and reuse cached queries when revisiting the list.
 
 ## Non-Functional Requirements
 - Respect AniList rate limits with exponential backoff + jitter. Surface graceful error states (`Retry`, `Report issue`) and empty-state illustrations.
@@ -83,7 +83,7 @@ pnpm test           # Vitest suite (jsdom + @testing-library/react)
 - When hitting AniList GraphQL, keep fragments reusable across routes and document them in `src/data/queries`.
 
 ## Testing & Quality
-- Place route/component tests beside their files as `*.test.ts(x)`.  
+- Place route/component tests beside their files as `*.test.ts(x)`.
 - Add integration tests for infinite scroll boundaries, filter URL syncing, and optimistic watchlist updates once Stage 2 begins.
 - Run `pnpm test` before commits; ensure `pnpm build` stays green to catch RSC regressions.
 
@@ -92,7 +92,7 @@ pnpm test           # Vitest suite (jsdom + @testing-library/react)
 - Consider feature flag hooks early for Stage 3 admin tooling.
 
 ## Resources
-- AniList Docs: https://docs.anilist.co/guide/introduction  
-- TanStack Start: https://tanstack.com/start/latest  
-- TanStack Router & Query: https://tanstack.com/router · https://tanstack.com/query  
+- AniList Docs: https://docs.anilist.co/guide/introduction
+- TanStack Start: https://tanstack.com/start/latest
+- TanStack Router & Query: https://tanstack.com/router · https://tanstack.com/query
 - shadcn/ui: https://ui.shadcn.com

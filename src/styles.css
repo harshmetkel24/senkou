@@ -1,37 +1,53 @@
-@import 'tailwindcss';
+@import url("https://fonts.googleapis.com/css2?family=Delius&family=DynaPuff:wght@400..700&display=swap");
 
-@import 'tw-animate-css';
+@import "tailwindcss";
 
-@import '@radix-ui/colors/indigo.css';
-@import '@radix-ui/colors/indigo-dark.css';
-@import '@radix-ui/colors/cyan.css';
-@import '@radix-ui/colors/cyan-dark.css';
-@import '@radix-ui/colors/mint.css';
-@import '@radix-ui/colors/mint-dark.css';
-@import '@radix-ui/colors/pink.css';
-@import '@radix-ui/colors/pink-dark.css';
-@import '@radix-ui/colors/crimson.css';
-@import '@radix-ui/colors/crimson-dark.css';
+@import "tw-animate-css";
+
+@import "@radix-ui/colors/indigo.css";
+@import "@radix-ui/colors/indigo-dark.css";
+@import "@radix-ui/colors/blue.css";
+@import "@radix-ui/colors/blue-dark.css";
+@import "@radix-ui/colors/violet.css";
+@import "@radix-ui/colors/violet-dark.css";
+@import "@radix-ui/colors/purple.css";
+@import "@radix-ui/colors/purple-dark.css";
+@import "@radix-ui/colors/cyan.css";
+@import "@radix-ui/colors/cyan-dark.css";
+@import "@radix-ui/colors/mint.css";
+@import "@radix-ui/colors/mint-dark.css";
+@import "@radix-ui/colors/pink.css";
+@import "@radix-ui/colors/pink-dark.css";
+@import "@radix-ui/colors/crimson.css";
+@import "@radix-ui/colors/crimson-dark.css";
+@import "@radix-ui/colors/yellow.css";
+@import "@radix-ui/colors/yellow-dark.css";
 
 @custom-variant dark (&:is(.dark *, [data-theme='senkou-dark'] *));
 
 body {
   @apply m-0;
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
   font-family:
-    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 :root {
   color-scheme: dark;
   --radius: 0.625rem;
+}
+
+.delius-regular {
+  font-family: "Delius", cursive;
+  font-weight: 400;
+  font-style: normal;
 }
 
 /*
@@ -43,46 +59,46 @@ code {
 */
 :root.dark,
 :root.dark-theme,
-[data-theme='senkou-dark'] {
+[data-theme="senkou-dark"] {
   color-scheme: dark;
 
-  --background: var(--indigo-1);
-  --foreground: var(--indigo-12);
-  --card: var(--indigo-2);
-  --card-foreground: var(--indigo-12);
-  --popover: var(--indigo-2);
-  --popover-foreground: var(--indigo-12);
-  --primary: var(--cyan-9);
+  --background: var(--indigo-11);
+  --foreground: var(--yellow-11);
+  --card: var(--indigo-10);
+  --card-foreground: var(--yellow-8);
+  --popover: var(--indigo-10);
+  --popover-foreground: var(--yellow-3);
+  --primary: var(--blue-8);
   --primary-foreground: var(--indigo-1);
-  --secondary: var(--mint-4);
-  --secondary-foreground: var(--mint-12);
-  --muted: var(--indigo-4);
-  --muted-foreground: var(--indigo-11);
-  --accent: var(--pink-9);
-  --accent-foreground: var(--indigo-1);
-  --destructive: var(--crimson-9);
+  --secondary: var(--pink-8);
+  --secondary-foreground: var(--pink-1);
+  --muted: var(--indigo-9);
+  --muted-foreground: var(--yellow-9);
+  --accent: var(--violet-8);
+  --accent-foreground: var(--violet-1);
+  --destructive: var(--crimson-7);
   --destructive-foreground: var(--crimson-1);
-  --border: var(--indigo-6);
-  --input: var(--indigo-5);
-  --ring: var(--cyan-10);
-  --chart-1: var(--cyan-9);
-  --chart-2: var(--mint-9);
-  --chart-3: var(--pink-9);
-  --chart-4: var(--indigo-9);
-  --chart-5: var(--crimson-9);
-  --sidebar: var(--indigo-2);
-  --sidebar-foreground: var(--indigo-12);
-  --sidebar-primary: var(--cyan-9);
+  --border: var(--indigo-9);
+  --input: var(--indigo-8);
+  --ring: var(--blue-7);
+  --chart-1: var(--blue-8);
+  --chart-2: var(--pink-8);
+  --chart-3: var(--violet-8);
+  --chart-4: var(--indigo-8);
+  --chart-5: var(--crimson-7);
+  --sidebar: var(--indigo-10);
+  --sidebar-foreground: var(--yellow-3);
+  --sidebar-primary: var(--blue-8);
   --sidebar-primary-foreground: var(--indigo-1);
-  --sidebar-accent: var(--indigo-4);
-  --sidebar-accent-foreground: var(--indigo-12);
-  --sidebar-border: var(--indigo-6);
-  --sidebar-ring: var(--cyan-10);
+  --sidebar-accent: var(--indigo-9);
+  --sidebar-accent-foreground: var(--indigo-1);
+  --sidebar-border: var(--indigo-9);
+  --sidebar-ring: var(--blue-7);
 }
 
 :root.light,
 :root.light-theme,
-[data-theme='senkou-light'] {
+[data-theme="senkou-light"] {
   color-scheme: light;
 
   --background: var(--indigo-1);
@@ -91,32 +107,32 @@ code {
   --card-foreground: var(--indigo-12);
   --popover: var(--indigo-2);
   --popover-foreground: var(--indigo-12);
-  --primary: var(--cyan-9);
+  --primary: var(--cyan-7);
   --primary-foreground: var(--indigo-1);
-  --secondary: var(--mint-3);
+  --secondary: var(--mint-5);
   --secondary-foreground: var(--mint-12);
   --muted: var(--indigo-3);
   --muted-foreground: var(--indigo-11);
-  --accent: var(--pink-9);
+  --accent: var(--pink-7);
   --accent-foreground: var(--indigo-1);
-  --destructive: var(--crimson-9);
+  --destructive: var(--crimson-7);
   --destructive-foreground: var(--crimson-1);
   --border: var(--indigo-5);
   --input: var(--indigo-4);
-  --ring: var(--cyan-10);
-  --chart-1: var(--cyan-9);
-  --chart-2: var(--mint-9);
-  --chart-3: var(--pink-9);
-  --chart-4: var(--indigo-9);
-  --chart-5: var(--crimson-9);
+  --ring: var(--cyan-6);
+  --chart-1: var(--cyan-7);
+  --chart-2: var(--mint-7);
+  --chart-3: var(--pink-7);
+  --chart-4: var(--indigo-7);
+  --chart-5: var(--crimson-7);
   --sidebar: var(--indigo-1);
   --sidebar-foreground: var(--indigo-12);
-  --sidebar-primary: var(--cyan-9);
+  --sidebar-primary: var(--cyan-7);
   --sidebar-primary-foreground: var(--indigo-1);
   --sidebar-accent: var(--indigo-3);
   --sidebar-accent-foreground: var(--indigo-12);
   --sidebar-border: var(--indigo-5);
-  --sidebar-ring: var(--cyan-10);
+  --sidebar-ring: var(--cyan-6);
 }
 
 @theme inline {
