@@ -49,7 +49,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="delius-regular">
+      <body>
         <Header />
         {children}
         <TanStackDevtools

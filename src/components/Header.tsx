@@ -1,7 +1,7 @@
 "use client";
 
 import { Link, useRouterState } from "@tanstack/react-router";
-import { BookOpen, Film, Users } from "lucide-react";
+import { BookOpen, Film, Search, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -17,18 +17,60 @@ export default function Header() {
   });
 
   return (
-    <header className="bg-accent-foreground border-b border-border px-6 py-4">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3">
-          <img
-            src="/senkou-circle-logo.png"
-            alt="Senkou Logo"
-            className="w-10 h-10"
-          />
-          <span className="text-xl font-bold uppercase">senkō!</span>
-        </Link>
+    <header className="border-b border-border bg-background/90 px-4 py-4 backdrop-blur md:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 md:grid md:grid-cols-[auto_minmax(320px,1fr)_auto] md:items-center md:gap-6">
+        <div className="flex items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-3">
+            <img
+              src="/senkou-circle-logo.png"
+              alt="Senkou Logo"
+              className="h-10 w-10"
+            />
+            <span className="text-xl font-bold uppercase tracking-tighter">
+              senkō!
+            </span>
+          </Link>
 
-        <nav className="hidden md:flex items-center gap-3">
+          {/* Mobile menu button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-lg hover:bg-muted md:hidden"
+            aria-label="Menu"
+          >
+            <span className="sr-only">Menu</span>
+            <div className="mb-1 h-0.5 w-6 bg-foreground"></div>
+            <div className="mb-1 h-0.5 w-6 bg-foreground"></div>
+            <div className="h-0.5 w-6 bg-foreground"></div>
+          </Button>
+        </div>
+
+        <form
+          role="search"
+          className="order-3 flex w-full items-center gap-3 rounded-2xl border border-border bg-card/80 px-4 py-2 text-sm shadow-sm focus-within:ring-2 focus-within:ring-ring/60 md:order-none"
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <Search
+            className="h-5 w-5 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            name="q"
+            placeholder="Search anime, manga, characters..."
+            className="flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none"
+            autoComplete="off"
+          />
+          <Button
+            type="submit"
+            size="sm"
+            className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/80"
+          >
+            Search
+          </Button>
+        </form>
+
+        <nav className="order-2 flex justify-end gap-2 md:order-none">
           {navItems.map(({ to, label, icon: Icon }) => {
             const isActive = pathname === to || pathname.startsWith(`${to}/`);
             return (
@@ -37,7 +79,7 @@ export default function Header() {
                 asChild
                 variant={isActive ? "outline" : "ghost"}
                 size="sm"
-                className="flex items-center gap-2 rounded-lg px-3"
+                className="hidden items-center gap-2 rounded-lg px-3 md:flex"
               >
                 <Link to={to}>
                   <Icon size={18} />
@@ -47,19 +89,6 @@ export default function Header() {
             );
           })}
         </nav>
-
-        {/* Mobile menu button - simplified */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden rounded-lg hover:bg-muted"
-          aria-label="Menu"
-        >
-          <span className="sr-only">Menu</span>
-          <div className="w-6 h-0.5 bg-foreground mb-1"></div>
-          <div className="w-6 h-0.5 bg-foreground mb-1"></div>
-          <div className="w-6 h-0.5 bg-foreground"></div>
-        </Button>
       </div>
     </header>
   );

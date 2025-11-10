@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, Play, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/")({ component: App });
@@ -33,6 +33,25 @@ function App() {
       image: "https://cdn.myanimelist.net/images/anime/9/9453.jpg",
     },
   ];
+  const editorialBoards = [
+    {
+      title: "Critics' Corner",
+      description:
+        "Award-ready dramas and experiments handpicked by the Senkou editorial room.",
+      meta: "Updated every Friday",
+    },
+    {
+      title: "Fan Drafts",
+      description:
+        "Playlists inspired by iconic IMDb user lists, tuned for weekend binges.",
+      meta: "Voted in by the community",
+    },
+    {
+      title: "Late Night Binge",
+      description: "High-energy action and comedy under 25 minutes per episode.",
+      meta: "Runtime under 25 min",
+    },
+  ];
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % (popularAnime.length - 2));
@@ -61,7 +80,7 @@ function App() {
       />
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 py-12">
         {/* Logo and Title */}
-        <div className="text-center mb-12">
+        <div className="mb-10 text-center">
           <img
             src="/senkou-full.png"
             alt="Senkou Logo"
@@ -70,52 +89,28 @@ function App() {
           <h1 className="text-4xl md:text-6xl font-black mb-4 uppercase [letter-spacing:-0.08em]">
             senkō!
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground font-light">
-            Endless light. Endless stories.
+          <p className="mx-auto max-w-2xl text-lg md:text-xl text-muted-foreground font-light">
+            Endless light. Endless stories. Built with the same sleek, data-rich
+            spirit you love on IMDb—now curated for anime-first adventures.
           </p>
         </div>
 
-        {/* Dominant Search Section */}
-        <div className="w-full max-w-2xl mx-auto mb-12">
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
-            <form className="flex items-center gap-4">
-              <Search className="w-6 h-6 text-muted-foreground flex-shrink-0" />
-              <input
-                type="text"
-                placeholder="Search for anime, manga, characters..."
-                className="flex-1 bg-transparent text-foreground placeholder-muted-foreground text-lg outline-none"
-              />
-              <button
-                type="submit"
-                className="rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg transition-all hover:bg-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
-              >
-                Search
-              </button>
-            </form>
+        {/* Editorial Billboard */}
+        <section className="mx-auto mb-12 w-full max-w-4xl">
+          <div className="rounded-[28px] border border-border/80 bg-card/90 p-8 text-left shadow-2xl shadow-black/40">
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+              Tonight on Senkou
+            </p>
+            <h2 className="mt-3 text-3xl font-black uppercase tracking-tight md:text-4xl">
+              The watchlist millions are curating
+            </h2>
+            <p className="mt-4 text-base text-muted-foreground">
+              Follow cast, studios, and ratings just like you would on IMDb.
+              Each card stacks metadata, staff previews, and cinematic stills so
+              it feels like browsing a film set.
+            </p>
           </div>
-
-          {/* Top Searches */}
-          <div className="mt-6 text-center">
-            <p className="text-muted-foreground mb-3">Popular searches:</p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {[
-                "One Piece",
-                "Attack on Titan",
-                "Demon Slayer",
-                "My Hero Academia",
-                "Naruto",
-                "Death Note",
-              ].map((item) => (
-                <button
-                  key={item}
-                  className="bg-muted hover:bg-muted/80 text-muted-foreground px-4 py-2 rounded-full text-sm transition-colors"
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        </section>
 
         {/* Popular Anime Carousel */}
         <div className="w-full max-w-6xl mx-auto mb-12">
@@ -155,6 +150,38 @@ function App() {
             </button>
           </div>
         </div>
+
+        {/* IMDb-inspired boards (dummy content) */}
+        <section className="mx-auto mb-14 w-full max-w-6xl">
+          <div className="flex flex-col gap-2 text-center md:text-left">
+            <p className="text-xs uppercase tracking-[0.35em] text-muted-foreground">
+              Boards in progress
+            </p>
+            <h3 className="text-2xl font-semibold">
+              IMDb-style lists tailored for anime lovers
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              These modules will evolve into living charts, but for now enjoy a
+              glimpse at the curation pillars.
+            </p>
+          </div>
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
+            {editorialBoards.map((board) => (
+              <article
+                key={board.title}
+                className="rounded-3xl border border-border/70 bg-card/70 p-6 text-left shadow-lg shadow-black/25"
+              >
+                <p className="text-[0.65rem] uppercase tracking-[0.4em] text-muted-foreground">
+                  {board.meta}
+                </p>
+                <h4 className="mt-3 text-xl font-bold">{board.title}</h4>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  {board.description}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
 
         {/* Call to Action */}
         <div className="text-center">

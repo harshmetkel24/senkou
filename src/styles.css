@@ -4,24 +4,18 @@
 
 @import "tw-animate-css";
 
-@import "@radix-ui/colors/indigo.css";
-@import "@radix-ui/colors/indigo-dark.css";
-@import "@radix-ui/colors/blue.css";
-@import "@radix-ui/colors/blue-dark.css";
-@import "@radix-ui/colors/violet.css";
-@import "@radix-ui/colors/violet-dark.css";
-@import "@radix-ui/colors/purple.css";
-@import "@radix-ui/colors/purple-dark.css";
-@import "@radix-ui/colors/cyan.css";
-@import "@radix-ui/colors/cyan-dark.css";
-@import "@radix-ui/colors/mint.css";
-@import "@radix-ui/colors/mint-dark.css";
-@import "@radix-ui/colors/pink.css";
-@import "@radix-ui/colors/pink-dark.css";
-@import "@radix-ui/colors/crimson.css";
-@import "@radix-ui/colors/crimson-dark.css";
+@import "@radix-ui/colors/gray.css";
+@import "@radix-ui/colors/gray-dark.css";
+@import "@radix-ui/colors/mauve.css";
+@import "@radix-ui/colors/mauve-dark.css";
+@import "@radix-ui/colors/slate.css";
+@import "@radix-ui/colors/slate-dark.css";
 @import "@radix-ui/colors/yellow.css";
 @import "@radix-ui/colors/yellow-dark.css";
+@import "@radix-ui/colors/amber.css";
+@import "@radix-ui/colors/amber-dark.css";
+@import "@radix-ui/colors/crimson.css";
+@import "@radix-ui/colors/crimson-dark.css";
 
 @custom-variant dark (&:is(.dark *, [data-theme='senkou-dark'] *));
 
@@ -62,78 +56,41 @@ code {
 [data-theme="senkou-dark"] {
   color-scheme: dark;
 
-  --background: var(--indigo-11);
+  --background: var(--slate-1);
   --foreground: var(--yellow-11);
-  --card: var(--indigo-10);
-  --card-foreground: var(--yellow-8);
-  --popover: var(--indigo-10);
+  --card: var(--slate-2);
+  --card-foreground: var(--yellow-10);
+  --popover: var(--slate-3);
   --popover-foreground: var(--yellow-3);
-  --primary: var(--blue-8);
-  --primary-foreground: var(--indigo-1);
-  --secondary: var(--pink-8);
-  --secondary-foreground: var(--pink-1);
-  --muted: var(--indigo-9);
-  --muted-foreground: var(--yellow-9);
-  --accent: var(--violet-8);
-  --accent-foreground: var(--violet-1);
+  --primary: var(--yellow-8);
+  --primary-foreground: var(--slate-1);
+  --secondary: var(--gray-7);
+  --secondary-foreground: var(--gray-1);
+  --muted: var(--slate-4);
+  --muted-foreground: var(--gray-9);
+  --accent: var(--amber-8);
+  --accent-foreground: var(--amber-1);
   --destructive: var(--crimson-7);
   --destructive-foreground: var(--crimson-1);
-  --border: var(--indigo-9);
-  --input: var(--indigo-8);
-  --ring: var(--blue-7);
-  --chart-1: var(--blue-8);
-  --chart-2: var(--pink-8);
-  --chart-3: var(--violet-8);
-  --chart-4: var(--indigo-8);
+  --border: var(--slate-6);
+  --input: var(--slate-5);
+  --ring: var(--yellow-7);
+  --chart-1: var(--yellow-8);
+  --chart-2: var(--amber-8);
+  --chart-3: var(--gray-8);
+  --chart-4: var(--mauve-8);
   --chart-5: var(--crimson-7);
-  --sidebar: var(--indigo-10);
-  --sidebar-foreground: var(--yellow-3);
-  --sidebar-primary: var(--blue-8);
-  --sidebar-primary-foreground: var(--indigo-1);
-  --sidebar-accent: var(--indigo-9);
-  --sidebar-accent-foreground: var(--indigo-1);
-  --sidebar-border: var(--indigo-9);
-  --sidebar-ring: var(--blue-7);
+  --sidebar: var(--slate-3);
+  --sidebar-foreground: var(--yellow-4);
+  --sidebar-primary: var(--yellow-8);
+  --sidebar-primary-foreground: var(--slate-1);
+  --sidebar-accent: var(--slate-4);
+  --sidebar-accent-foreground: var(--slate-1);
+  --sidebar-border: var(--slate-6);
+  --sidebar-ring: var(--yellow-7);
 }
 
-:root.light,
-:root.light-theme,
-[data-theme="senkou-light"] {
-  color-scheme: light;
 
-  --background: var(--indigo-1);
-  --foreground: var(--indigo-12);
-  --card: var(--indigo-2);
-  --card-foreground: var(--indigo-12);
-  --popover: var(--indigo-2);
-  --popover-foreground: var(--indigo-12);
-  --primary: var(--cyan-7);
-  --primary-foreground: var(--indigo-1);
-  --secondary: var(--mint-5);
-  --secondary-foreground: var(--mint-12);
-  --muted: var(--indigo-3);
-  --muted-foreground: var(--indigo-11);
-  --accent: var(--pink-7);
-  --accent-foreground: var(--indigo-1);
-  --destructive: var(--crimson-7);
-  --destructive-foreground: var(--crimson-1);
-  --border: var(--indigo-5);
-  --input: var(--indigo-4);
-  --ring: var(--cyan-6);
-  --chart-1: var(--cyan-7);
-  --chart-2: var(--mint-7);
-  --chart-3: var(--pink-7);
-  --chart-4: var(--indigo-7);
-  --chart-5: var(--crimson-7);
-  --sidebar: var(--indigo-1);
-  --sidebar-foreground: var(--indigo-12);
-  --sidebar-primary: var(--cyan-7);
-  --sidebar-primary-foreground: var(--indigo-1);
-  --sidebar-accent: var(--indigo-3);
-  --sidebar-accent-foreground: var(--indigo-12);
-  --sidebar-border: var(--indigo-5);
-  --sidebar-ring: var(--cyan-6);
-}
 
 @theme inline {
   --color-background: var(--background);
