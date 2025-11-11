@@ -1,8 +1,9 @@
 import { keepPreviousData, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { useSidebar } from "@/components/contexts/SidebarContext";
 import { MediaGrid } from "@/components/media/media-grid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,16 @@ function App() {
   const { data } = useSuspenseQuery(trendingAnimeQueryOptions());
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const shouldFocusSearch = useSidebar((state) => state.shouldFocusSearch);
+  const setShouldFocusSearch = useSidebar((state) => state.setShouldFocusSearch);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (shouldFocusSearch && searchInputRef.current) {
+      searchInputRef.current.focus();
+      setShouldFocusSearch(false);
+    }
+  }, [shouldFocusSearch, setShouldFocusSearch]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,28 +45,8 @@ function App() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-[url('/starfield.svg')] bg-cover bg-center opacity-30 starfield-pan"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 mix-blend-screen opacity-40 starfield-twinkle"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 50% 20%, rgba(255,255,255,0.15), transparent 45%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.1), transparent 50%), radial-gradient(circle at 20% 60%, rgba(255,255,255,0.12), transparent 45%)",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute -top-32 left-8 h-80 w-80 rounded-full bg-primary/20 blur-3xl"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute bottom-0 right-0 h-[28rem] w-[28rem] rounded-full bg-accent/15 blur-[180px]"
-      />
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 py-12">
+    <div className="relative min-h-screen">
+      <div className="flex flex-col items-center justify-center px-6 py-12">
         {/* Logo and Title */}
         <div className="mb-10 text-center animate-fade-in">
           <img
@@ -77,8 +68,9 @@ function App() {
           <div className="relative">
             <Search className="absolute left-8 top-1/2 transform -translate-y-1/2 w-8 h-8 text-muted-foreground" />
             <Input
+              ref={searchInputRef}
               type="text"
-              placeholder="Search anime, manga, characters..."
+              placeholder="⌘+K to search anime, manga, characters..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-20 pr-40 py-6 text-2xl rounded-3xl border-2 border-border bg-card/95 text-foreground placeholder-muted-foreground focus:ring-4 focus:ring-primary/50 shadow-lg"

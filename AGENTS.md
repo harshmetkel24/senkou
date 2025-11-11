@@ -28,6 +28,7 @@
 - Place AniList GraphQL operations/fragments in `src/data/queries` and keep them typed via generated artifacts or `graphql-request` helpers.
 - Static assets → `public/`. Build outputs → `.output/`, `dist/`. Generated files like `src/routeTree.gen.ts` stay untouched.
 - Use absolute imports (TS path aliases). Files follow kebab-case; hooks/utilities colocated near usage when feasible.
+- Prefer creating reusable components in `src/components/` organized by appropriate subfolders (e.g., `layouts/`, `helpers/`, `ui/`). Avoid writing JSX directly in main route components like `__root.tsx` to keep them clean and focused on routing logic.
 
 ## API & Data Guidance
 - Primary datasource: AniList GraphQL (`https://graphql.anilist.co`). Reference https://docs.anilist.co/guide/introduction for schema and rate limits.
@@ -45,7 +46,7 @@
 
 ## Styling & Components
 - Tailwind CSS (v4) with design tokens documented in `src/lib/theme`.
-- Use shadcn/ui primitives; extend via `class-variance-authority` when variants grow.
+- Strongly use shadcn/ui components; install via `pnpx shadcn@latest init` if not set up. Extend via `class-variance-authority` when variants grow.
 - Theme-ready from Day 1 (light/dark), but default is dark cinematic palette.
 - Palette values must come from Radix UI Colors via `@radix-ui/colors`; import the official scales into `src/styles.css` (per the Radix usage guide) before aliasing them to our semantic tokens.
 - Color palette lives in `src/styles.css`: consume tokens via the exposed CSS variables/utility classes (or Tailwind `theme()` helpers) instead of hard-coding hex/oklch values. Toggle palettes by switching the `data-theme` attribute (default `senkou-dark`) and define new variables there before using them anywhere else.

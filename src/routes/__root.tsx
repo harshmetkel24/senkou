@@ -6,9 +6,13 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
-import Header from "../components/Header";
-import Sidebar from "../components/Sidebar";
-import { SidebarProvider, useSidebar } from "../components/SidebarContext";
+
+import { FloatingHelpButton } from "../components/helpers/FloatingHelpButton";
+import { HotkeysHandlers } from "../components/helpers/HotkeysHandlers";
+import { StarlightBackground } from "../components/helpers/StarlightBackground";
+import Header from "../components/layouts/Header";
+import { MainContent } from "../components/layouts/MainContent";
+import Sidebar from "../components/layouts/Sidebar";
 
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
@@ -45,30 +49,22 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   shellComponent: RootDocument,
 });
 
-function MainContent({ children }: { children: React.ReactNode }) {
-  const { collapsed } = useSidebar();
-  return (
-    <main className={`transition-all duration-300 ${collapsed ? 'md:ml-16' : 'md:ml-64'}`}>
-      {children}
-    </main>
-  );
-}
-
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-theme="senkou-dark" className="dark">
       <head>
         <HeadContent />
       </head>
-      <body>
-        <SidebarProvider>
-          <Sidebar />
-          <Header />
-          <MainContent>{children}</MainContent>
-        </SidebarProvider>
+      <body className="relative min-h-screen  bg-background text-foreground">
+        <StarlightBackground />
+        <HotkeysHandlers />
+        <Sidebar />
+        <Header />
+        <MainContent>{children}</MainContent>
+        <FloatingHelpButton />
         <TanStackDevtools
           config={{
-            position: "bottom-right",
+            position: "bottom-left",
           }}
           plugins={[
             {
@@ -83,5 +79,3 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     </html>
   );
 }
-
-

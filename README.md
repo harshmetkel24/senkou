@@ -75,6 +75,7 @@ pnpm test           # Vitest suite (jsdom + @testing-library/react)
 ```
 
 ## Component Library
+- If shadcn/ui is not initialized, run `pnpx shadcn@latest init` first.
 - Generate shadcn/ui components with `pnpx shadcn@latest add <component>`. Keep tokens aligned with the Senkou theme (dark-leaning, cinematic color palette).
 
 ## Data & Query Guidelines

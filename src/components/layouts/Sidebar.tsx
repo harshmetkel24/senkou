@@ -1,7 +1,15 @@
 "use client";
 
 import { Link, useRouterState } from "@tanstack/react-router";
-import { BookOpen, ChevronLeft, ChevronRight, Film, Home, Menu, Users } from "lucide-react";
+import {
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  Film,
+  Home,
+  Menu,
+  Users,
+} from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -12,7 +20,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useSidebar } from "./SidebarContext";
+import { useSidebarStore } from "@/lib/stores";
 
 const navItems = [
   { to: "/", label: "Home", icon: Home },
@@ -23,7 +31,8 @@ const navItems = [
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
-  const { collapsed, setCollapsed } = useSidebar();
+  const collapsed = useSidebarStore((state) => state.collapsed);
+  const setCollapsed = useSidebarStore((state) => state.setCollapsed);
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
@@ -69,7 +78,9 @@ export default function Sidebar() {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <aside className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:bg-background md:border-r md:border-border transition-all duration-300 ${collapsed ? 'md:w-16' : 'md:w-64'}`}>
+      <aside
+        className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:bg-background md:border-r md:border-border transition-all duration-300 ${collapsed ? "md:w-16" : "md:w-64"}`}
+      >
         <div className="flex items-center justify-between p-4 border-b border-border">
           {!collapsed && (
             <div className="flex items-center gap-3">
@@ -89,22 +100,27 @@ export default function Sidebar() {
             onClick={() => setCollapsed(!collapsed)}
             className="h-8 w-8"
           >
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            {collapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
           </Button>
         </div>
         <nav className="flex-1 p-4 space-y-2">
           {navItems.map(({ to, label, icon: Icon }) => {
-            const isActive = pathname === to || (to !== "/" && pathname.startsWith(`${to}/`));
+            const isActive =
+              pathname === to || (to !== "/" && pathname.startsWith(`${to}/`));
             return (
               <Button
                 key={to}
                 asChild
                 variant={isActive ? "secondary" : "ghost"}
-                className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
+                className={`w-full ${collapsed ? "justify-center px-2" : "justify-start"}`}
                 title={collapsed ? label : undefined}
               >
                 <Link to={to}>
-                  <Icon className={`${collapsed ? '' : 'mr-2'} h-4 w-4`} />
+                  <Icon className={`${collapsed ? "" : "mr-2"} h-4 w-4`} />
                   {!collapsed && label}
                 </Link>
               </Button>
