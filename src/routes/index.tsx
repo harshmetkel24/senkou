@@ -1,8 +1,9 @@
 import { keepPreviousData, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { useSidebar } from "@/components/contexts/SidebarContext";
 import { MediaGrid } from "@/components/media/media-grid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,16 @@ function App() {
   const { data } = useSuspenseQuery(trendingAnimeQueryOptions());
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const shouldFocusSearch = useSidebar((state) => state.shouldFocusSearch);
+  const setShouldFocusSearch = useSidebar((state) => state.setShouldFocusSearch);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (shouldFocusSearch && searchInputRef.current) {
+      searchInputRef.current.focus();
+      setShouldFocusSearch(false);
+    }
+  }, [shouldFocusSearch, setShouldFocusSearch]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,8 +68,9 @@ function App() {
           <div className="relative">
             <Search className="absolute left-8 top-1/2 transform -translate-y-1/2 w-8 h-8 text-muted-foreground" />
             <Input
+              ref={searchInputRef}
               type="text"
-              placeholder="Search anime, manga, characters..."
+              placeholder="⌘+K to search anime, manga, characters..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-20 pr-40 py-6 text-2xl rounded-3xl border-2 border-border bg-card/95 text-foreground placeholder-muted-foreground focus:ring-4 focus:ring-primary/50 shadow-lg"

@@ -28,6 +28,7 @@
 - Place AniList GraphQL operations/fragments in `src/data/queries` and keep them typed via generated artifacts or `graphql-request` helpers.
 - Static assets → `public/`. Build outputs → `.output/`, `dist/`. Generated files like `src/routeTree.gen.ts` stay untouched.
 - Use absolute imports (TS path aliases). Files follow kebab-case; hooks/utilities colocated near usage when feasible.
+- Prefer creating reusable components in `src/components/` organized by appropriate subfolders (e.g., `layouts/`, `helpers/`, `ui/`). Avoid writing JSX directly in main route components like `__root.tsx` to keep them clean and focused on routing logic.
 
 ## API & Data Guidance
 - Primary datasource: AniList GraphQL (`https://graphql.anilist.co`). Reference https://docs.anilist.co/guide/introduction for schema and rate limits.

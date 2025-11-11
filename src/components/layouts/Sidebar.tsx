@@ -20,7 +20,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useSidebar } from "../contexts/SidebarContext";
+import { useSidebarStore } from "@/lib/stores";
 
 const navItems = [
   { to: "/", label: "Home", icon: Home },
@@ -31,7 +31,8 @@ const navItems = [
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
-  const { collapsed, setCollapsed } = useSidebar();
+  const collapsed = useSidebarStore((state) => state.collapsed);
+  const setCollapsed = useSidebarStore((state) => state.setCollapsed);
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });

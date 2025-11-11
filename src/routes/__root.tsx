@@ -6,10 +6,13 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
-import Header from "../components/layouts/Header";
-import Sidebar from "../components/layouts/Sidebar";
-import { SidebarProvider, useSidebar } from "../components/contexts/SidebarContext";
+
+import { FloatingHelpButton } from "../components/helpers/FloatingHelpButton";
+import { HotkeysHandlers } from "../components/helpers/HotkeysHandlers";
 import { StarlightBackground } from "../components/helpers/StarlightBackground";
+import Header from "../components/layouts/Header";
+import { MainContent } from "../components/layouts/MainContent";
+import Sidebar from "../components/layouts/Sidebar";
 
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
@@ -46,17 +49,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   shellComponent: RootDocument,
 });
 
-function MainContent({ children }: { children: React.ReactNode }) {
-  const { collapsed } = useSidebar();
-  return (
-    <main
-      className={`transition-all duration-300 ${collapsed ? "md:ml-16" : "md:ml-64"}`}
-    >
-      {children}
-    </main>
-  );
-}
-
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-theme="senkou-dark" className="dark">
@@ -65,14 +57,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="relative min-h-screen  bg-background text-foreground">
         <StarlightBackground />
-        <SidebarProvider>
-          <Sidebar />
-          <Header />
-          <MainContent>{children}</MainContent>
-        </SidebarProvider>
+        <HotkeysHandlers />
+        <Sidebar />
+        <Header />
+        <MainContent>{children}</MainContent>
+        <FloatingHelpButton />
         <TanStackDevtools
           config={{
-            position: "bottom-right",
+            position: "bottom-left",
           }}
           plugins={[
             {
