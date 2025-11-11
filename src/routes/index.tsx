@@ -34,28 +34,8 @@ function App() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-[url('/starfield.svg')] bg-cover bg-center opacity-30 starfield-pan"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 mix-blend-screen opacity-40 starfield-twinkle"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 50% 20%, rgba(255,255,255,0.15), transparent 45%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.1), transparent 50%), radial-gradient(circle at 20% 60%, rgba(255,255,255,0.12), transparent 45%)",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute -top-32 left-8 h-80 w-80 rounded-full bg-primary/20 blur-3xl"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute bottom-0 right-0 h-[28rem] w-[28rem] rounded-full bg-accent/15 blur-[180px]"
-      />
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 py-12">
+    <div className="relative min-h-screen">
+      <div className="flex flex-col items-center justify-center px-6 py-12">
         {/* Logo and Title */}
         <div className="mb-10 text-center animate-fade-in">
           <img

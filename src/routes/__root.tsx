@@ -6,9 +6,10 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
-import Header from "../components/Header";
-import Sidebar from "../components/Sidebar";
-import { SidebarProvider, useSidebar } from "../components/SidebarContext";
+import Header from "../components/layouts/Header";
+import Sidebar from "../components/layouts/Sidebar";
+import { SidebarProvider, useSidebar } from "../components/contexts/SidebarContext";
+import { StarlightBackground } from "../components/helpers/StarlightBackground";
 
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
@@ -48,7 +49,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 function MainContent({ children }: { children: React.ReactNode }) {
   const { collapsed } = useSidebar();
   return (
-    <main className={`transition-all duration-300 ${collapsed ? 'md:ml-16' : 'md:ml-64'}`}>
+    <main
+      className={`transition-all duration-300 ${collapsed ? "md:ml-16" : "md:ml-64"}`}
+    >
       {children}
     </main>
   );
@@ -60,7 +63,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="relative min-h-screen  bg-background text-foreground">
+        <StarlightBackground />
         <SidebarProvider>
           <Sidebar />
           <Header />
@@ -83,5 +87,3 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     </html>
   );
 }
-
-

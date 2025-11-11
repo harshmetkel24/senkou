@@ -2,7 +2,7 @@
 
 import { Link } from "@tanstack/react-router";
 
-import { useSidebar } from "./SidebarContext";
+import { useSidebar } from "../contexts/SidebarContext";
 
 export default function Header() {
   const { collapsed } = useSidebar();

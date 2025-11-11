@@ -3,12 +3,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Activity, Film, RefreshCw, Sparkles, Wand2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { HighlightCard } from "@/components/media/highlight-card";
 import {
   MediaDetailPanel,
   type MediaDetailData,
 } from "@/components/media/media-detail-panel";
 import { MediaGrid } from "@/components/media/media-grid";
-import { HighlightCard } from "@/components/media/highlight-card";
 import { Button } from "@/components/ui/button";
 import { fetchTrendingAnime } from "@/data/queries/anime";
 
@@ -44,7 +44,7 @@ function AnimeRoute() {
   };
 
   return (
-    <main className="relative min-h-screen bg-background px-4 py-10 md:px-10">
+    <main className="relative min-h-screen px-4 py-10 md:px-10">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 opacity-50"

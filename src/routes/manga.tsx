@@ -45,7 +45,7 @@ function MangaRoute() {
   };
 
   return (
-    <main className="relative min-h-screen bg-background px-4 py-10 md:px-10">
+    <main className="relative min-h-screen px-4 py-10 md:px-10">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 opacity-60"

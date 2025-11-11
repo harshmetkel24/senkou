@@ -45,7 +45,7 @@
 
 ## Styling & Components
 - Tailwind CSS (v4) with design tokens documented in `src/lib/theme`.
-- Use shadcn/ui primitives; extend via `class-variance-authority` when variants grow.
+- Strongly use shadcn/ui components; install via `pnpx shadcn@latest init` if not set up. Extend via `class-variance-authority` when variants grow.
 - Theme-ready from Day 1 (light/dark), but default is dark cinematic palette.
 - Palette values must come from Radix UI Colors via `@radix-ui/colors`; import the official scales into `src/styles.css` (per the Radix usage guide) before aliasing them to our semantic tokens.
 - Color palette lives in `src/styles.css`: consume tokens via the exposed CSS variables/utility classes (or Tailwind `theme()` helpers) instead of hard-coding hex/oklch values. Toggle palettes by switching the `data-theme` attribute (default `senkou-dark`) and define new variables there before using them anywhere else.
