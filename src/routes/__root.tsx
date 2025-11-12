@@ -6,7 +6,6 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
-
 import { FloatingHelpButton } from "../components/helpers/FloatingHelpButton";
 import { HotkeysHandlers } from "../components/helpers/HotkeysHandlers";
 import { StarlightBackground } from "../components/helpers/StarlightBackground";
@@ -62,18 +61,20 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Header />
         <MainContent>{children}</MainContent>
         <FloatingHelpButton />
-        <TanStackDevtools
-          config={{
-            position: "bottom-left",
-          }}
-          plugins={[
-            {
-              name: "Tanstack Router",
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-            TanStackQueryDevtools,
-          ]}
-        />
+        {process.env.NODE_ENV === "development" && (
+          <TanStackDevtools
+            config={{
+              position: "bottom-left",
+            }}
+            plugins={[
+              {
+                name: "Tanstack Router",
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+              TanStackQueryDevtools,
+            ]}
+          />
+        )}
         <Scripts />
       </body>
     </html>
