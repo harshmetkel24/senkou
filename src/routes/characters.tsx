@@ -1,17 +1,35 @@
-import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
 import { Heart, RefreshCw, Sparkles, Star } from "lucide-react";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
-import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import type { CharacterCardData } from "@/components/characters/character-card";
 import { CharacterDetailPanel } from "@/components/characters/character-detail-panel";
-import { CharacterGrid, CharacterGridSkeleton } from "@/components/characters/character-grid";
-import { Button } from "@/components/ui/button";
-import { fetchCharacterSearch, fetchTrendingCharacters } from "@/data/queries/characters";
+import {
+  CharacterGrid,
+  CharacterGridSkeleton,
+} from "@/components/characters/character-grid";
+import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import { SearchResultsPanel } from "@/components/search/search-results-panel";
+import { Button } from "@/components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselIndicators,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import {
+  fetchCharacterSearch,
+  fetchTrendingCharacters,
+} from "@/data/queries/characters";
 import { deriveRelatedResults } from "@/lib/search-helpers";
 
 const trendingCharactersQueryOptions = () => ({
@@ -90,15 +108,21 @@ function CharactersRoute() {
     enabled: shouldShowSearch,
   });
 
-  const spotlight = useMemo(() => data.items[0], [data.items]);
+  const spotlightItems = useMemo(() => data.items.slice(0, 5), [data.items]);
   const searchResults = searchData?.items ?? [];
   const searchTotal = searchData?.pageInfo.total ?? 0;
   const showSkeleton =
     shouldShowSearch && searchStatus === "pending" && !searchData;
   const showSearchResults =
-    shouldShowSearch && !showSkeleton && !isSearchError && searchResults.length > 0;
+    shouldShowSearch &&
+    !showSkeleton &&
+    !isSearchError &&
+    searchResults.length > 0;
   const showEmptyState =
-    shouldShowSearch && !showSkeleton && !isSearchError && searchResults.length === 0;
+    shouldShowSearch &&
+    !showSkeleton &&
+    !isSearchError &&
+    searchResults.length === 0;
 
   const { visible: curatedResults, suggestions: relatedSuggestions } = useMemo(
     () =>
@@ -162,7 +186,9 @@ function CharactersRoute() {
             onClear={handleClearSearch}
             showResults={showSearchResults}
             results={curatedResults}
-            renderGrid={(items) => <CharacterGrid items={items} onSelect={handleSelect} />}
+            renderGrid={(items) => (
+              <CharacterGrid items={items} onSelect={handleSelect} />
+            )}
             suggestions={
               relatedSuggestions.length
                 ? {
@@ -181,86 +207,107 @@ function CharactersRoute() {
                 : undefined
             }
           />
-        ) : spotlight ? (
-          <section className="relative overflow-hidden rounded-[36px] border border-border/60 bg-card/80 shadow-[0_45px_120px_rgba(0,0,0,0.55)]">
-            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/25" />
-            <div className="relative grid gap-10 px-8 py-10 md:grid-cols-[minmax(0,1fr)_320px] md:px-12 md:py-14">
-              <div className="space-y-5 text-white">
-                <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.35em] text-white/70">
-                  <Sparkles className="h-4 w-4" />
-                  Character spotlight
-                </p>
-                <h1 className="text-3xl font-black leading-tight md:text-4xl">
-                  {spotlight.name}
-                </h1>
-                <p className="text-sm text-white/80 md:text-base">
-                  {spotlight.description ??
-                    "From cult favorites to chart-topping leads—meet AniList’s most beloved characters in real time."}
-                </p>
+        ) : spotlightItems.length ? (
+          <section className="space-y-4">
+            <Carousel
+              autoPlayInterval={2000}
+              className="overflow-hidden rounded-[36px] border border-border/60 bg-card/80 shadow-[0_45px_120px_rgba(0,0,0,0.55)] md:h-[520px]"
+            >
+              <CarouselContent className="md:h-full">
+                {spotlightItems.map((spotlight) => (
+                  <CarouselItem key={spotlight.id} className="md:h-full">
+                    <article className="relative overflow-hidden rounded-[36px] md:h-full">
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/20" />
+                      <div className="relative grid gap-10 px-8 py-10 md:h-full md:grid-cols-[minmax(0,1fr)_320px] md:px-12 md:py-14">
+                        <div className="space-y-5 text-white">
+                          <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.35em] text-white/70">
+                            <Sparkles className="h-4 w-4" />
+                            Character spotlight
+                          </p>
+                          <h1 className="text-3xl font-black leading-tight md:text-4xl">
+                            {spotlight.name}
+                          </h1>
+                          <p className="text-sm text-white/80 md:text-base line-clamp-5">
+                            {spotlight.description ??
+                              "From cult favorites to chart-topping leads—meet AniList’s most beloved characters in real time."}
+                          </p>
 
-                <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.35em] text-white/80">
-                  {spotlight.appearances.slice(0, 3).map((appearance) => (
-                    <span
-                      key={appearance.id}
-                      className="rounded-full border border-white/20 bg-white/10 px-4 py-1"
-                    >
-                      {appearance.title}
-                    </span>
-                  ))}
-                </div>
+                          <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.35em] text-white/80">
+                            {spotlight.appearances
+                              .slice(0, 3)
+                              .map((appearance) => (
+                                <span
+                                  key={appearance.id}
+                                  className="rounded-full border border-white/20 bg-white/10 px-4 py-1"
+                                >
+                                  {appearance.title}
+                                </span>
+                              ))}
+                          </div>
 
-                <div className="flex flex-wrap gap-4">
-                  <Button
-                    type="button"
-                    className="rounded-2xl bg-primary/90 px-6 py-5 text-base"
-                    onClick={() => handleSelect(spotlight)}
-                  >
-                    <Heart className="h-5 w-5" />
-                    Open full profile
-                  </Button>
+                          <div className="flex flex-wrap gap-4 pb-2 md:pb-0">
+                            <Button
+                              type="button"
+                              className="rounded-2xl bg-primary/90 px-6 py-5 text-base"
+                              onClick={() => handleSelect(spotlight)}
+                              data-carousel-interactive="true"
+                            >
+                              <Heart className="h-5 w-5" />
+                              Open full profile
+                            </Button>
 
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="rounded-2xl border border-white/20 px-6 py-5 text-base text-white hover:bg-white/10"
-                  >
-                    <Star className="h-5 w-5" />
-                    Shuffle spotlight
-                  </Button>
-                </div>
-              </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="rounded-2xl border border-white/20 px-6 py-5 text-base text-white hover:bg-white/10"
+                              data-carousel-interactive="true"
+                            >
+                              <Star className="h-5 w-5" />
+                              Shuffle spotlight
+                            </Button>
+                          </div>
+                        </div>
 
-              <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/40">
-                <Image
-                  src={spotlight.image}
-                  alt={spotlight.name}
-                  width={600}
-                  height={800}
-                  className="h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                <div className="absolute bottom-4 left-4 flex gap-2 text-xs uppercase tracking-[0.35em] text-white/80">
-                  {spotlight.gender ? (
-                    <span className="rounded-full border border-white/20 bg-black/40 px-3 py-1">
-                      {spotlight.gender}
-                    </span>
-                  ) : null}
-                  {spotlight.age ? (
-                    <span className="rounded-full border border-white/20 bg-black/40 px-3 py-1">
-                      Age {spotlight.age}
-                    </span>
-                  ) : null}
-                  {spotlight.favorites ? (
-                    <span className="rounded-full border border-white/20 bg-black/40 px-3 py-1">
-                      {Intl.NumberFormat("en", {
-                        notation: "compact",
-                      }).format(spotlight.favorites)}{" "}
-                      favs
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-            </div>
+                        <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/40">
+                          <Image
+                            src={spotlight.image}
+                            alt={spotlight.name}
+                            width={600}
+                            height={800}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                          <div className="absolute bottom-4 left-4 flex gap-2 text-xs uppercase tracking-[0.35em] text-white/80">
+                            {spotlight.gender ? (
+                              <span className="rounded-full border border-white/20 bg-black/40 px-3 py-1">
+                                {spotlight.gender}
+                              </span>
+                            ) : null}
+                            {spotlight.age ? (
+                              <span className="rounded-full border border-white/20 bg-black/40 px-3 py-1">
+                                Age {spotlight.age}
+                              </span>
+                            ) : null}
+                            {spotlight.favorites ? (
+                              <span className="rounded-full border border-white/20 bg-black/40 px-3 py-1">
+                                {Intl.NumberFormat("en", {
+                                  notation: "compact",
+                                }).format(spotlight.favorites)}{" "}
+                                favs
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden md:flex" />
+              <CarouselNext className="hidden md:flex" />
+              <CarouselIndicators className="bottom-4 md:bottom-6" />
+            </Carousel>
           </section>
         ) : null}
 

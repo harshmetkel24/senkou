@@ -1,4 +1,8 @@
-import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
 import { Activity, Film, RefreshCw, Sparkles, Wand2 } from "lucide-react";
@@ -12,9 +16,17 @@ import {
   type MediaDetailData,
 } from "@/components/media/media-detail-panel";
 import { MediaGrid, MediaGridSkeleton } from "@/components/media/media-grid";
-import { Button } from "@/components/ui/button";
-import { fetchAnimeSearch, fetchTrendingAnime } from "@/data/queries/anime";
 import { SearchResultsPanel } from "@/components/search/search-results-panel";
+import { Button } from "@/components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselIndicators,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { fetchAnimeSearch, fetchTrendingAnime } from "@/data/queries/anime";
 import { deriveRelatedResults } from "@/lib/search-helpers";
 
 const trendingAnimeQueryOptions = () => ({
@@ -89,16 +101,22 @@ function AnimeRoute() {
     enabled: shouldShowSearch,
   });
 
-  const spotlight = useMemo(() => data.items[0], [data.items]);
+  const spotlightItems = useMemo(() => data.items.slice(0, 5), [data.items]);
   const searchResults = searchData?.items ?? [];
   const searchTotal = searchData?.pageInfo.total ?? 0;
   const isInitialSearch =
     shouldShowSearch && searchStatus === "pending" && !searchData;
   const showSkeleton = isInitialSearch;
   const showSearchResults =
-    shouldShowSearch && !showSkeleton && !isSearchError && searchResults.length > 0;
+    shouldShowSearch &&
+    !showSkeleton &&
+    !isSearchError &&
+    searchResults.length > 0;
   const showEmptyState =
-    shouldShowSearch && !showSkeleton && !isSearchError && searchResults.length === 0;
+    shouldShowSearch &&
+    !showSkeleton &&
+    !isSearchError &&
+    searchResults.length === 0;
 
   const { visible: curatedResults, suggestions: relatedSuggestions } = useMemo(
     () =>
@@ -166,7 +184,9 @@ function AnimeRoute() {
             onClear={handleClearSearch}
             showResults={showSearchResults}
             results={curatedResults}
-            renderGrid={(items) => <MediaGrid items={items} onSelect={handleSelect} />}
+            renderGrid={(items) => (
+              <MediaGrid items={items} onSelect={handleSelect} />
+            )}
             suggestions={
               relatedSuggestions.length
                 ? {
@@ -182,97 +202,122 @@ function AnimeRoute() {
                 : undefined
             }
           />
-        ) : spotlight ? (
-          <section className="relative overflow-hidden rounded-[36px] border border-border/60 bg-card/70 shadow-[0_45px_120px_rgba(0,0,0,0.55)]">
-            <div className="absolute inset-0">
-              <Image
-                src={spotlight.bannerImage ?? spotlight.coverImage}
-                alt={`${spotlight.title} banner art`}
-                width={1600}
-                height={600}
-                className="h-full w-full object-cover opacity-70"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/60 to-black/30" />
-            </div>
-            <div className="relative grid gap-8 px-8 py-10 md:grid-cols-[1.2fr_minmax(0,0.8fr)] md:px-12 md:py-14">
-              <div className="space-y-5 text-white">
-                <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.35em] text-white/70">
-                  <Sparkles className="h-4 w-4" />
-                  Trending spotlight
-                </p>
-                <h1 className="text-3xl font-black leading-tight md:text-4xl">
-                  {spotlight.title}
-                </h1>
-                <p className="text-sm text-white/80 md:text-base">
-                  {spotlight.description ??
-                    "Dive into the latest cinematic anime experiences curated straight from AniList’s live charts."}
-                </p>
+        ) : spotlightItems.length ? (
+          <section className="space-y-4">
+            <Carousel
+              autoPlayInterval={2000}
+              className="overflow-hidden rounded-[36px] border border-border/60 bg-card/70 shadow-[0_45px_120px_rgba(0,0,0,0.55)] md:h-[520px]"
+            >
+              <CarouselContent className="md:h-full">
+                {spotlightItems.map((spotlight) => (
+                  <CarouselItem key={spotlight.id} className="md:h-full">
+                    <article className="relative overflow-hidden rounded-[36px] md:h-full">
+                      <div className="absolute inset-0">
+                        <Image
+                          src={spotlight.bannerImage ?? spotlight.coverImage}
+                          alt={`${spotlight.title} banner art`}
+                          width={1600}
+                          height={600}
+                          className="h-full w-full object-cover opacity-70"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/30" />
+                      </div>
+                      <div className="relative grid gap-8 px-8 py-10 md:h-full md:grid-cols-[1.2fr_minmax(0,0.8fr)] md:px-12 md:py-14">
+                        <div className="space-y-5 text-white">
+                          <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.35em] text-white/70">
+                            <Sparkles className="h-4 w-4" />
+                            Trending spotlight
+                          </p>
+                          <h1 className="text-3xl font-black leading-tight md:text-4xl">
+                            {spotlight.title}
+                          </h1>
+                          <p className="text-sm text-white/80 md:text-base line-clamp-5">
+                            {spotlight.description ??
+                              "Dive into the latest cinematic anime experiences curated straight from AniList’s live charts."}
+                          </p>
 
-                <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.35em] text-white/80">
-                  {spotlight.genres.slice(0, 3).map((genre) => (
-                    <span
-                      key={genre}
-                      className="rounded-full border border-white/20 bg-white/10 px-4 py-1"
-                    >
-                      {genre}
-                    </span>
-                  ))}
-                </div>
+                          <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.35em] text-white/80">
+                            {spotlight.genres.slice(0, 3).map((genre) => (
+                              <span
+                                key={genre}
+                                className="rounded-full border border-white/20 bg-white/10 px-4 py-1"
+                              >
+                                {genre}
+                              </span>
+                            ))}
+                          </div>
 
-                <div className="flex flex-wrap gap-4">
-                  <Button
-                    type="button"
-                    className="rounded-2xl bg-primary/90 px-6 py-5 text-base"
-                    onClick={() => handleSelect(spotlight)}
-                  >
-                    <Film className="h-5 w-5" />
-                    Open Full Details
-                  </Button>
+                          <div className="flex flex-wrap gap-4 pb-2 md:pb-0">
+                            <Button
+                              type="button"
+                              className="rounded-2xl bg-primary/90 px-6 py-5 text-base"
+                              onClick={() => handleSelect(spotlight)}
+                              data-carousel-interactive="true"
+                            >
+                              <Film className="h-5 w-5" />
+                              Open Full Details
+                            </Button>
 
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="rounded-2xl border border-white/20 px-6 py-5 text-base text-white hover:bg-white/10"
-                  >
-                    <Wand2 className="h-5 w-5" />
-                    Surprise me
-                  </Button>
-                </div>
-              </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="rounded-2xl border border-white/20 px-6 py-5 text-base text-white hover:bg-white/10"
+                              data-carousel-interactive="true"
+                            >
+                              <Wand2 className="h-5 w-5" />
+                              Surprise me
+                            </Button>
+                          </div>
+                        </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <HighlightCard
-                  label="Audience score"
-                  value={
-                    spotlight.averageScore
-                      ? `${spotlight.averageScore}%`
-                      : "N/A"
-                  }
-                  icon={<Activity className="h-5 w-5 text-yellow-300" />}
-                />
-                <HighlightCard
-                  label="Episodes"
-                  value={
-                    spotlight.episodes ? `${spotlight.episodes} ep` : "TBD"
-                  }
-                  icon={<Film className="h-5 w-5 text-sky-300" />}
-                />
-                <HighlightCard
-                  label="Status"
-                  value={spotlight.status ?? "TBD"}
-                  icon={<Sparkles className="h-5 w-5 text-emerald-300" />}
-                />
-                <HighlightCard
-                  label="Season"
-                  value={
-                    spotlight.seasonYear
-                      ? `${spotlight.season ?? ""} ${spotlight.seasonYear}`.trim()
-                      : spotlight.season ?? "TBA"
-                  }
-                  icon={<Wand2 className="h-5 w-5 text-violet-300" />}
-                />
-              </div>
-            </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <HighlightCard
+                            label="Audience score"
+                            value={
+                              spotlight.averageScore
+                                ? `${spotlight.averageScore}%`
+                                : "N/A"
+                            }
+                            icon={
+                              <Activity className="h-5 w-5 text-yellow-300" />
+                            }
+                          />
+                          <HighlightCard
+                            label="Episodes"
+                            value={
+                              spotlight.episodes
+                                ? `${spotlight.episodes} ep`
+                                : "TBD"
+                            }
+                            icon={<Film className="h-5 w-5 text-sky-300" />}
+                          />
+                          <HighlightCard
+                            label="Status"
+                            value={spotlight.status ?? "TBD"}
+                            icon={
+                              <Sparkles className="h-5 w-5 text-emerald-300" />
+                            }
+                          />
+                          <HighlightCard
+                            label="Season"
+                            value={
+                              spotlight.seasonYear
+                                ? `${spotlight.season ?? ""} ${spotlight.seasonYear}`.trim()
+                                : (spotlight.season ?? "TBA")
+                            }
+                            icon={<Wand2 className="h-5 w-5 text-violet-300" />}
+                          />
+                        </div>
+                      </div>
+                    </article>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden md:flex" />
+              <CarouselNext className="hidden md:flex" />
+              <CarouselIndicators className="bottom-4 md:bottom-6" />
+            </Carousel>
           </section>
         ) : null}
 
