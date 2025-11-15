@@ -30,6 +30,7 @@ import {
   fetchCharacterSearch,
   fetchTrendingCharacters,
 } from "@/data/queries/characters";
+import { useSpotlightDeck } from "@/hooks/use-spotlight-deck";
 import { deriveRelatedResults } from "@/lib/search-helpers";
 
 const trendingCharactersQueryOptions = () => ({
@@ -108,7 +109,7 @@ function CharactersRoute() {
     enabled: shouldShowSearch,
   });
 
-  const spotlightItems = useMemo(() => data.items.slice(0, 5), [data.items]);
+  const { spotlightItems, shuffleSpotlights } = useSpotlightDeck(data.items);
   const searchResults = searchData?.items ?? [];
   const searchTotal = searchData?.pageInfo.total ?? 0;
   const showSkeleton =
@@ -261,6 +262,7 @@ function CharactersRoute() {
                               variant="ghost"
                               className="rounded-2xl border border-white/20 px-6 py-5 text-base text-white hover:bg-white/10"
                               data-carousel-interactive="true"
+                              onClick={shuffleSpotlights}
                             >
                               <Star className="h-5 w-5" />
                               Shuffle spotlight

@@ -34,6 +34,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { fetchMangaSearch, fetchTrendingManga } from "@/data/queries/manga";
+import { useSpotlightDeck } from "@/hooks/use-spotlight-deck";
 import { deriveRelatedResults } from "@/lib/search-helpers";
 
 const trendingMangaQueryOptions = () => ({
@@ -108,7 +109,7 @@ function MangaRoute() {
     enabled: shouldShowSearch,
   });
 
-  const spotlightItems = useMemo(() => data.items.slice(0, 5), [data.items]);
+  const { spotlightItems, shuffleSpotlights } = useSpotlightDeck(data.items);
   const searchResults = searchData?.items ?? [];
   const searchTotal = searchData?.pageInfo.total ?? 0;
   const showSkeleton =
@@ -266,6 +267,7 @@ function MangaRoute() {
                               variant="ghost"
                               className="rounded-2xl border border-white/20 px-6 py-5 text-base text-white hover:bg-white/10"
                               data-carousel-interactive="true"
+                              onClick={shuffleSpotlights}
                             >
                               <ScrollText className="h-5 w-5" />
                               Random chapter
