@@ -51,9 +51,11 @@ export default function Header() {
               alt="Senkou Logo"
               className="h-10 w-10"
             />
-            <span className="text-xl font-bold uppercase tracking-tighter">
-              senkō!
-            </span>
+            {isIndexRoute ? (
+              <span className="text-xl font-bold uppercase tracking-tighter">
+                senkō!
+              </span>
+            ) : null}
           </Link>
         </div>
         <div className="flex-1 flex justify-center px-4">
