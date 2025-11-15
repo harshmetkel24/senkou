@@ -1,23 +1,20 @@
-import { keepPreviousData, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import {
-  BookOpen,
-  Layers,
-  Library,
-  RefreshCw,
-  ScrollText,
-  Sparkles,
-} from "lucide-react";
+import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { BookOpen, Layers, Library, RefreshCw, ScrollText, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
+import { z } from "zod";
 
+import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import { HighlightCard } from "@/components/media/highlight-card";
 import {
   MediaDetailPanel,
   type MediaDetailData,
 } from "@/components/media/media-detail-panel";
-import { MediaGrid } from "@/components/media/media-grid";
+import { MediaGrid, MediaGridSkeleton } from "@/components/media/media-grid";
 import { Button } from "@/components/ui/button";
-import { fetchTrendingManga } from "@/data/queries/manga";
+import { fetchMangaSearch, fetchTrendingManga } from "@/data/queries/manga";
+import { SearchResultsPanel } from "@/components/search/search-results-panel";
+import { deriveRelatedResults } from "@/lib/search-helpers";
 
 const trendingMangaQueryOptions = () => ({
   queryKey: ["manga", "trending", 1],
@@ -26,22 +23,113 @@ const trendingMangaQueryOptions = () => ({
   placeholderData: keepPreviousData,
 });
 
+const searchSchema = z.object({
+  q: z
+    .string()
+    .trim()
+    .max(60, "Search queries are capped at 60 characters")
+    .optional()
+    .transform((value) => (value && value.length ? value : undefined)),
+});
+
+const searchMangaQueryOptions = (query: string) => ({
+  queryKey: ["manga", "search", query],
+  queryFn: () => fetchMangaSearch(query, 1, 24),
+  staleTime: 1000 * 60 * 2,
+  placeholderData: keepPreviousData,
+});
+
 export const Route = createFileRoute("/manga")({
-  loader: ({ context }) =>
-    context.queryClient.ensureQueryData(trendingMangaQueryOptions()),
+  validateSearch: (search) => searchSchema.parse(search ?? {}),
+  loader: ({ context, search }) => {
+    const resolvedSearch = search ?? {};
+    const tasks = [
+      context.queryClient.ensureQueryData(trendingMangaQueryOptions()),
+    ];
+
+    if (resolvedSearch.q) {
+      tasks.push(
+        context.queryClient.ensureQueryData(
+          searchMangaQueryOptions(resolvedSearch.q),
+        ),
+      );
+    }
+
+    return Promise.all(tasks);
+  },
   component: MangaRoute,
+  errorComponent: (props) => (
+    <RouteErrorBoundary
+      {...props}
+      title="Manga page glitched out"
+      description="The illustrated lineup couldn't load. Give it another shot or pick a different tab."
+    />
+  ),
 });
 
 function MangaRoute() {
+  const navigate = useNavigate();
   const { data, isFetching } = useSuspenseQuery(trendingMangaQueryOptions());
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [activeMedia, setActiveMedia] = useState<MediaDetailData | undefined>();
+  const { q: searchQuery } = Route.useSearch();
+  const normalizedSearchQuery = searchQuery ?? "";
+
+  const shouldShowSearch = Boolean(searchQuery);
+  const {
+    data: searchData,
+    status: searchStatus,
+    isFetching: isSearching,
+    isError: isSearchError,
+    error: searchError,
+    refetch: refetchSearch,
+  } = useQuery({
+    ...searchMangaQueryOptions(normalizedSearchQuery),
+    enabled: shouldShowSearch,
+  });
 
   const spotlight = useMemo(() => data.items[0], [data.items]);
+  const searchResults = searchData?.items ?? [];
+  const searchTotal = searchData?.pageInfo.total ?? 0;
+  const showSkeleton =
+    shouldShowSearch && searchStatus === "pending" && !searchData;
+  const showSearchResults =
+    shouldShowSearch && !showSkeleton && !isSearchError && searchResults.length > 0;
+  const showEmptyState =
+    shouldShowSearch && !showSkeleton && !isSearchError && searchResults.length === 0;
+
+  const { visible: curatedResults, suggestions: relatedSuggestions } = useMemo(
+    () =>
+      deriveRelatedResults(
+        searchResults,
+        normalizedSearchQuery,
+        (item) => [item.title],
+        { limit: 6 },
+      ),
+    [searchResults, normalizedSearchQuery],
+  );
+
+  const searchDescription = searchTotal
+    ? `${searchTotal} titles match this query. Share this URL to keep the context.`
+    : "Refine the query to uncover the perfect manga arc.";
+  const errorDescription =
+    searchError instanceof Error
+      ? searchError.message
+      : "Rate limits or invalid filters stopped this search.";
 
   const handleSelect = (media: MediaDetailData) => {
     setActiveMedia(media);
     setIsPanelOpen(true);
+  };
+
+  const handleClearSearch = () => {
+    navigate({
+      to: "/manga",
+      search: (prev) => ({
+        ...(prev ?? {}),
+        q: undefined,
+      }),
+    });
   };
 
   return (
@@ -55,7 +143,40 @@ function MangaRoute() {
       </div>
 
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-12">
-        {spotlight ? (
+        {shouldShowSearch ? (
+          <SearchResultsPanel
+            heading={`Library results for "${normalizedSearchQuery}"`}
+            description={searchDescription}
+            isSearching={isSearching}
+            showSkeleton={showSkeleton}
+            skeleton={<MediaGridSkeleton />}
+            isError={Boolean(searchQuery) && isSearchError}
+            errorTitle="AniList search failed"
+            errorDescription={errorDescription}
+            showEmpty={Boolean(searchQuery) && showEmptyState}
+            emptyTitle={`No manga found for "${normalizedSearchQuery}"`}
+            emptyDescription="Adjust romanization, try author names, or clear the filter to go back to charts."
+            onRetry={() => refetchSearch()}
+            onClear={handleClearSearch}
+            showResults={showSearchResults}
+            results={curatedResults}
+            renderGrid={(items) => <MediaGrid items={items} onSelect={handleSelect} />}
+            suggestions={
+              relatedSuggestions.length
+                ? {
+                    heading: "Nearby picks",
+                    items: relatedSuggestions,
+                    getLabel: (item) => item.title,
+                    onSelect: (item) =>
+                      navigate({
+                        to: "/manga",
+                        search: (prev) => ({ ...(prev ?? {}), q: item.title }),
+                      }),
+                  }
+                : undefined
+            }
+          />
+        ) : spotlight ? (
           <section className="relative overflow-hidden rounded-[36px] border border-border/60 bg-card/70 shadow-[0_45px_120px_rgba(0,0,0,0.55)]">
             <div className="absolute inset-0">
               <img
@@ -148,7 +269,9 @@ function MangaRoute() {
                 AniList Illustrated Charts
               </p>
               <h2 className="mt-2 text-3xl font-bold">
-                Prestige manga made for binge reading
+                {shouldShowSearch
+                  ? "Still hungry? Trend charts await"
+                  : "Prestige manga made for binge reading"}
               </h2>
             </div>
             {isFetching ? (

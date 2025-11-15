@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 interface SidebarState {
   collapsed: boolean;
+  mobileOpen: boolean;
   shouldFocusSearch: boolean;
   helpDialogOpen: boolean;
 }
@@ -9,6 +10,7 @@ interface SidebarState {
 interface SidebarActions {
   setCollapsed: (collapsed: boolean) => void;
   toggleSidebar: () => void;
+  setMobileOpen: (open: boolean) => void;
   setShouldFocusSearch: (focus: boolean) => void;
   setHelpDialogOpen: (open: boolean) => void;
 }
@@ -17,11 +19,13 @@ type SidebarStore = SidebarState & SidebarActions;
 
 export const useSidebarStore = create<SidebarStore>((set) => ({
   collapsed: false,
+  mobileOpen: false,
   shouldFocusSearch: false,
   helpDialogOpen: false,
 
   setCollapsed: (collapsed) => set({ collapsed }),
   toggleSidebar: () => set((state) => ({ collapsed: !state.collapsed })),
+  setMobileOpen: (open) => set({ mobileOpen: open }),
   setShouldFocusSearch: (focus) => set({ shouldFocusSearch: focus }),
   setHelpDialogOpen: (open) => set({ helpDialogOpen: open }),
 }));

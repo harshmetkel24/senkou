@@ -1,6 +1,6 @@
 import { fetchAniList } from "@/lib/anilist-client";
 
-import { sanitizeDescription } from "./utils";
+import { sanitizeDescription, sanitizeSearchTerm } from "./utils";
 
 const TRENDING_MANGA_QUERY = /* GraphQL */ `
   query TrendingManga($page: Int!, $perPage: Int!) {
@@ -54,7 +54,7 @@ const TRENDING_MANGA_QUERY = /* GraphQL */ `
   }
 `;
 
-type TrendingMangaQueryResult = {
+type MangaPageQueryResult = {
   Page: {
     pageInfo: {
       total: number;
@@ -120,7 +120,7 @@ export type MangaListItem = {
 
 export type MangaListPage = {
   items: MangaListItem[];
-  pageInfo: TrendingMangaQueryResult["Page"]["pageInfo"];
+  pageInfo: MangaPageQueryResult["Page"]["pageInfo"];
 };
 
 const normalizeStaff = (media: MangaMedia): MangaListItem["studios"] => {
@@ -168,9 +168,93 @@ export const fetchTrendingManga = async (
   page = 1,
   perPage = 20,
 ): Promise<MangaListPage> => {
-  const data = await fetchAniList<TrendingMangaQueryResult>({
+  const data = await fetchAniList<MangaPageQueryResult>({
     query: TRENDING_MANGA_QUERY,
     variables: { page, perPage },
+  });
+
+  return {
+    items: data.Page.media.map(normalizeManga),
+    pageInfo: data.Page.pageInfo,
+  };
+};
+
+const SEARCH_MANGA_QUERY = /* GraphQL */ `
+  query SearchManga($page: Int!, $perPage: Int!, $search: String!) {
+    Page(page: $page, perPage: $perPage) {
+      pageInfo {
+        total
+        perPage
+        currentPage
+        lastPage
+        hasNextPage
+      }
+      media(
+        type: MANGA
+        search: $search
+        sort: [SEARCH_MATCH, POPULARITY_DESC]
+        status_in: [RELEASING, FINISHED]
+        isAdult: false
+      ) {
+        id
+        format
+        status
+        chapters
+        volumes
+        averageScore
+        popularity
+        genres
+        description
+        bannerImage
+        coverImage {
+          extraLarge
+          large
+          color
+        }
+        staff(perPage: 6) {
+          edges {
+            node {
+              id
+              name {
+                full
+                native
+              }
+            }
+          }
+        }
+        title {
+          romaji
+          english
+          native
+        }
+      }
+    }
+  }
+`;
+
+export const fetchMangaSearch = async (
+  searchTerm: string,
+  page = 1,
+  perPage = 20,
+): Promise<MangaListPage> => {
+  const sanitizedSearch = sanitizeSearchTerm(searchTerm);
+
+  if (!sanitizedSearch) {
+    return {
+      items: [],
+      pageInfo: {
+        total: 0,
+        perPage,
+        currentPage: page,
+        lastPage: 0,
+        hasNextPage: false,
+      },
+    };
+  }
+
+  const data = await fetchAniList<MangaPageQueryResult>({
+    query: SEARCH_MANGA_QUERY,
+    variables: { page, perPage, search: sanitizedSearch },
   });
 
   return {

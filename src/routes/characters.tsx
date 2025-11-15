@@ -1,13 +1,17 @@
-import { keepPreviousData, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Heart, RefreshCw, Sparkles, Star } from "lucide-react";
 import { useMemo, useState } from "react";
+import { z } from "zod";
 
+import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import type { CharacterCardData } from "@/components/characters/character-card";
 import { CharacterDetailPanel } from "@/components/characters/character-detail-panel";
-import { CharacterGrid } from "@/components/characters/character-grid";
+import { CharacterGrid, CharacterGridSkeleton } from "@/components/characters/character-grid";
 import { Button } from "@/components/ui/button";
-import { fetchTrendingCharacters } from "@/data/queries/characters";
+import { fetchCharacterSearch, fetchTrendingCharacters } from "@/data/queries/characters";
+import { SearchResultsPanel } from "@/components/search/search-results-panel";
+import { deriveRelatedResults } from "@/lib/search-helpers";
 
 const trendingCharactersQueryOptions = () => ({
   queryKey: ["characters", "trending", 1],
@@ -16,13 +20,52 @@ const trendingCharactersQueryOptions = () => ({
   placeholderData: keepPreviousData,
 });
 
+const searchSchema = z.object({
+  q: z
+    .string()
+    .trim()
+    .max(60, "Search queries are capped at 60 characters")
+    .optional()
+    .transform((value) => (value && value.length ? value : undefined)),
+});
+
+const searchCharacterQueryOptions = (query: string) => ({
+  queryKey: ["characters", "search", query],
+  queryFn: () => fetchCharacterSearch(query, 1, 24),
+  staleTime: 1000 * 60 * 2,
+  placeholderData: keepPreviousData,
+});
+
 export const Route = createFileRoute("/characters")({
-  loader: ({ context }) =>
-    context.queryClient.ensureQueryData(trendingCharactersQueryOptions()),
+  validateSearch: (search) => searchSchema.parse(search ?? {}),
+  loader: ({ context, search }) => {
+    const resolvedSearch = search ?? {};
+    const tasks = [
+      context.queryClient.ensureQueryData(trendingCharactersQueryOptions()),
+    ];
+
+    if (resolvedSearch.q) {
+      tasks.push(
+        context.queryClient.ensureQueryData(
+          searchCharacterQueryOptions(resolvedSearch.q),
+        ),
+      );
+    }
+
+    return Promise.all(tasks);
+  },
   component: CharactersRoute,
+  errorComponent: (props) => (
+    <RouteErrorBoundary
+      {...props}
+      title="Character compendium failed to render"
+      description="AniList didn't return the character data in time. Try again or switch routes via the sidebar."
+    />
+  ),
 });
 
 function CharactersRoute() {
+  const navigate = useNavigate();
   const { data, isFetching } = useSuspenseQuery(
     trendingCharactersQueryOptions(),
   );
@@ -31,11 +74,63 @@ function CharactersRoute() {
     CharacterCardData | undefined
   >();
 
+  const { q: searchQuery } = Route.useSearch();
+  const normalizedSearchQuery = searchQuery ?? "";
+  const shouldShowSearch = Boolean(searchQuery);
+  const {
+    data: searchData,
+    status: searchStatus,
+    isFetching: isSearching,
+    isError: isSearchError,
+    error: searchError,
+    refetch: refetchSearch,
+  } = useQuery({
+    ...searchCharacterQueryOptions(normalizedSearchQuery),
+    enabled: shouldShowSearch,
+  });
+
   const spotlight = useMemo(() => data.items[0], [data.items]);
+  const searchResults = searchData?.items ?? [];
+  const searchTotal = searchData?.pageInfo.total ?? 0;
+  const showSkeleton =
+    shouldShowSearch && searchStatus === "pending" && !searchData;
+  const showSearchResults =
+    shouldShowSearch && !showSkeleton && !isSearchError && searchResults.length > 0;
+  const showEmptyState =
+    shouldShowSearch && !showSkeleton && !isSearchError && searchResults.length === 0;
+
+  const { visible: curatedResults, suggestions: relatedSuggestions } = useMemo(
+    () =>
+      deriveRelatedResults(
+        searchResults,
+        normalizedSearchQuery,
+        (item) => [item.name, item.nativeName],
+        { limit: 6 },
+      ),
+    [searchResults, normalizedSearchQuery],
+  );
+
+  const searchDescription = searchTotal
+    ? `${searchTotal} personas fit this query. Send this link to share the context.`
+    : "Search by name, alias, or romaji to surface just the right hero.";
+  const errorDescription =
+    searchError instanceof Error
+      ? searchError.message
+      : "Rate limits or invalid filters stopped this query.";
 
   const handleSelect = (character: CharacterCardData) => {
     setActiveCharacter(character);
     setIsPanelOpen(true);
+  };
+
+  const handleClearSearch = () => {
+    navigate({
+      to: "/characters",
+      search: (prev) => ({
+        ...(prev ?? {}),
+        q: undefined,
+      }),
+    });
   };
 
   return (
@@ -49,7 +144,43 @@ function CharactersRoute() {
       </div>
 
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-12">
-        {spotlight ? (
+        {shouldShowSearch ? (
+          <SearchResultsPanel
+            heading={`Character hits for "${normalizedSearchQuery}"`}
+            description={searchDescription}
+            isSearching={isSearching}
+            showSkeleton={showSkeleton}
+            skeleton={<CharacterGridSkeleton />}
+            isError={Boolean(searchQuery) && isSearchError}
+            errorTitle="AniList search failed"
+            errorDescription={errorDescription}
+            showEmpty={Boolean(searchQuery) && showEmptyState}
+            emptyTitle={`Couldn't find "${normalizedSearchQuery}"`}
+            emptyDescription="Try alternate spellings or clear the filter to browse trending favorites."
+            onRetry={() => refetchSearch()}
+            onClear={handleClearSearch}
+            showResults={showSearchResults}
+            results={curatedResults}
+            renderGrid={(items) => <CharacterGrid items={items} onSelect={handleSelect} />}
+            suggestions={
+              relatedSuggestions.length
+                ? {
+                    heading: "Maybe you meant",
+                    items: relatedSuggestions,
+                    getLabel: (item) => item.name,
+                    onSelect: (item) =>
+                      navigate({
+                        to: "/characters",
+                        search: (prev) => ({
+                          ...(prev ?? {}),
+                          q: item.name,
+                        }),
+                      }),
+                  }
+                : undefined
+            }
+          />
+        ) : spotlight ? (
           <section className="relative overflow-hidden rounded-[36px] border border-border/60 bg-card/80 shadow-[0_45px_120px_rgba(0,0,0,0.55)]">
             <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/25" />
             <div className="relative grid gap-10 px-8 py-10 md:grid-cols-[minmax(0,1fr)_320px] md:px-12 md:py-14">
@@ -137,7 +268,9 @@ function CharactersRoute() {
                 AniList Character Index
               </p>
               <h2 className="mt-2 text-3xl font-bold">
-                Your favorite voices, all in one canon
+                {shouldShowSearch
+                  ? "Or keep browsing beloved icons"
+                  : "Your favorite voices, all in one canon"}
               </h2>
             </div>
             {isFetching ? (

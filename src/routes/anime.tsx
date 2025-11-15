@@ -1,16 +1,20 @@
-import { keepPreviousData, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Activity, Film, RefreshCw, Sparkles, Wand2 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { z } from "zod";
 
+import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import { HighlightCard } from "@/components/media/highlight-card";
 import {
   MediaDetailPanel,
   type MediaDetailData,
 } from "@/components/media/media-detail-panel";
-import { MediaGrid } from "@/components/media/media-grid";
+import { MediaGrid, MediaGridSkeleton } from "@/components/media/media-grid";
 import { Button } from "@/components/ui/button";
-import { fetchTrendingAnime } from "@/data/queries/anime";
+import { fetchAnimeSearch, fetchTrendingAnime } from "@/data/queries/anime";
+import { SearchResultsPanel } from "@/components/search/search-results-panel";
+import { deriveRelatedResults } from "@/lib/search-helpers";
 
 const trendingAnimeQueryOptions = () => ({
   queryKey: ["anime", "trending", 1],
@@ -19,20 +23,100 @@ const trendingAnimeQueryOptions = () => ({
   placeholderData: keepPreviousData,
 });
 
+const searchSchema = z.object({
+  q: z
+    .string()
+    .trim()
+    .max(60, "Search queries are capped at 60 characters")
+    .optional()
+    .transform((value) => (value && value.length ? value : undefined)),
+});
+
+const searchAnimeQueryOptions = (query: string) => ({
+  queryKey: ["anime", "search", query],
+  queryFn: () => fetchAnimeSearch(query, 1, 24),
+  staleTime: 1000 * 60 * 2,
+  placeholderData: keepPreviousData,
+});
+
 export const Route = createFileRoute("/anime")({
-  loader: ({ context }) =>
-    context.queryClient.ensureQueryData(trendingAnimeQueryOptions()),
+  validateSearch: (search) => searchSchema.parse(search ?? {}),
+  loader: ({ context, search }) => {
+    const resolvedSearch = search ?? {};
+    const tasks = [
+      context.queryClient.ensureQueryData(trendingAnimeQueryOptions()),
+    ];
+
+    if (resolvedSearch.q) {
+      tasks.push(
+        context.queryClient.ensureQueryData(
+          searchAnimeQueryOptions(resolvedSearch.q),
+        ),
+      );
+    }
+
+    return Promise.all(tasks);
+  },
   component: AnimeRoute,
+  errorComponent: (props) => (
+    <RouteErrorBoundary
+      {...props}
+      title="Anime grid took a direct hit"
+      description="We couldn't fetch AniList's trending anime. Retry the request or jump to another destination."
+    />
+  ),
 });
 
 function AnimeRoute() {
+  const navigate = useNavigate();
   const { data, isFetching } = useSuspenseQuery(trendingAnimeQueryOptions());
   const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [activeMedia, setActiveMedia] = useState<MediaDetailData | undefined>(
-    undefined,
-  );
+  const [activeMedia, setActiveMedia] = useState<MediaDetailData | undefined>();
+  const { q: searchQuery } = Route.useSearch();
+  const normalizedSearchQuery = searchQuery ?? "";
+
+  const shouldShowSearch = Boolean(searchQuery);
+  const {
+    data: searchData,
+    status: searchStatus,
+    isFetching: isSearching,
+    isError: isSearchError,
+    error: searchError,
+    refetch: refetchSearch,
+  } = useQuery({
+    ...searchAnimeQueryOptions(normalizedSearchQuery),
+    enabled: shouldShowSearch,
+  });
 
   const spotlight = useMemo(() => data.items[0], [data.items]);
+  const searchResults = searchData?.items ?? [];
+  const searchTotal = searchData?.pageInfo.total ?? 0;
+  const isInitialSearch =
+    shouldShowSearch && searchStatus === "pending" && !searchData;
+  const showSkeleton = isInitialSearch;
+  const showSearchResults =
+    shouldShowSearch && !showSkeleton && !isSearchError && searchResults.length > 0;
+  const showEmptyState =
+    shouldShowSearch && !showSkeleton && !isSearchError && searchResults.length === 0;
+
+  const { visible: curatedResults, suggestions: relatedSuggestions } = useMemo(
+    () =>
+      deriveRelatedResults(
+        searchResults,
+        normalizedSearchQuery,
+        (item) => [item.title],
+        { limit: 6 },
+      ),
+    [searchResults, normalizedSearchQuery],
+  );
+
+  const searchDescription = searchTotal
+    ? `${searchTotal} total results loaded straight from AniList.`
+    : "Search results update instantly as you refine the query.";
+  const errorDescription =
+    searchError instanceof Error
+      ? searchError.message
+      : "AniList rejected the request. Retry or adjust the keyword.";
 
   const handleSelect = (media: MediaDetailData) => {
     setActiveMedia(media);
@@ -41,6 +125,16 @@ function AnimeRoute() {
 
   const closePanel = () => {
     setIsPanelOpen(false);
+  };
+
+  const handleClearSearch = () => {
+    navigate({
+      to: "/anime",
+      search: (prev) => ({
+        ...prev,
+        q: undefined,
+      }),
+    });
   };
 
   return (
@@ -54,7 +148,40 @@ function AnimeRoute() {
       </div>
 
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-12">
-        {spotlight ? (
+        {shouldShowSearch ? (
+          <SearchResultsPanel
+            heading={`Matches for "${normalizedSearchQuery}"`}
+            description={searchDescription}
+            isSearching={isSearching}
+            showSkeleton={showSkeleton}
+            skeleton={<MediaGridSkeleton />}
+            isError={Boolean(searchQuery) && isSearchError}
+            errorTitle="Could not search AniList right now"
+            errorDescription={errorDescription}
+            showEmpty={Boolean(searchQuery) && showEmptyState}
+            emptyTitle={`Nothing matched "${normalizedSearchQuery}"`}
+            emptyDescription="Try using a different spelling or jump back to the trending list."
+            onRetry={() => refetchSearch()}
+            onClear={handleClearSearch}
+            showResults={showSearchResults}
+            results={curatedResults}
+            renderGrid={(items) => <MediaGrid items={items} onSelect={handleSelect} />}
+            suggestions={
+              relatedSuggestions.length
+                ? {
+                    heading: "Quick pivots",
+                    items: relatedSuggestions,
+                    getLabel: (item) => item.title,
+                    onSelect: (item) =>
+                      navigate({
+                        to: "/anime",
+                        search: (prev) => ({ ...(prev ?? {}), q: item.title }),
+                      }),
+                  }
+                : undefined
+            }
+          />
+        ) : spotlight ? (
           <section className="relative overflow-hidden rounded-[36px] border border-border/60 bg-card/70 shadow-[0_45px_120px_rgba(0,0,0,0.55)]">
             <div className="absolute inset-0">
               <img
@@ -137,7 +264,7 @@ function AnimeRoute() {
                   value={
                     spotlight.seasonYear
                       ? `${spotlight.season ?? ""} ${spotlight.seasonYear}`.trim()
-                      : (spotlight.season ?? "TBA")
+                      : spotlight.season ?? "TBA"
                   }
                   icon={<Wand2 className="h-5 w-5 text-violet-300" />}
                 />
@@ -153,7 +280,9 @@ function AnimeRoute() {
                 ANIList Live Charts
               </p>
               <h2 className="mt-2 text-3xl font-bold">
-                Cinematic cards built for binge planning
+                {shouldShowSearch
+                  ? "Stay for what's trending this week"
+                  : "Cinematic cards built for binge planning"}
               </h2>
             </div>
             {isFetching ? (
