@@ -6,6 +6,7 @@ import {
   User,
   X,
 } from "lucide-react";
+import { Image } from "@unpic/react";
 
 import type { CharacterCardData } from "./character-card";
 
@@ -32,9 +33,11 @@ export function CharacterDetailPanel({
       <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
       <article className="relative z-10 grid max-h-[92vh] w-full max-w-5xl grid-cols-1 overflow-hidden rounded-[32px] border border-border/70 bg-gradient-to-b from-card/90 via-background/95 to-background shadow-[0_40px_90px_rgba(0,0,0,0.65)] md:grid-cols-[320px_minmax(0,1fr)]">
         <div className="relative h-full bg-black/30">
-          <img
+          <Image
             src={character.image}
             alt={character.name}
+            width={700}
+            height={900}
             className="h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/50" />
@@ -114,9 +117,11 @@ export function CharacterDetailPanel({
                   >
                     <div className="h-14 w-14 overflow-hidden rounded-xl border border-border/60 bg-muted/20">
                       {media.coverImage ? (
-                        <img
+                        <Image
                           src={media.coverImage}
                           alt={media.title}
+                          width={400}
+                          height={600}
                           className="h-full w-full object-cover"
                         />
                       ) : (

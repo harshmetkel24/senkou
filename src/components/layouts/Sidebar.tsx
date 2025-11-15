@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/sheet";
 import { useSidebarStore } from "@/lib/stores";
 import { Link, useRouterState } from "@tanstack/react-router";
+import { Image } from "@unpic/react";
 import {
   BookOpen,
   ChevronLeft,
@@ -50,7 +51,7 @@ export default function Sidebar() {
           aria-label="Primary navigation"
         >
           <SheetHeader>
-            <SheetTitle className="text-left">Navigation</SheetTitle>
+          <SheetTitle className="text-left">Navigation</SheetTitle>
           </SheetHeader>
           <nav className="mt-6 space-y-2">
             {navItems.map(({ to, label, icon: Icon }) => {
@@ -81,9 +82,11 @@ export default function Sidebar() {
         <div className="flex items-center justify-between p-4 border-b border-border">
           {!collapsed && (
             <div className="flex items-center gap-3">
-              <img
+              <Image
                 src="/senkou-circle-logo.png"
                 alt="Senkou Logo"
+                width={1024}
+                height={1024}
                 className="h-8 w-8"
               />
               <span className="text-lg font-bold uppercase tracking-tighter">

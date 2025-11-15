@@ -1,5 +1,6 @@
 import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Image } from "@unpic/react";
 import { Heart, RefreshCw, Sparkles, Star } from "lucide-react";
 import { useMemo, useState } from "react";
 import { z } from "zod";
@@ -230,9 +231,11 @@ function CharactersRoute() {
               </div>
 
               <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/40">
-                <img
+                <Image
                   src={spotlight.image}
                   alt={spotlight.name}
+                  width={600}
+                  height={800}
                   className="h-full w-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />

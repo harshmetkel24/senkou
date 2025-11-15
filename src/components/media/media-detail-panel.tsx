@@ -7,6 +7,7 @@ import {
   Star,
   X,
 } from "lucide-react";
+import { Image } from "@unpic/react";
 import { type ComponentType, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -99,9 +100,11 @@ export function MediaDetailPanel({
       <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
       <article className="relative z-10 flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-[32px] border border-border/60 bg-gradient-to-b from-card/90 via-background/95 to-background shadow-[0_40px_90px_rgba(0,0,0,0.65)]">
         <header className="relative h-64 overflow-hidden">
-          <img
+          <Image
             src={media.bannerImage ?? media.coverImage}
             alt={media.title}
+            width={1600}
+            height={600}
             className="h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/85" />

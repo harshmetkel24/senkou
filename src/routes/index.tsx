@@ -1,5 +1,6 @@
 import { keepPreviousData, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { Image } from "@unpic/react";
 
 import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import { MediaGrid } from "@/components/media/media-grid";
@@ -34,9 +35,12 @@ function App() {
       <div className="flex flex-col items-center justify-center px-6 py-12">
         {/* Logo and Title */}
         <div className="mb-10 text-center animate-fade-in">
-          <img
+          <Image
             src="/senkou-full.png"
             alt="Senkou Logo"
+            width={1024}
+            height={1024}
+            priority
             className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6"
           />
           <h1 className="text-4xl md:text-6xl font-black mb-4 uppercase [letter-spacing:-0.08em]">
