@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as MangaRouteImport } from './routes/manga'
 import { Route as CharactersRouteImport } from './routes/characters'
 import { Route as AnimeRouteImport } from './routes/anime'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MangaRoute = MangaRouteImport.update({
   id: '/manga',
   path: '/manga',
@@ -40,12 +46,14 @@ export interface FileRoutesByFullPath {
   '/anime': typeof AnimeRoute
   '/characters': typeof CharactersRoute
   '/manga': typeof MangaRoute
+  '/search': typeof SearchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/anime': typeof AnimeRoute
   '/characters': typeof CharactersRoute
   '/manga': typeof MangaRoute
+  '/search': typeof SearchRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/anime': typeof AnimeRoute
   '/characters': typeof CharactersRoute
   '/manga': typeof MangaRoute
+  '/search': typeof SearchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/anime' | '/characters' | '/manga'
+  fullPaths: '/' | '/anime' | '/characters' | '/manga' | '/search'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/anime' | '/characters' | '/manga'
-  id: '__root__' | '/' | '/anime' | '/characters' | '/manga'
+  to: '/' | '/anime' | '/characters' | '/manga' | '/search'
+  id: '__root__' | '/' | '/anime' | '/characters' | '/manga' | '/search'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,10 +76,18 @@ export interface RootRouteChildren {
   AnimeRoute: typeof AnimeRoute
   CharactersRoute: typeof CharactersRoute
   MangaRoute: typeof MangaRoute
+  SearchRoute: typeof SearchRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/manga': {
       id: '/manga'
       path: '/manga'
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnimeRoute: AnimeRoute,
   CharactersRoute: CharactersRoute,
   MangaRoute: MangaRoute,
+  SearchRoute: SearchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
