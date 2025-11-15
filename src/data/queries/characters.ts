@@ -1,6 +1,6 @@
 import { fetchAniList } from "@/lib/anilist-client";
 
-import { sanitizeDescription } from "./utils";
+import { sanitizeDescription, sanitizeSearchTerm } from "./utils";
 
 const TRENDING_CHARACTERS_QUERY = /* GraphQL */ `
   query TrendingCharacters($page: Int!, $perPage: Int!) {
@@ -44,7 +44,7 @@ const TRENDING_CHARACTERS_QUERY = /* GraphQL */ `
   }
 `;
 
-type TrendingCharactersQueryResult = {
+type CharactersPageQueryResult = {
   Page: {
     pageInfo: {
       total: number;
@@ -108,7 +108,7 @@ export type CharacterListItem = {
 
 export type CharacterListPage = {
   items: CharacterListItem[];
-  pageInfo: TrendingCharactersQueryResult["Page"]["pageInfo"];
+  pageInfo: CharactersPageQueryResult["Page"]["pageInfo"];
 };
 
 const normalizeCharacter = (character: CharacterEntity): CharacterListItem => ({
@@ -136,9 +136,82 @@ export const fetchTrendingCharacters = async (
   page = 1,
   perPage = 20,
 ): Promise<CharacterListPage> => {
-  const data = await fetchAniList<TrendingCharactersQueryResult>({
+  const data = await fetchAniList<CharactersPageQueryResult>({
     query: TRENDING_CHARACTERS_QUERY,
     variables: { page, perPage },
+  });
+
+  return {
+    items: data.Page.characters.map(normalizeCharacter),
+    pageInfo: data.Page.pageInfo,
+  };
+};
+
+const SEARCH_CHARACTERS_QUERY = /* GraphQL */ `
+  query SearchCharacters($page: Int!, $perPage: Int!, $search: String!) {
+    Page(page: $page, perPage: $perPage) {
+      pageInfo {
+        total
+        perPage
+        currentPage
+        lastPage
+        hasNextPage
+      }
+      characters(search: $search, sort: [SEARCH_MATCH, FAVOURITES_DESC]) {
+        id
+        name {
+          full
+          native
+        }
+        image {
+          large
+        }
+        favourites
+        age
+        gender
+        description
+        media(perPage: 4, sort: [POPULARITY_DESC]) {
+          nodes {
+            id
+            type
+            format
+            title {
+              romaji
+              english
+            }
+            coverImage {
+              large
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const fetchCharacterSearch = async (
+  searchTerm: string,
+  page = 1,
+  perPage = 20,
+): Promise<CharacterListPage> => {
+  const sanitizedSearch = sanitizeSearchTerm(searchTerm);
+
+  if (!sanitizedSearch) {
+    return {
+      items: [],
+      pageInfo: {
+        total: 0,
+        perPage,
+        currentPage: page,
+        lastPage: 0,
+        hasNextPage: false,
+      },
+    };
+  }
+
+  const data = await fetchAniList<CharactersPageQueryResult>({
+    query: SEARCH_CHARACTERS_QUERY,
+    variables: { page, perPage, search: sanitizedSearch },
   });
 
   return {

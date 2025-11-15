@@ -1,6 +1,6 @@
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useSidebar } from "@/components/contexts/SidebarContext";
 import { Button } from "@/components/ui/button";
@@ -8,15 +8,35 @@ import { Input } from "@/components/ui/input";
 
 interface SearchBarProps {
   variant?: "header" | "hero";
+  onQueryChange?: (value: string) => void;
 }
 
-export function SearchBar({ variant = "header" }: SearchBarProps) {
+export function SearchBar({ variant = "header", onQueryChange }: SearchBarProps) {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
+  const locationState = useRouterState({
+    select: (state) => ({
+      pathname: state.location.pathname,
+      q: (state.location.search as { q?: string }).q,
+    }),
+  });
+  const [searchQuery, setSearchQuery] = useState(locationState.q ?? "");
   const shouldFocusSearch = useSidebar((state) => state.shouldFocusSearch);
   const setShouldFocusSearch = useSidebar(
     (state) => state.setShouldFocusSearch,
   );
+
+  const resolveSearchRoute = (pathname: string) => {
+    if (pathname.startsWith("/manga")) return "/manga" as const;
+    if (pathname.startsWith("/characters")) return "/characters" as const;
+    return "/anime" as const;
+  };
+
+  const searchTarget = resolveSearchRoute(locationState.pathname);
+
+  useEffect(() => {
+    const nextQuery = locationState.q ?? "";
+    setSearchQuery((current) => (current === nextQuery ? current : nextQuery));
+  }, [locationState.q]);
 
   const focusInputRefCallback = (node: HTMLInputElement | undefined) => {
     if (shouldFocusSearch) {
@@ -27,9 +47,15 @@ export function SearchBar({ variant = "header" }: SearchBarProps) {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate({ to: "/anime", search: { q: searchQuery } });
-    }
+    const trimmedQuery = searchQuery.trim();
+
+    navigate({
+      to: searchTarget,
+      search: (prev) => ({
+        ...(prev ?? {}),
+        q: trimmedQuery || undefined,
+      }),
+    });
   };
 
   const isHero = variant === "hero";
@@ -45,7 +71,10 @@ export function SearchBar({ variant = "header" }: SearchBarProps) {
           type="text"
           placeholder="⌘+K to search anime, manga, characters..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            onQueryChange?.(e.target.value);
+          }}
           className={`${isHero ? "pl-20 pr-40 py-6 text-2xl rounded-3xl border-2 shadow-lg focus:ring-4" : "pl-12 pr-24 py-2 text-base rounded-2xl border focus:ring-2"} border-border bg-card/95 text-foreground placeholder-muted-foreground focus:ring-primary/50`}
         />
         <Button

@@ -1,6 +1,6 @@
 import { fetchAniList } from "@/lib/anilist-client";
 
-import { sanitizeDescription } from "./utils";
+import { sanitizeDescription, sanitizeSearchTerm } from "./utils";
 
 const TRENDING_ANIME_QUERY = /* GraphQL */ `
   query TrendingAnime($page: Int!, $perPage: Int!) {
@@ -51,7 +51,7 @@ const TRENDING_ANIME_QUERY = /* GraphQL */ `
   }
 `;
 
-type TrendingAnimeQueryResult = {
+type AnimePageQueryResult = {
   Page: {
     pageInfo: {
       total: number;
@@ -115,7 +115,7 @@ export type AnimeListItem = {
 
 export type AnimeListPage = {
   items: AnimeListItem[];
-  pageInfo: TrendingAnimeQueryResult["Page"]["pageInfo"];
+  pageInfo: AnimePageQueryResult["Page"]["pageInfo"];
 };
 
 const normalizeAnime = (media: AnimeMedia): AnimeListItem => ({
@@ -151,9 +151,90 @@ export const fetchTrendingAnime = async (
   page = 1,
   perPage = 20,
 ): Promise<AnimeListPage> => {
-  const data = await fetchAniList<TrendingAnimeQueryResult>({
+  const data = await fetchAniList<AnimePageQueryResult>({
     query: TRENDING_ANIME_QUERY,
     variables: { page, perPage },
+  });
+
+  return {
+    items: data.Page.media.map(normalizeAnime),
+    pageInfo: data.Page.pageInfo,
+  };
+};
+
+const SEARCH_ANIME_QUERY = /* GraphQL */ `
+  query SearchAnime($page: Int!, $perPage: Int!, $search: String!) {
+    Page(page: $page, perPage: $perPage) {
+      pageInfo {
+        total
+        perPage
+        currentPage
+        lastPage
+        hasNextPage
+      }
+      media(
+        type: ANIME
+        search: $search
+        sort: [SEARCH_MATCH, POPULARITY_DESC]
+        status_in: [RELEASING, FINISHED]
+        isAdult: false
+      ) {
+        id
+        format
+        status
+        episodes
+        duration
+        averageScore
+        popularity
+        season
+        seasonYear
+        genres
+        description
+        bannerImage
+        coverImage {
+          extraLarge
+          large
+          color
+        }
+        studios(isMain: true) {
+          nodes {
+            id
+            name
+          }
+        }
+        title {
+          romaji
+          english
+          native
+        }
+      }
+    }
+  }
+`;
+
+export const fetchAnimeSearch = async (
+  searchTerm: string,
+  page = 1,
+  perPage = 20,
+): Promise<AnimeListPage> => {
+  const sanitizedSearch = sanitizeSearchTerm(searchTerm);
+
+  if (!sanitizedSearch) {
+    return {
+      items: [],
+      pageInfo: {
+        total: 0,
+        perPage,
+        currentPage: page,
+        lastPage: 0,
+        hasNextPage: false,
+      },
+    };
+  }
+
+  const data = await fetchAniList<AnimePageQueryResult>({
+    query: SEARCH_ANIME_QUERY,
+    variables: { page, perPage, search: sanitizedSearch },
   });
 
   return {
