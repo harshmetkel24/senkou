@@ -152,9 +152,9 @@ function AnimeRoute() {
               </div>
             </div>
           </section>
-        ) : null}
+         ) : null}
 
-        <section className="space-y-6">
+         <section className="space-y-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
