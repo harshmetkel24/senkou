@@ -1,4 +1,5 @@
 import { Calendar, Flame, Star } from "lucide-react";
+import { Image } from "@unpic/react";
 
 import { cn } from "@/lib/utils";
 
@@ -42,9 +43,11 @@ export function MediaCard({ media, onSelect }: MediaCardProps) {
       aria-label={`Open details for ${media.title}`}
     >
       <div className="relative aspect-[3/4] overflow-hidden">
-        <img
+        <Image
           src={media.coverImage}
           alt={media.title}
+          width={600}
+          height={800}
           loading="lazy"
           className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
         />

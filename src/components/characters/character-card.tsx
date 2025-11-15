@@ -1,4 +1,5 @@
 import { Flame, Heart, Sparkles } from "lucide-react";
+import { Image } from "@unpic/react";
 
 import type { CharacterListItem } from "@/data/queries/characters";
 import { cn } from "@/lib/utils";
@@ -22,9 +23,11 @@ export function CharacterCard({ character, onSelect }: CharacterCardProps) {
     >
       <div className="flex gap-4">
         <div className="relative h-36 w-28 overflow-hidden rounded-2xl border border-border/60 bg-background/40">
-          <img
+          <Image
             src={character.image}
             alt={character.name}
+            width={600}
+            height={800}
             loading="lazy"
             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
           />

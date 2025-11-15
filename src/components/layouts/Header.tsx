@@ -1,6 +1,7 @@
 "use client";
 
 import { Link, useLocation } from "@tanstack/react-router";
+import { Image } from "@unpic/react";
 import { Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -46,9 +47,11 @@ export default function Header() {
             )}
           </Button>
           <Link to="/" className="flex items-center gap-3 md:hidden">
-            <img
+            <Image
               src="/senkou-circle-logo.png"
               alt="Senkou Logo"
+              width={1024}
+              height={1024}
               className="h-10 w-10"
             />
             {isIndexRoute ? (

@@ -1,5 +1,6 @@
 import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Image } from "@unpic/react";
 import { BookOpen, Layers, Library, RefreshCw, ScrollText, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { z } from "zod";
@@ -179,9 +180,11 @@ function MangaRoute() {
         ) : spotlight ? (
           <section className="relative overflow-hidden rounded-[36px] border border-border/60 bg-card/70 shadow-[0_45px_120px_rgba(0,0,0,0.55)]">
             <div className="absolute inset-0">
-              <img
+              <Image
                 src={spotlight.bannerImage ?? spotlight.coverImage}
                 alt={`${spotlight.title} banner art`}
+                width={1600}
+                height={600}
                 className="h-full w-full object-cover opacity-70"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/65 to-black/35" />
