@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import { HighlightCard } from "@/components/media/highlight-card";
 import {
   MediaDetailPanel,
@@ -30,6 +31,13 @@ export const Route = createFileRoute("/manga")({
   loader: ({ context }) =>
     context.queryClient.ensureQueryData(trendingMangaQueryOptions()),
   component: MangaRoute,
+  errorComponent: (props) => (
+    <RouteErrorBoundary
+      {...props}
+      title="Manga page glitched out"
+      description="The illustrated lineup couldn't load. Give it another shot or pick a different tab."
+    />
+  ),
 });
 
 function MangaRoute() {

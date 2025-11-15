@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import { useSidebar } from "@/components/contexts/SidebarContext";
 import { MediaGrid } from "@/components/media/media-grid";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,13 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) =>
     context.queryClient.ensureQueryData(trendingAnimeQueryOptions()),
   component: App,
+  errorComponent: (props) => (
+    <RouteErrorBoundary
+      {...props}
+      title="We couldn't render the home showcase"
+      description="Trending picks failed to load. The sidebar still works, so hop to another section or try again."
+    />
+  ),
 });
 
 function App() {

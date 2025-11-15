@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Activity, Film, RefreshCw, Sparkles, Wand2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import { HighlightCard } from "@/components/media/highlight-card";
 import {
   MediaDetailPanel,
@@ -23,6 +24,13 @@ export const Route = createFileRoute("/anime")({
   loader: ({ context }) =>
     context.queryClient.ensureQueryData(trendingAnimeQueryOptions()),
   component: AnimeRoute,
+  errorComponent: (props) => (
+    <RouteErrorBoundary
+      {...props}
+      title="Anime grid took a direct hit"
+      description="We couldn't fetch AniList's trending anime. Retry the request or jump to another destination."
+    />
+  ),
 });
 
 function AnimeRoute() {

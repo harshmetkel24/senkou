@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Heart, RefreshCw, Sparkles, Star } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import type { CharacterCardData } from "@/components/characters/character-card";
 import { CharacterDetailPanel } from "@/components/characters/character-detail-panel";
 import { CharacterGrid } from "@/components/characters/character-grid";
@@ -20,6 +21,13 @@ export const Route = createFileRoute("/characters")({
   loader: ({ context }) =>
     context.queryClient.ensureQueryData(trendingCharactersQueryOptions()),
   component: CharactersRoute,
+  errorComponent: (props) => (
+    <RouteErrorBoundary
+      {...props}
+      title="Character compendium failed to render"
+      description="AniList didn't return the character data in time. Try again or switch routes via the sidebar."
+    />
+  ),
 });
 
 function CharactersRoute() {

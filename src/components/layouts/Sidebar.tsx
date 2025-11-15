@@ -1,5 +1,13 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { useSidebarStore } from "@/lib/stores";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BookOpen,
@@ -7,20 +15,9 @@ import {
   ChevronRight,
   Film,
   Home,
-  Menu,
   Users,
 } from "lucide-react";
-import { useState } from "react";
-
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { useSidebarStore } from "@/lib/stores";
+import { useEffect } from "react";
 
 const navItems = [
   { to: "/", label: "Home", icon: Home },
@@ -30,28 +27,28 @@ const navItems = [
 ];
 
 export default function Sidebar() {
-  const [open, setOpen] = useState(false);
   const collapsed = useSidebarStore((state) => state.collapsed);
   const setCollapsed = useSidebarStore((state) => state.setCollapsed);
+  const mobileOpen = useSidebarStore((state) => state.mobileOpen);
+  const setMobileOpen = useSidebarStore((state) => state.setMobileOpen);
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
 
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname, setMobileOpen]);
+
   return (
     <>
       {/* Mobile Sheet */}
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            aria-label="Open menu"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-64">
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetContent
+          id="mobile-sidebar"
+          side="left"
+          className="w-64 px-0"
+          aria-label="Primary navigation"
+        >
           <SheetHeader>
             <SheetTitle className="text-left">Navigation</SheetTitle>
           </SheetHeader>
@@ -64,7 +61,7 @@ export default function Sidebar() {
                   asChild
                   variant={isActive ? "secondary" : "ghost"}
                   className="w-full justify-start"
-                  onClick={() => setOpen(false)}
+                  onClick={() => setMobileOpen(false)}
                 >
                   <Link to={to}>
                     <Icon className="mr-2 h-4 w-4" />
