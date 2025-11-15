@@ -1,6 +1,6 @@
 import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AlertCircle, Heart, RefreshCw, Search as SearchIcon, Sparkles, Star } from "lucide-react";
+import { Heart, RefreshCw, Sparkles, Star } from "lucide-react";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
@@ -10,6 +10,7 @@ import { CharacterDetailPanel } from "@/components/characters/character-detail-p
 import { CharacterGrid, CharacterGridSkeleton } from "@/components/characters/character-grid";
 import { Button } from "@/components/ui/button";
 import { fetchCharacterSearch, fetchTrendingCharacters } from "@/data/queries/characters";
+import { SearchResultsPanel } from "@/components/search/search-results-panel";
 import { deriveRelatedResults } from "@/lib/search-helpers";
 
 const trendingCharactersQueryOptions = () => ({
@@ -109,6 +110,14 @@ function CharactersRoute() {
     [searchResults, normalizedSearchQuery],
   );
 
+  const searchDescription = searchTotal
+    ? `${searchTotal} personas fit this query. Send this link to share the context.`
+    : "Search by name, alias, or romaji to surface just the right hero.";
+  const errorDescription =
+    searchError instanceof Error
+      ? searchError.message
+      : "Rate limits or invalid filters stopped this query.";
+
   const handleSelect = (character: CharacterCardData) => {
     setActiveCharacter(character);
     setIsPanelOpen(true);
@@ -136,132 +145,41 @@ function CharactersRoute() {
 
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-12">
         {shouldShowSearch ? (
-          <section className="space-y-6 rounded-[36px] border border-border/60 bg-card/80 p-6 shadow-[0_45px_120px_rgba(0,0,0,0.55)] md:p-8">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-                  AniList search
-                </p>
-                <h2 className="mt-2 text-3xl font-bold">
-                  Character hits for "{normalizedSearchQuery}"
-                </h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {searchTotal
-                    ? `${searchTotal} personas fit this query. Send this link to share the context.`
-                    : "Search by name, alias, or romaji to surface just the right hero."}
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                {isSearching ? (
-                  <span className="inline-flex items-center gap-2 rounded-full border border-border/60 px-4 py-2 text-xs uppercase tracking-[0.35em] text-muted-foreground">
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                    Updating
-                  </span>
-                ) : null}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="rounded-2xl border border-border/60"
-                  onClick={handleClearSearch}
-                >
-                  Clear search
-                </Button>
-              </div>
-            </div>
-
-            {showSkeleton ? <CharacterGridSkeleton /> : null}
-
-            {isSearchError && searchQuery ? (
-              <div className="rounded-3xl border border-destructive/40 bg-destructive/5 p-6 text-destructive">
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                    <div>
-                      <h3 className="text-lg font-semibold text-foreground">
-                        AniList search failed
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {searchError instanceof Error
-                          ? searchError.message
-                          : "Rate limits or invalid filters stopped this query."}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <Button type="button" onClick={() => refetchSearch()}>
-                      Retry search
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleClearSearch}
-                    >
-                      Reset
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ) : null}
-
-            {showEmptyState && searchQuery ? (
-              <div className="rounded-3xl border border-border/60 bg-background/40 p-8 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-border/80 bg-card/50">
-                  <SearchIcon className="h-6 w-6 text-muted-foreground" />
-                </div>
-                <h3 className="mt-4 text-2xl font-semibold">
-                  Couldn't find "{normalizedSearchQuery}"
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Try alternate spellings or clear the filter to browse trending favorites.
-                </p>
-                <div className="mt-6 flex flex-wrap justify-center gap-3">
-                  <Button type="button" onClick={() => refetchSearch()}>
-                    Try again
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleClearSearch}
-                  >
-                    Clear search
-                  </Button>
-                </div>
-              </div>
-            ) : null}
-
-            {showSearchResults ? (
-              <CharacterGrid items={curatedResults} onSelect={handleSelect} />
-            ) : null}
-
-            {relatedSuggestions.length ? (
-              <div className="rounded-3xl border border-border/50 bg-background/40 p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-                  Maybe you meant
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {relatedSuggestions.map((item) => (
-                    <Button
-                      key={item.id}
-                      variant="outline"
-                      size="sm"
-                      className="rounded-full border-border/70"
-                      onClick={() =>
-                        navigate({
-                          to: "/characters",
-                          search: (prev) => ({
-                            ...(prev ?? {}),
-                            q: item.name,
-                          }),
-                        })
-                      }
-                    >
-                      {item.name}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </section>
+          <SearchResultsPanel
+            heading={`Character hits for "${normalizedSearchQuery}"`}
+            description={searchDescription}
+            isSearching={isSearching}
+            showSkeleton={showSkeleton}
+            skeleton={<CharacterGridSkeleton />}
+            isError={Boolean(searchQuery) && isSearchError}
+            errorTitle="AniList search failed"
+            errorDescription={errorDescription}
+            showEmpty={Boolean(searchQuery) && showEmptyState}
+            emptyTitle={`Couldn't find "${normalizedSearchQuery}"`}
+            emptyDescription="Try alternate spellings or clear the filter to browse trending favorites."
+            onRetry={() => refetchSearch()}
+            onClear={handleClearSearch}
+            showResults={showSearchResults}
+            results={curatedResults}
+            renderGrid={(items) => <CharacterGrid items={items} onSelect={handleSelect} />}
+            suggestions={
+              relatedSuggestions.length
+                ? {
+                    heading: "Maybe you meant",
+                    items: relatedSuggestions,
+                    getLabel: (item) => item.name,
+                    onSelect: (item) =>
+                      navigate({
+                        to: "/characters",
+                        search: (prev) => ({
+                          ...(prev ?? {}),
+                          q: item.name,
+                        }),
+                      }),
+                  }
+                : undefined
+            }
+          />
         ) : spotlight ? (
           <section className="relative overflow-hidden rounded-[36px] border border-border/60 bg-card/80 shadow-[0_45px_120px_rgba(0,0,0,0.55)]">
             <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/25" />
