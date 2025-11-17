@@ -53,7 +53,7 @@ function App() {
         </div>
 
         {/* Search Bar */}
-        <div className="mb-12">
+        <div className="mb-12 w-full justify-center flex">
           <SearchBar variant="hero" />
         </div>
 
