@@ -32,7 +32,7 @@ Senkou (線光) is an IMDB-style experience for anime, manga, characters. Stage 
 ## Roadmap
 - **Stage 1 — MVP “Beautiful Infinite Scroll” (current)**
   - Server components fetch AniList GraphQL data for fast first paint; client components hydrate infinite lists via `useInfiniteQuery` + IntersectionObserver sentinels.
-  - Sidebar routes: Anime, Characters, Manga. Each route keeps search/sort/filter state in URL params for shareable state.
+  - Sidebar routes: Anime, Characters, Manga (Staff is on deck next). Each route keeps search/sort/filter state in URL params for shareable state.
   - Card grid with skeletons, responsive breakpoints, lazy-loaded art, and empty/error states that handle AniList rate limits with retry/backoff.
   - Details pages reuse cached query data when possible; images are prepared for future CDN offloading.
 - **Stage 2 — Auth + Watchlists**
@@ -60,37 +60,8 @@ Senkou (線光) is an IMDB-style experience for anime, manga, characters. Stage 
 - Track performance budgets via Web Vitals, and instrument AniList GraphQL requests for tracing.
 - Edge-safe cookies for future auth; no secrets in the repo. All user input validated & sanitized before rendering.
 
-## Getting Started
-```bash
-pnpm install        # install deps
-pnpm dev            # Vite dev server (http://localhost:3000)
-pnpm start          # TanStack Start preview (if configured)
-```
-
-## Build & Test
-```bash
-pnpm build          # production build
-pnpm serve          # preview dist build
-pnpm test           # Vitest suite (jsdom + @testing-library/react)
-```
-
-## Component Library
-- If shadcn/ui is not initialized, run `pnpx shadcn@latest init` first.
-- Generate shadcn/ui components with `pnpx shadcn@latest add <component>`. Keep tokens aligned with the Senkou theme (dark-leaning, cinematic color palette).
-
-## Data & Query Guidelines
-- Prefer route loaders for initial render and `@tanstack/react-query` for client pagination/mutations.
-- Search, filters, and sorting persist in the URL (`?query=...&sort=POPULARITY_DESC`), and loaders must parse/validate these params.
-- When hitting AniList GraphQL, keep fragments reusable across routes and document them in `src/data/queries`.
-
-## Testing & Quality
-- Place route/component tests beside their files as `*.test.ts(x)`.
-- Add integration tests for infinite scroll boundaries, filter URL syncing, and optimistic watchlist updates once Stage 2 begins.
-- Run `pnpm test` before commits; ensure `pnpm build` stays green to catch RSC regressions.
-
-## Observability
-- Wire Sentry (client + server) and trace slow AniList queries. Log rate-limit hits and retries for future tuning.
-- Consider feature flag hooks early for Stage 3 admin tooling.
+## Contributing
+Implementation details, development setup, and contributor workflow have moved to [`CONTRIBUTION.md`](./CONTRIBUTION.md). Check it for local environment steps, component library expectations, data/query patterns, testing gates, and release hygiene.
 
 ## Resources
 - AniList Docs: https://docs.anilist.co/guide/introduction
