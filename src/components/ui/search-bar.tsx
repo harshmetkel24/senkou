@@ -2,14 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import debounce from "lodash/debounce";
 import { AlertCircle, RefreshCw, Search as SearchIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useSidebar } from "@/components/contexts/SidebarContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  isSearchCategory,
+  decodeSearchCategoriesParam,
   SEARCH_CATEGORIES,
+  sortSearchCategories,
   type SearchCategory,
 } from "@/lib/constants/search";
 import {
@@ -35,7 +36,7 @@ export function SearchBar({
   const navigate = useNavigate();
   type RouterSearchState = {
     q?: string;
-    category?: string;
+    categories?: SearchCategory[] | SearchCategory;
   };
   const locationState = useRouterState({
     select: (state) => ({
@@ -44,10 +45,25 @@ export function SearchBar({
     }),
   });
   const locationQuery = locationState.search?.q ?? "";
-  const locationCategory = isSearchCategory(locationState.search?.category)
-    ? locationState.search?.category
-    : null;
+  const locationCategories = useMemo(
+    () => decodeSearchCategoriesParam(locationState.search?.categories),
+    [locationState.search],
+  );
   const [searchQuery, setSearchQuery] = useState(locationQuery);
+  const [rawSelectedCategories, setRawSelectedCategories] =
+    useState<SearchCategory[]>(locationCategories);
+  const selectedCategories = rawSelectedCategories;
+  const setSelectedCategories = useCallback(
+    (
+      value: SearchCategory[] | ((prev: SearchCategory[]) => SearchCategory[]),
+    ) => {
+      setRawSelectedCategories((current) => {
+        const nextValue = typeof value === "function" ? value(current) : value;
+        return sortSearchCategories(nextValue);
+      });
+    },
+    [],
+  );
   const shouldFocusSearch = useSidebar((state) => state.shouldFocusSearch);
   const setShouldFocusSearch = useSidebar(
     (state) => state.setShouldFocusSearch,
@@ -63,8 +79,6 @@ export function SearchBar({
   const searchTarget = resolveSearchRoute(locationState.pathname);
   const showCategoryChips =
     variant === "hero" || searchTarget === "/search" ? true : false;
-  const [selectedCategory, setSelectedCategory] =
-    useState<SearchCategory | null>(locationCategory);
   const isHero = variant === "hero";
   const showInlineCategoryChips = showCategoryChips && !isHero;
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -80,7 +94,11 @@ export function SearchBar({
   );
   const normalizedDebouncedQuery = debouncedSearchQuery.trim();
   const autocompleteScope: SearchAutocompleteScope = showCategoryChips
-    ? (selectedCategory ?? "all")
+    ? selectedCategories.length === 0
+      ? "all"
+      : selectedCategories.length === 1
+        ? selectedCategories[0]
+        : selectedCategories
     : searchTarget === "/manga"
       ? "manga"
       : searchTarget === "/characters"
@@ -142,10 +160,12 @@ export function SearchBar({
   }, [locationQuery]);
 
   useEffect(() => {
-    setSelectedCategory((current) =>
-      current === locationCategory ? current : locationCategory,
+    setSelectedCategories((current) =>
+      areCategoryArraysEqual(current, locationCategories)
+        ? current
+        : locationCategories,
     );
-  }, [locationCategory]);
+  }, [locationCategories, setSelectedCategories]);
 
   useEffect(() => {
     debouncedUpdater(searchQuery);
@@ -163,7 +183,7 @@ export function SearchBar({
     onQueryChange?.(trimmedSuggestion);
 
     if (showCategoryChips) {
-      setSelectedCategory(suggestion.category);
+      setSelectedCategories([suggestion.category]);
     }
 
     const target = showCategoryChips ? "/search" : searchTarget;
@@ -175,10 +195,12 @@ export function SearchBar({
         next.q = trimmedSuggestion;
 
         if (showCategoryChips) {
-          next.category = suggestion.category;
+          next.categories = encodeCategoriesParam([suggestion.category]);
         } else {
-          delete next.category;
+          delete next.categories;
         }
+
+        delete (next as { category?: unknown }).category;
 
         return next;
       },
@@ -204,10 +226,12 @@ export function SearchBar({
         next.q = trimmedQuery || undefined;
 
         if (showCategoryChips) {
-          next.category = selectedCategory ?? undefined;
+          next.categories = encodeCategoriesParam(selectedCategories);
         } else {
-          delete next.category;
+          delete next.categories;
         }
+
+        delete (next as { category?: unknown }).category;
 
         return next;
       },
@@ -255,8 +279,8 @@ export function SearchBar({
           >
             <div className="pointer-events-auto rounded-full border border-border/60 bg-background/90 px-2 py-1 shadow-sm">
               <CategoryChipGroup
-                selected={selectedCategory}
-                onChange={setSelectedCategory}
+                selected={selectedCategories}
+                onChange={setSelectedCategories}
                 variant="inline"
                 className="flex-nowrap"
               />
@@ -265,9 +289,9 @@ export function SearchBar({
         ) : null}
         <Button
           type="submit"
-          size={isHero ? "lg" : "sm"}
+          size="sm"
           variant="outline"
-          className={`absolute top-1/2 -translate-y-1/2 transform ${isHero ? "right-4 px-6 py-2 text-lg" : "right-2 px-3 py-1 text-sm"} rounded-2xl`}
+          className={`absolute top-1/2 -translate-y-1/2 transform px-2  ${isHero ? "right-4 py-2" : "right-2 py-1 text-sm"} rounded-2xl`}
         >
           Search
         </Button>
@@ -286,8 +310,8 @@ export function SearchBar({
       {isHero && showCategoryChips ? (
         <div className="mt-4 flex justify-center">
           <CategoryChipGroup
-            selected={selectedCategory}
-            onChange={setSelectedCategory}
+            selected={selectedCategories}
+            onChange={setSelectedCategories}
             className="justify-center"
           />
         </div>
@@ -315,6 +339,13 @@ function SearchAutocompletePanel({
   showEmpty,
   onSelect,
 }: SearchAutocompletePanelProps) {
+  const columnsClass =
+    groups.length >= 3
+      ? "lg:grid-cols-3"
+      : groups.length === 2
+        ? "lg:grid-cols-2"
+        : "lg:grid-cols-1";
+
   return (
     <div
       className="absolute left-0 right-0 top-full z-30 mt-3"
@@ -338,7 +369,7 @@ function SearchAutocompletePanel({
         ) : null}
 
         {groups.length ? (
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className={cn("grid grid-cols-1 gap-4", columnsClass)}>
             {groups.map((group) => (
               <div key={group.category} className="space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
@@ -399,8 +430,8 @@ function SearchAutocompletePanel({
 }
 
 interface CategoryChipGroupProps {
-  selected: SearchCategory | null;
-  onChange: (value: SearchCategory | null) => void;
+  selected: SearchCategory[];
+  onChange: (value: SearchCategory[]) => void;
   allowClear?: boolean;
   className?: string;
   variant?: "default" | "inline";
@@ -425,17 +456,23 @@ export function CategoryChipGroup({
   return (
     <div className={cn(containerBase, className)}>
       {SEARCH_CATEGORIES.map((category) => {
-        const isActive = selected === category.value;
+        const isActive = selected.includes(category.value);
+        const handleSelect = () => {
+          if (isActive) {
+            const next = selected.filter((value) => value !== category.value);
+            if (!allowClear && next.length === 0) return;
+            onChange(next);
+            return;
+          }
+          onChange([...selected, category.value]);
+        };
 
         return (
           <button
             key={category.value}
             type="button"
             aria-pressed={isActive}
-            onClick={() => {
-              if (isActive && !allowClear) return;
-              onChange(isActive ? null : category.value);
-            }}
+            onClick={handleSelect}
             className={cn(
               chipBase,
               "transition focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/40",
@@ -450,4 +487,22 @@ export function CategoryChipGroup({
       })}
     </div>
   );
+}
+
+function areCategoryArraysEqual(
+  a: SearchCategory[],
+  b: SearchCategory[],
+): boolean {
+  if (a.length !== b.length) return false;
+  for (let index = 0; index < a.length; index += 1) {
+    if (a[index] !== b[index]) return false;
+  }
+  return true;
+}
+
+function encodeCategoriesParam(
+  categories: SearchCategory[],
+): SearchCategory[] | SearchCategory | undefined {
+  if (categories.length === 0) return undefined;
+  return categories.length === 1 ? categories[0] : categories;
 }

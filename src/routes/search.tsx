@@ -18,6 +18,7 @@ import { fetchMangaSearch } from "@/data/queries/manga";
 import {
   getSearchCategoryLabel,
   SEARCH_CATEGORY_VALUES,
+  sortSearchCategories,
   type SearchCategory,
 } from "@/lib/constants/search";
 
@@ -30,7 +31,17 @@ const searchSchema = z.object({
     .max(60, "Search queries are capped at 60 characters")
     .optional()
     .transform((value) => (value && value.length ? value : undefined)),
-  category: z.enum(SEARCH_CATEGORY_VALUES).optional(),
+  categories: z
+    .union([
+      z.enum(SEARCH_CATEGORY_VALUES),
+      z.array(z.enum(SEARCH_CATEGORY_VALUES)),
+    ])
+    .optional()
+    .transform((value) => {
+      if (!value) return [] as SearchCategory[];
+      const list = Array.isArray(value) ? value : [value];
+      return sortSearchCategories(list);
+    }),
 });
 
 const animeOverviewQueryOptions = (query: string) => ({
@@ -54,15 +65,52 @@ const characterOverviewQueryOptions = (query: string) => ({
   placeholderData: keepPreviousData,
 });
 
+function withLegacyCategorySupport(
+  search: Record<string, unknown> | null | undefined,
+) {
+  if (!search) return undefined;
+  if ("categories" in search || !("category" in search)) return search;
+
+  const { category, ...rest } = search as {
+    category?: unknown;
+  } & Record<string, unknown>;
+
+  return {
+    ...rest,
+    categories: category,
+  };
+}
+
+function formatCategoryList(
+  categories: SearchCategory[],
+  options: { lowercase?: boolean } = {},
+) {
+  const labels = categories.map((category) => {
+    const label = getSearchCategoryLabel(category);
+    return options.lowercase ? label.toLowerCase() : label;
+  });
+
+  if (!labels.length) return "";
+  if (labels.length === 1) return labels[0];
+  if (labels.length === 2) return `${labels[0]} and ${labels[1]}`;
+
+  const leading = labels.slice(0, -1).join(", ");
+  const trailing = labels[labels.length - 1];
+  return `${leading}, and ${trailing}`;
+}
+
 export const Route = createFileRoute("/search")({
-  validateSearch: (search) => searchSchema.parse(search ?? {}),
+  validateSearch: (search) =>
+    searchSchema.parse(withLegacyCategorySupport(search) ?? {}),
   loader: ({ context, search }) => {
-    const resolvedSearch = searchSchema.parse(search ?? {});
+    const resolvedSearch = searchSchema.parse(
+      withLegacyCategorySupport(search) ?? {},
+    );
 
     if (!resolvedSearch.q) return null;
 
-    const categoriesToPreload: SearchCategory[] = resolvedSearch.category
-      ? [resolvedSearch.category]
+    const categoriesToPreload: SearchCategory[] = resolvedSearch.categories.length
+      ? resolvedSearch.categories
       : [...SEARCH_CATEGORY_VALUES];
     const tasks: Array<Promise<unknown>> = [];
 
@@ -101,28 +149,32 @@ export const Route = createFileRoute("/search")({
 });
 
 function SearchRoute() {
-  const { q, category } = Route.useSearch();
+  const { q, categories } = Route.useSearch();
   const navigate = useNavigate();
   const normalizedQuery = q ?? "";
   const hasQuery = Boolean(normalizedQuery);
-  const normalizedCategory = category ?? null;
-  const scopedCategoryLabel = normalizedCategory
-    ? getSearchCategoryLabel(normalizedCategory)
+  const normalizedCategories = categories ?? [];
+  const hasScopedCategories = normalizedCategories.length > 0;
+  const scopedCategoryLabel = hasScopedCategories
+    ? formatCategoryList(normalizedCategories)
+    : null;
+  const scopedCategoryLabelLowercase = hasScopedCategories
+    ? formatCategoryList(normalizedCategories, { lowercase: true })
     : null;
   const showAnimeScope =
-    !normalizedCategory || normalizedCategory === "anime";
+    !hasScopedCategories || normalizedCategories.includes("anime");
   const showMangaScope =
-    !normalizedCategory || normalizedCategory === "manga";
+    !hasScopedCategories || normalizedCategories.includes("manga");
   const showCharacterScope =
-    !normalizedCategory || normalizedCategory === "characters";
+    !hasScopedCategories || normalizedCategories.includes("characters");
   const headerTitle = hasQuery
-    ? normalizedCategory
-      ? `${scopedCategoryLabel ?? normalizedCategory} hits for "${normalizedQuery}"`
+    ? hasScopedCategories
+      ? `${scopedCategoryLabel} hits for "${normalizedQuery}"`
       : `All hits for "${normalizedQuery}"`
     : "Search everything";
   const headerDescription = hasQuery
-    ? normalizedCategory
-      ? `Locked on ${(scopedCategoryLabel ?? normalizedCategory).toLowerCase()} only. Toggle the chips to widen the search.`
+    ? hasScopedCategories
+      ? `Locked on ${scopedCategoryLabelLowercase} only. Toggle the chips to widen the search.`
       : "We aggregate the strongest anime, manga, and character matches before you dive deeper."
     : "Use the hero search bar (⌘+K) or the chips at the top of the home page to get started.";
 
