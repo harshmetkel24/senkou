@@ -13,6 +13,7 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as MangaRouteImport } from './routes/manga'
 import { Route as CharactersRouteImport } from './routes/characters'
 import { Route as AnimeRouteImport } from './routes/anime'
+import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SearchRoute = SearchRouteImport.update({
@@ -33,6 +34,10 @@ const CharactersRoute = CharactersRouteImport.update({
 const AnimeRoute = AnimeRouteImport.update({
   id: '/anime',
   path: '/anime',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedRoute = AuthedRouteImport.update({
+  id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -58,6 +63,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authed': typeof AuthedRoute
   '/anime': typeof AnimeRoute
   '/characters': typeof CharactersRoute
   '/manga': typeof MangaRoute
@@ -68,11 +74,19 @@ export interface FileRouteTypes {
   fullPaths: '/' | '/anime' | '/characters' | '/manga' | '/search'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/anime' | '/characters' | '/manga' | '/search'
-  id: '__root__' | '/' | '/anime' | '/characters' | '/manga' | '/search'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authed'
+    | '/anime'
+    | '/characters'
+    | '/manga'
+    | '/search'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthedRoute: typeof AuthedRoute
   AnimeRoute: typeof AnimeRoute
   CharactersRoute: typeof CharactersRoute
   MangaRoute: typeof MangaRoute
@@ -109,6 +123,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnimeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed': {
+      id: '/_authed'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -121,6 +142,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthedRoute: AuthedRoute,
   AnimeRoute: AnimeRoute,
   CharactersRoute: CharactersRoute,
   MangaRoute: MangaRoute,
