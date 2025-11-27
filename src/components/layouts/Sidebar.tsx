@@ -17,6 +17,7 @@ import {
   Film,
   Home,
   Users,
+  UserPlus,
 } from "lucide-react";
 import { useEffect } from "react";
 
@@ -25,6 +26,7 @@ const navItems = [
   { to: "/anime", label: "Anime", icon: Film },
   { to: "/manga", label: "Manga", icon: BookOpen },
   { to: "/characters", label: "Characters", icon: Users },
+  { to: "/sign-up", label: "Sign up", icon: UserPlus },
 ];
 
 export default function Sidebar() {

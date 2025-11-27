@@ -6,10 +6,15 @@ import {
 import { fetchMangaSearch, type MangaListItem } from "@/data/queries/manga";
 import {
   getSearchCategoryLabel,
+  SEARCH_CATEGORY_VALUES,
+  sortSearchCategories,
   type SearchCategory,
 } from "@/lib/constants/search";
 
-export type SearchAutocompleteScope = SearchCategory | "all";
+export type SearchAutocompleteScope =
+  | SearchCategory
+  | SearchCategory[]
+  | "all";
 
 export type SearchAutocompleteItem = {
   id: number;
@@ -120,6 +125,45 @@ const fetchScopedResults = (
   return fetchCharacterSearch(query, 1, perCategoryLimit);
 };
 
+async function fetchGroupsForCategories(
+  scopes: Iterable<SearchCategory>,
+  query: string,
+  perCategoryLimit: number,
+) {
+  const normalizedScopes = sortSearchCategories(scopes);
+
+  if (!normalizedScopes.length) return [];
+
+  const results = await Promise.all(
+    normalizedScopes.map((category) =>
+      fetchScopedResults(category, query, perCategoryLimit),
+    ),
+  );
+
+  return normalizedScopes
+    .map((category, index) => {
+      const result = results[index];
+
+      if (category === "anime") {
+        return createAnimeGroup(
+          (result.items ?? []) as AnimeListItem[],
+          perCategoryLimit,
+        );
+      }
+      if (category === "manga") {
+        return createMangaGroup(
+          (result.items ?? []) as MangaListItem[],
+          perCategoryLimit,
+        );
+      }
+      return createCharacterGroup(
+        (result.items ?? []) as CharacterListItem[],
+        perCategoryLimit,
+      );
+    })
+    .filter((group) => group.items.length > 0);
+}
+
 export async function fetchSearchAutocomplete(
   query: string,
   scope: SearchAutocompleteScope,
@@ -132,17 +176,24 @@ export async function fetchSearchAutocomplete(
   }
 
   if (scope === "all") {
-    const [anime, manga, characters] = await Promise.all([
-      fetchAnimeSearch(trimmedQuery, 1, perCategoryLimit),
-      fetchMangaSearch(trimmedQuery, 1, perCategoryLimit),
-      fetchCharacterSearch(trimmedQuery, 1, perCategoryLimit),
-    ]);
+    const groups = await fetchGroupsForCategories(
+      SEARCH_CATEGORY_VALUES,
+      trimmedQuery,
+      perCategoryLimit,
+    );
 
-    const groups = [
-      createAnimeGroup(anime.items, perCategoryLimit),
-      createMangaGroup(manga.items, perCategoryLimit),
-      createCharacterGroup(characters.items, perCategoryLimit),
-    ].filter((group) => group.items.length > 0);
+    return {
+      query: trimmedQuery,
+      groups,
+    };
+  }
+
+  if (Array.isArray(scope)) {
+    const groups = await fetchGroupsForCategories(
+      scope,
+      trimmedQuery,
+      perCategoryLimit,
+    );
 
     return {
       query: trimmedQuery,
