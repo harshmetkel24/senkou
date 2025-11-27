@@ -20,6 +20,10 @@
       <img src="https://avatars.githubusercontent.com/u/139895814?s=200&v=4" height="56" alt="shadcn/ui logo" />
     </a>
     &nbsp;&nbsp;
+    <a href="https://orm.drizzle.team/">
+      <img src="https://raw.githubusercontent.com/drizzle-team/drizzle-orm/main/apps/docs/public/logo.svg" height="56" alt="Drizzle ORM logo" />
+    </a>
+    &nbsp;&nbsp;
     <a href="https://anilist.co/">
       <img src="https://anilist.co/img/icons/icon.svg" height="56" alt="AniList logo" />
     </a>
