@@ -11,10 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as MangaRouteImport } from './routes/manga'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as CharactersRouteImport } from './routes/characters'
 import { Route as AnimeRouteImport } from './routes/anime'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
 
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
@@ -24,6 +26,11 @@ const SearchRoute = SearchRouteImport.update({
 const MangaRoute = MangaRouteImport.update({
   id: '/manga',
   path: '/manga',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CharactersRoute = CharactersRouteImport.update({
@@ -45,50 +52,78 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedProfileRoute = AuthedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/anime': typeof AnimeRoute
   '/characters': typeof CharactersRoute
+  '/login': typeof LoginRoute
   '/manga': typeof MangaRoute
   '/search': typeof SearchRoute
+  '/profile': typeof AuthedProfileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/anime': typeof AnimeRoute
   '/characters': typeof CharactersRoute
+  '/login': typeof LoginRoute
   '/manga': typeof MangaRoute
   '/search': typeof SearchRoute
+  '/profile': typeof AuthedProfileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authed': typeof AuthedRoute
+  '/_authed': typeof AuthedRouteWithChildren
   '/anime': typeof AnimeRoute
   '/characters': typeof CharactersRoute
+  '/login': typeof LoginRoute
   '/manga': typeof MangaRoute
   '/search': typeof SearchRoute
+  '/_authed/profile': typeof AuthedProfileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/anime' | '/characters' | '/manga' | '/search'
+  fullPaths:
+    | '/'
+    | '/anime'
+    | '/characters'
+    | '/login'
+    | '/manga'
+    | '/search'
+    | '/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/anime' | '/characters' | '/manga' | '/search'
+  to:
+    | '/'
+    | '/anime'
+    | '/characters'
+    | '/login'
+    | '/manga'
+    | '/search'
+    | '/profile'
   id:
     | '__root__'
     | '/'
     | '/_authed'
     | '/anime'
     | '/characters'
+    | '/login'
     | '/manga'
     | '/search'
+    | '/_authed/profile'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthedRoute: typeof AuthedRoute
+  AuthedRoute: typeof AuthedRouteWithChildren
   AnimeRoute: typeof AnimeRoute
   CharactersRoute: typeof CharactersRoute
+  LoginRoute: typeof LoginRoute
   MangaRoute: typeof MangaRoute
   SearchRoute: typeof SearchRoute
 }
@@ -107,6 +142,13 @@ declare module '@tanstack/react-router' {
       path: '/manga'
       fullPath: '/manga'
       preLoaderRoute: typeof MangaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/characters': {
@@ -137,14 +179,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/profile': {
+      id: '/_authed/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthedProfileRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
+interface AuthedRouteChildren {
+  AuthedProfileRoute: typeof AuthedProfileRoute
+}
+
+const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedProfileRoute: AuthedProfileRoute,
+}
+
+const AuthedRouteWithChildren =
+  AuthedRoute._addFileChildren(AuthedRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthedRoute: AuthedRoute,
+  AuthedRoute: AuthedRouteWithChildren,
   AnimeRoute: AnimeRoute,
   CharactersRoute: CharactersRoute,
+  LoginRoute: LoginRoute,
   MangaRoute: MangaRoute,
   SearchRoute: SearchRoute,
 }

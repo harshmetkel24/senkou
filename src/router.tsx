@@ -3,7 +3,6 @@ import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query
 import * as TanstackQuery from "./integrations/tanstack-query/root-provider";
 
 // Import the generated route tree
-import { AuthProvider } from "@/components/contexts/auth-content";
 import { routeTree } from "./routeTree.gen";
 
 // Create a new router instance
@@ -18,7 +17,9 @@ export const getRouter = async () => {
     Wrap: (props: { children: React.ReactNode }) => {
       return (
         <TanstackQuery.Provider {...rqContext}>
-          <AuthProvider>{props.children}</AuthProvider>
+          {/* FIXME: always redirecting user to home route: / */}
+          {/* <AuthProvider>{props.children}</AuthProvider> */}
+          {props.children}
         </TanstackQuery.Provider>
       );
     },

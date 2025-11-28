@@ -1,18 +1,20 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { getCurrentUserFn } from "@/lib/auth";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-// src/routes/_authenticated.tsx
 export const Route = createFileRoute("/_authed")({
   beforeLoad: async ({ location }) => {
-    // if (!isAuthenticated()) {
-    //   throw redirect({
-    //     to: "/login",
-    //     search: {
-    //       // Use the current location to power a redirect after login
-    //       // (Do not use `router.state.resolvedLocation` as it can
-    //       // potentially lag behind the actual current location)
-    //       redirect: location.href,
-    //     },
-    //   });
-    // }
+    const user = await getCurrentUserFn();
+
+    console.log("Authed route - current user:", user);
+
+    if (!user) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: location.href },
+      });
+    }
+
+    // Pass user to child routes
+    return { user };
   },
 });
