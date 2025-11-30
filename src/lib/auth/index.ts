@@ -28,7 +28,7 @@ async function getUserById(id: User["id"]) {
   return user || null;
 }
 
-async function getUserByEmail(email: User["email"]) {
+export async function getUserByEmail(email: User["email"]) {
   const user = await db.query.usersTable.findFirst({
     where: eq(usersTable.email, email),
   });
