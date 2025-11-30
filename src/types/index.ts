@@ -1,0 +1,16 @@
+import { usersTable } from "@/db/schema";
+
+// user
+export type User = typeof usersTable.$inferSelect;
+export type UserWithoutSensitiveInfo = Omit<
+  typeof usersTable.$inferInsert,
+  "passwordHash" | "id"
+> & {
+  password: string;
+};
+
+// session
+export type SessionData = {
+  userId: User["id"];
+  email: User["email"];
+};

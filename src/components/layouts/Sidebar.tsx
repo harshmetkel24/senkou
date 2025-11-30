@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -77,7 +75,9 @@ export default function Sidebar() {
 
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:bg-background md:border-r md:border-border transition-all duration-300 ${collapsed ? "md:w-16" : "md:w-64"}`}
+        className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:bg-background md:border-r md:border-border transition-all duration-300 ${
+          collapsed ? "md:w-16" : "md:w-64"
+        }`}
       >
         <div className="flex items-center justify-between p-4 border-b border-border">
           {!collapsed && (
@@ -116,7 +116,9 @@ export default function Sidebar() {
                 key={to}
                 asChild
                 variant={isActive ? "secondary" : "ghost"}
-                className={`w-full ${collapsed ? "justify-center px-2" : "justify-start"}`}
+                className={`w-full ${
+                  collapsed ? "justify-center px-2" : "justify-start"
+                }`}
                 title={collapsed ? label : undefined}
               >
                 <Link to={to}>

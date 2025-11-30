@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as MangaRouteImport } from './routes/manga'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as CharactersRouteImport } from './routes/characters'
 import { Route as AnimeRouteImport } from './routes/anime'
 import { Route as IndexRouteImport } from './routes/index'
@@ -20,9 +22,19 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MangaRoute = MangaRouteImport.update({
   id: '/manga',
   path: '/manga',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CharactersRoute = CharactersRouteImport.update({
@@ -45,14 +57,18 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/anime': typeof AnimeRoute
   '/characters': typeof CharactersRoute
+  '/login': typeof LoginRoute
   '/manga': typeof MangaRoute
+  '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/anime': typeof AnimeRoute
   '/characters': typeof CharactersRoute
+  '/login': typeof LoginRoute
   '/manga': typeof MangaRoute
+  '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
 }
 export interface FileRoutesById {
@@ -60,22 +76,48 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/anime': typeof AnimeRoute
   '/characters': typeof CharactersRoute
+  '/login': typeof LoginRoute
   '/manga': typeof MangaRoute
+  '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/anime' | '/characters' | '/manga' | '/search'
+  fullPaths:
+    | '/'
+    | '/anime'
+    | '/characters'
+    | '/login'
+    | '/manga'
+    | '/register'
+    | '/search'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/anime' | '/characters' | '/manga' | '/search'
-  id: '__root__' | '/' | '/anime' | '/characters' | '/manga' | '/search'
+  to:
+    | '/'
+    | '/anime'
+    | '/characters'
+    | '/login'
+    | '/manga'
+    | '/register'
+    | '/search'
+  id:
+    | '__root__'
+    | '/'
+    | '/anime'
+    | '/characters'
+    | '/login'
+    | '/manga'
+    | '/register'
+    | '/search'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnimeRoute: typeof AnimeRoute
   CharactersRoute: typeof CharactersRoute
+  LoginRoute: typeof LoginRoute
   MangaRoute: typeof MangaRoute
+  RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
 }
 
@@ -88,11 +130,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/manga': {
       id: '/manga'
       path: '/manga'
       fullPath: '/manga'
       preLoaderRoute: typeof MangaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/characters': {
@@ -123,7 +179,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnimeRoute: AnimeRoute,
   CharactersRoute: CharactersRoute,
+  LoginRoute: LoginRoute,
   MangaRoute: MangaRoute,
+  RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
 }
 export const routeTree = rootRouteImport

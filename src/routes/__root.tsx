@@ -6,13 +6,13 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
-import { FloatingHelpButton } from "../components/helpers/FloatingHelpButton";
-import { HotkeysHandlers } from "../components/helpers/HotkeysHandlers";
-import { StarlightBackground } from "../components/helpers/StarlightBackground";
-import Header from "../components/layouts/Header";
-import { MainContent } from "../components/layouts/MainContent";
-import Sidebar from "../components/layouts/Sidebar";
-import Footer from "../components/layouts/Footer";
+import { FloatingHelpButton } from "@/components/helpers/FloatingHelpButton";
+import { HotkeysHandlers } from "@/components/helpers/HotkeysHandlers";
+import { StarlightBackground } from "@/components/helpers/StarlightBackground";
+import Footer from "@/components/layouts/Footer";
+import Header from "@/components/layouts/Header";
+import { MainContent } from "@/components/layouts/MainContent";
+import Sidebar from "@/components/layouts/Sidebar";
 
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
