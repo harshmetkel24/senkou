@@ -1,5 +1,3 @@
-"use client";
-
 import { Link, useLocation } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
 import { Menu, X } from "lucide-react";
@@ -26,7 +24,7 @@ export default function Header() {
         collapsed ? "md:ml-16" : "md:ml-64",
         {
           "h-16": !isIndexRoute,
-        },
+        }
       )}
     >
       <div className="mx-auto flex w-full max-w-7xl items-center">

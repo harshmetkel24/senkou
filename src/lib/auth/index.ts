@@ -3,7 +3,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { db } from "@/db";
 import { usersTable } from "@/db/schema";
 import { useAppSession } from "@/lib/auth/session";
-import { User } from "@/types";
+import type { User } from "@/types";
+import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 
 // Get current user
@@ -20,14 +21,14 @@ export const getCurrentUserFn = createServerFn({ method: "GET" }).handler(
   }
 );
 
-async function getUserById(id: number) {
+async function getUserById(id: User["id"]) {
   const user = await db.query.usersTable.findFirst({
     where: eq(usersTable.id, id),
   });
   return user || null;
 }
 
-async function getUserByEmail(email: User["email"]) {
+export async function getUserByEmail(email: User["email"]) {
   const user = await db.query.usersTable.findFirst({
     where: eq(usersTable.email, email),
   });
@@ -36,11 +37,8 @@ async function getUserByEmail(email: User["email"]) {
 
 export async function authenticateUser(email: string, password: string) {
   const user = await getUserByEmail(email);
+  if (!user) return null;
 
-  if (user) {
-    // WIP - replace with proper password hashing
-    return user.passwordHash === password ? user : null;
-  }
-
-  return null;
+  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+  return isPasswordValid ? user : null;
 }

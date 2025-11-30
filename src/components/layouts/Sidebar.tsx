@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -8,6 +6,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useSidebarStore } from "@/lib/stores";
+import { cn } from "@/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
 import {
@@ -17,7 +16,6 @@ import {
   Film,
   Home,
   Users,
-  UserPlus,
 } from "lucide-react";
 import { useEffect } from "react";
 
@@ -26,7 +24,10 @@ const navItems = [
   { to: "/anime", label: "Anime", icon: Film },
   { to: "/manga", label: "Manga", icon: BookOpen },
   { to: "/characters", label: "Characters", icon: Users },
-  { to: "/sign-up", label: "Sign up", icon: UserPlus },
+];
+const authItems = [
+  { to: "/login", label: "Log in" },
+  { to: "/register", label: "Register" },
 ];
 
 export default function Sidebar() {
@@ -53,7 +54,7 @@ export default function Sidebar() {
           aria-label="Primary navigation"
         >
           <SheetHeader>
-          <SheetTitle className="text-left">Navigation</SheetTitle>
+            <SheetTitle className="text-left">Navigation</SheetTitle>
           </SheetHeader>
           <nav className="mt-6 space-y-2">
             {navItems.map(({ to, label, icon: Icon }) => {
@@ -79,7 +80,9 @@ export default function Sidebar() {
 
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:bg-background md:border-r md:border-border transition-all duration-300 ${collapsed ? "md:w-16" : "md:w-64"}`}
+        className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:bg-background md:border-r md:border-border transition-all duration-300 ${
+          collapsed ? "md:w-16" : "md:w-64"
+        }`}
       >
         <div className="flex items-center justify-between p-4 border-b border-border">
           {!collapsed && (
@@ -118,7 +121,10 @@ export default function Sidebar() {
                 key={to}
                 asChild
                 variant={isActive ? "secondary" : "ghost"}
-                className={`w-full ${collapsed ? "justify-center px-2" : "justify-start"}`}
+                className={cn(
+                  "w-full",
+                  collapsed ? "justify-center px-2" : "justify-start"
+                )}
                 title={collapsed ? label : undefined}
               >
                 <Link to={to}>
@@ -128,6 +134,31 @@ export default function Sidebar() {
               </Button>
             );
           })}
+          <div
+            className={`mt-4 flex flex-col gap-2 border-t border-border/60 pt-4 ${
+              collapsed ? "items-center" : ""
+            }`}
+          >
+            {authItems.map(({ to, label }) => {
+              const isActive = pathname === to;
+              return (
+                <Button
+                  key={to}
+                  asChild
+                  variant={isActive ? "secondary" : "ghost"}
+                  className={`w-full ${
+                    collapsed ? "justify-center px-2" : ""
+                  } ${
+                    label === "Register"
+                      ? "text-xs uppercase tracking-[0.3em]"
+                      : ""
+                  }`}
+                >
+                  <Link to={to}>{label}</Link>
+                </Button>
+              );
+            })}
+          </div>
         </nav>
       </aside>
     </>

@@ -6,22 +6,25 @@ import { createServerFn } from "@tanstack/react-start";
 export const loginFn = createServerFn({ method: "POST" })
   .inputValidator((data: { email: string; password: string }) => data)
   .handler(async ({ data }) => {
-    // Verify credentials (replace with your auth logic)
-    const user = await authenticateUser(data.email, data.password);
+    try {
+      const user = await authenticateUser(data.email, data.password);
 
-    if (!user) {
-      return { error: "Invalid credentials" };
+      if (!user) {
+        throw new Error("Invalid Credentials");
+      }
+
+      // Create session
+      const session = await useAppSession();
+      await session.update({ userId: user.id });
+
+      return {
+        success: true,
+        user: { id: user.id, email: user.email },
+      };
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
     }
-
-    // Create session
-    const session = await useAppSession();
-    await session.update({
-      userId: user.id,
-      email: user.email,
-    });
-
-    // Redirect to protected area
-    throw redirect({ to: "/" });
   });
 
 // Logout server function

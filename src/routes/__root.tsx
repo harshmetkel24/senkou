@@ -3,16 +3,18 @@ import {
   HeadContent,
   Scripts,
   createRootRouteWithContext,
+  useRouterState,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
+import { NotFound } from "@/components/helpers/NotFound";
 import { FloatingHelpButton } from "../components/helpers/FloatingHelpButton";
 import { HotkeysHandlers } from "../components/helpers/HotkeysHandlers";
-import { StarlightBackground } from "../components/helpers/StarlightBackground";
 import Footer from "../components/layouts/Footer";
 import Header from "../components/layouts/Header";
 import { MainContent } from "../components/layouts/MainContent";
 import Sidebar from "../components/layouts/Sidebar";
+import { Toaster } from "../components/ui/sonner";
 
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
@@ -46,23 +48,37 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
   }),
 
+  notFoundComponent: NotFound,
   shellComponent: RootDocument,
 });
 
+const pathsToExcludeSidebar = ["/login", "/register"];
+
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  });
+  const sidebarVisible = pathsToExcludeSidebar.includes(pathname);
+
   return (
     <html lang="en" data-theme="senkou-dark" className="dark">
       <head>
         <HeadContent />
       </head>
       <body className="relative min-h-screen  bg-background text-foreground">
-        <StarlightBackground />
+        {/* <StarlightBackground /> */}
         <HotkeysHandlers />
-        <Sidebar />
-        <Header />
-        <MainContent>{children}</MainContent>
-        <Footer />
-        <FloatingHelpButton />
+        {!sidebarVisible ? (
+          <>
+            <Sidebar />
+            <Header />
+            <MainContent>{children}</MainContent>
+            <Footer />
+            <FloatingHelpButton />
+          </>
+        ) : (
+          <>{children}</>
+        )}
         {process.env.NODE_ENV === "development" && (
           <TanStackDevtools
             config={{
@@ -77,6 +93,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             ]}
           />
         )}
+        <Toaster />
         <Scripts />
       </body>
     </html>
