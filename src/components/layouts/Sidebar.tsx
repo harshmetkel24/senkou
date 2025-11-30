@@ -24,6 +24,10 @@ const navItems = [
   { to: "/manga", label: "Manga", icon: BookOpen },
   { to: "/characters", label: "Characters", icon: Users },
 ];
+const authItems = [
+  { to: "/login", label: "Log in" },
+  { to: "/register", label: "Register" },
+];
 
 export default function Sidebar() {
   const collapsed = useSidebarStore((state) => state.collapsed);
@@ -49,7 +53,7 @@ export default function Sidebar() {
           aria-label="Primary navigation"
         >
           <SheetHeader>
-          <SheetTitle className="text-left">Navigation</SheetTitle>
+            <SheetTitle className="text-left">Navigation</SheetTitle>
           </SheetHeader>
           <nav className="mt-6 space-y-2">
             {navItems.map(({ to, label, icon: Icon }) => {
@@ -128,6 +132,27 @@ export default function Sidebar() {
               </Button>
             );
           })}
+          <div
+            className={`mt-4 flex flex-col gap-2 border-t border-border/60 pt-4 ${
+              collapsed ? "items-center" : ""
+            }`}
+          >
+            {authItems.map(({ to, label }) => {
+              const isActive = pathname === to;
+              return (
+                <Button
+                  key={to}
+                  asChild
+                  variant={isActive ? "secondary" : "ghost"}
+                  className={`w-full ${collapsed ? "justify-center px-2" : ""} ${
+                    label === "Register" ? "text-xs uppercase tracking-[0.3em]" : ""
+                  }`}
+                >
+                  <Link to={to}>{label}</Link>
+                </Button>
+              );
+            })}
+          </div>
         </nav>
       </aside>
     </>

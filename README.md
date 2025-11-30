@@ -12,6 +12,10 @@
       <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" height="56" alt="React logo" />
     </a>
     &nbsp;&nbsp;
+    <a href="https://orm.drizzle.team/">
+      <img src="https://avatars.githubusercontent.com/u/108468352?s=200&v=4" height="56" alt="Drizzle ORM logo" />
+    </a>
+    &nbsp;&nbsp;
     <a href="https://tailwindcss.com/">
       <img src="https://upload.wikimedia.org/wikipedia/commons/d/d5/Tailwind_CSS_Logo.svg" height="56" alt="Tailwind CSS logo" />
     </a>
@@ -27,9 +31,11 @@
 </div>
 
 ## Vision
+
 Senkou (線光) is an IMDB-style experience for anime, manga, characters. Stage 1 focuses on a best-in-class browsing experience powered by TanStack Router RSC + React Query, with a sidebar-first layout, sticky filter bar, and buttery-smooth infinite scroll. Later stages add auth, watchlists, recommendations, and social features while preserving the cinematic feel and strict performance targets (TTFB < 200 ms cached, LCP < 2.5 s, CLS < 0.05).
 
 ## Roadmap
+
 - **Stage 1 — MVP “Beautiful Infinite Scroll” (current)**
   - Server components fetch AniList GraphQL data for fast first paint; client components hydrate infinite lists via `useInfiniteQuery` + IntersectionObserver sentinels.
   - Sidebar routes: Anime, Characters, Manga (Staff is on deck next). Each route keeps search/sort/filter state in URL params for shareable state.
@@ -43,6 +49,7 @@ Senkou (線光) is an IMDB-style experience for anime, manga, characters. Stage 
   - Collections & shareable slugs, ratings/reviews with moderation, popular searches, activity feed/follow graph, recommendations (“Because you watched …”), offline/PWA caching, advanced faceted search, Vercel image caching, i18n routing, and admin tooling for feature flags + moderation queues.
 
 ## Tech Stack
+
 - **Framework**: TanStack Start (React 19, Vite, File-based routing).
 - **Data**: AniList GraphQL API; loaders for RSC, React Query for client pagination, URLSearchParams for filter state.
 - **Styling**: Tailwind CSS + shadcn/ui; responsive grid tokens and sensible typography scale.
@@ -50,20 +57,24 @@ Senkou (線光) is an IMDB-style experience for anime, manga, characters. Stage 
 - **Tooling**: PNPM, TypeScript strict mode, Vitest + Testing Library, Sentry (client & server) for observability.
 
 ## Layout & UX Notes
+
 - Sidebar-first shell with a sticky filter/search bar. Keep navigation persistent and highlight the active route.
 - Lists must render skeleton cards immediately, stream first data chunk from RSC, then hydrate and continue infinite scroll.
 - Use IntersectionObserver sentinels per grid; pause fetching when filters/search change until new params resolve.
 - Detail routes share typography, include cast tabs, and reuse cached queries when revisiting the list.
 
 ## Non-Functional Requirements
+
 - Respect AniList rate limits with exponential backoff + jitter. Surface graceful error states (`Retry`, `Report issue`) and empty-state illustrations.
 - Track performance budgets via Web Vitals, and instrument AniList GraphQL requests for tracing.
 - Edge-safe cookies for future auth; no secrets in the repo. All user input validated & sanitized before rendering.
 
 ## Contributing
+
 Implementation details, development setup, and contributor workflow have moved to [`CONTRIBUTION.md`](./CONTRIBUTION.md). Check it for local environment steps, component library expectations, data/query patterns, testing gates, and release hygiene.
 
 ## Resources
+
 - AniList Docs: https://docs.anilist.co/guide/introduction
 - TanStack Start: https://tanstack.com/start/latest
 - TanStack Router & Query: https://tanstack.com/router · https://tanstack.com/query
