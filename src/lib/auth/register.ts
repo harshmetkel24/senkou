@@ -1,44 +1,41 @@
 import { db } from "@/db";
 import { usersTable } from "@/db/schema";
+import { SALT_ROUNDS } from "@/lib/auth/constant";
 import { useAppSession } from "@/lib/auth/session";
-import { RegisterUserData } from "@/types";
+import type { UserWithoutSensitiveInfo } from "@/types";
+import { createServerFn } from "@tanstack/react-start";
 import bcrypt from "bcryptjs";
 
-import { SALT_ROUNDS } from "@/lib/auth/constant";
-import { createServerFn } from "@tanstack/react-start";
-
-export const registerUser = createServerFn({
-  method: "POST",
-})
-  .inputValidator((data: RegisterUserData) => data)
+export const registerFn = createServerFn({ method: "POST" })
+  .inputValidator((data: UserWithoutSensitiveInfo) => data)
   .handler(async ({ data }) => {
     try {
-      const { email, password, displayName } = data;
+      const { password } = data;
+
       const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-      const userData = {
-        email,
-        displayName,
-        passwordHash: hashedPassword,
-      };
 
       const [insertedUser] = await db
         .insert(usersTable)
-        .values(userData)
+        .values({
+          email: data.email,
+          passwordHash: hashedPassword,
+          displayName: data.displayName,
+        })
         .returning();
 
+      console.log("Registration scuessful ✅");
+      console.log("Inserted User:", insertedUser);
+
+      // Create session
       const session = await useAppSession();
-      await session.update({
-        userId: insertedUser.id,
-        email: insertedUser.email,
-      });
+      await session.update({ userId: insertedUser.id });
+
       return {
-        message: {
-          type: "success",
-        },
-        user: insertedUser,
+        success: true,
+        user: { id: insertedUser.id, email: insertedUser.email },
       };
     } catch (error) {
-      console.error("Error signing up user:", error);
+      console.error("Registration error:", error);
       throw error;
     }
   });

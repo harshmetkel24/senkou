@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { db } from "@/db";
 import { usersTable } from "@/db/schema";
 import { useAppSession } from "@/lib/auth/session";
-import { User } from "@/types";
+import type { User } from "@/types";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 
@@ -28,7 +28,7 @@ async function getUserById(id: User["id"]) {
   return user || null;
 }
 
-async function getUserByEmail(email: User["email"]) {
+export async function getUserByEmail(email: User["email"]) {
   const user = await db.query.usersTable.findFirst({
     where: eq(usersTable.email, email),
   });

@@ -10,17 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as MangaRouteImport } from './routes/manga'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CharactersRouteImport } from './routes/characters'
 import { Route as AnimeRouteImport } from './routes/anime'
-import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
 
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MangaRoute = MangaRouteImport.update({
@@ -43,19 +47,10 @@ const AnimeRoute = AnimeRouteImport.update({
   path: '/anime',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedRoute = AuthedRouteImport.update({
-  id: '/_authed',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AuthedProfileRoute = AuthedProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => AuthedRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -64,8 +59,8 @@ export interface FileRoutesByFullPath {
   '/characters': typeof CharactersRoute
   '/login': typeof LoginRoute
   '/manga': typeof MangaRoute
+  '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
-  '/profile': typeof AuthedProfileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -73,19 +68,18 @@ export interface FileRoutesByTo {
   '/characters': typeof CharactersRoute
   '/login': typeof LoginRoute
   '/manga': typeof MangaRoute
+  '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
-  '/profile': typeof AuthedProfileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authed': typeof AuthedRouteWithChildren
   '/anime': typeof AnimeRoute
   '/characters': typeof CharactersRoute
   '/login': typeof LoginRoute
   '/manga': typeof MangaRoute
+  '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
-  '/_authed/profile': typeof AuthedProfileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -95,8 +89,8 @@ export interface FileRouteTypes {
     | '/characters'
     | '/login'
     | '/manga'
+    | '/register'
     | '/search'
-    | '/profile'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -104,27 +98,26 @@ export interface FileRouteTypes {
     | '/characters'
     | '/login'
     | '/manga'
+    | '/register'
     | '/search'
-    | '/profile'
   id:
     | '__root__'
     | '/'
-    | '/_authed'
     | '/anime'
     | '/characters'
     | '/login'
     | '/manga'
+    | '/register'
     | '/search'
-    | '/_authed/profile'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthedRoute: typeof AuthedRouteWithChildren
   AnimeRoute: typeof AnimeRoute
   CharactersRoute: typeof CharactersRoute
   LoginRoute: typeof LoginRoute
   MangaRoute: typeof MangaRoute
+  RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
 }
 
@@ -135,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/manga': {
@@ -165,13 +165,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnimeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed': {
-      id: '/_authed'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof AuthedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -179,34 +172,16 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/profile': {
-      id: '/_authed/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AuthedProfileRouteImport
-      parentRoute: typeof AuthedRoute
-    }
   }
 }
 
-interface AuthedRouteChildren {
-  AuthedProfileRoute: typeof AuthedProfileRoute
-}
-
-const AuthedRouteChildren: AuthedRouteChildren = {
-  AuthedProfileRoute: AuthedProfileRoute,
-}
-
-const AuthedRouteWithChildren =
-  AuthedRoute._addFileChildren(AuthedRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthedRoute: AuthedRouteWithChildren,
   AnimeRoute: AnimeRoute,
   CharactersRoute: CharactersRoute,
   LoginRoute: LoginRoute,
   MangaRoute: MangaRoute,
+  RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
 }
 export const routeTree = rootRouteImport

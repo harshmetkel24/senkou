@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -7,7 +5,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { registerUser } from "@/lib/auth/register";
 import { useSidebarStore } from "@/lib/stores";
 import { cn } from "@/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
@@ -27,6 +24,10 @@ const navItems = [
   { to: "/anime", label: "Anime", icon: Film },
   { to: "/manga", label: "Manga", icon: BookOpen },
   { to: "/characters", label: "Characters", icon: Users },
+];
+const authItems = [
+  { to: "/login", label: "Log in" },
+  { to: "/register", label: "Register" },
 ];
 
 export default function Sidebar() {
@@ -133,26 +134,31 @@ export default function Sidebar() {
               </Button>
             );
           })}
-          <Button
-            onClick={async () => {
-              console.log("Registering user...");
-              try {
-                const { message, user } = await registerUser({
-                  data: {
-                    email: "shreeji@gmail.com",
-                    password: "password123",
-                    displayName: "Shreeji",
-                  },
-                });
-
-                console.log({ message, user });
-              } catch (error) {
-                console.error("Error registering user:", error);
-              }
-            }}
+          <div
+            className={`mt-4 flex flex-col gap-2 border-t border-border/60 pt-4 ${
+              collapsed ? "items-center" : ""
+            }`}
           >
-            Register Shreeji
-          </Button>
+            {authItems.map(({ to, label }) => {
+              const isActive = pathname === to;
+              return (
+                <Button
+                  key={to}
+                  asChild
+                  variant={isActive ? "secondary" : "ghost"}
+                  className={`w-full ${
+                    collapsed ? "justify-center px-2" : ""
+                  } ${
+                    label === "Register"
+                      ? "text-xs uppercase tracking-[0.3em]"
+                      : ""
+                  }`}
+                >
+                  <Link to={to}>{label}</Link>
+                </Button>
+              );
+            })}
+          </div>
         </nav>
       </aside>
     </>
