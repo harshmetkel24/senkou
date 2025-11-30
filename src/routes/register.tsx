@@ -1,6 +1,8 @@
 import { FormEvent } from "react";
 
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,14 +14,73 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/sonner";
+import { registerFn } from "@/lib/auth/register";
 
 export const Route = createFileRoute("/register")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const navigate = useNavigate();
+  const register = useServerFn(registerFn);
+  const registerMutation = useMutation({
+    mutationFn: async (payload: {
+      displayName: string;
+      email: string;
+      password: string;
+    }) => {
+      return await register({ data: payload });
+    },
+    onSuccess: (response) => {
+      if (!response?.success) {
+        toast.error("Registration failed", {
+          description: "Please try again in a moment.",
+        });
+        return;
+      }
+
+      toast.success("Account created", {
+        description: "Redirecting you to your home feed.",
+      });
+      navigate({ to: "/" });
+    },
+    onError: (error) => {
+      const description =
+        error instanceof Error
+          ? error.message
+          : "Please try again in a moment.";
+      toast.error("Registration failed", { description });
+    },
+  });
+
+  const submissionError = registerMutation.isError
+    ? registerMutation.error instanceof Error
+      ? registerMutation.error.message
+      : "Something went wrong while creating your account."
+    : "";
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const displayName = (formData.get("register-display-name") as string) || "";
+    const email = (formData.get("register-email") as string) || "";
+    const password = (formData.get("register-password") as string) || "";
+    const confirmPassword =
+      (formData.get("register-confirm-password") as string) || "";
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match", {
+        description: "Please confirm your password and try again.",
+      });
+      return;
+    }
+
+    registerMutation.mutate({
+      displayName: displayName.trim(),
+      email: email.trim(),
+      password,
+    });
   };
 
   return (
@@ -35,12 +96,14 @@ function RouteComponent() {
           <form
             onSubmit={handleSubmit}
             className="flex flex-col gap-4"
+            aria-busy={registerMutation.isPending}
             aria-label="Signup form"
           >
             <label className="flex flex-col gap-1 text-sm font-semibold text-foreground">
               Display name
               <Input
                 id="register-display-name"
+                name="register-display-name"
                 placeholder="Senku fan"
                 type="text"
                 required
@@ -51,6 +114,7 @@ function RouteComponent() {
               Email
               <Input
                 id="register-email"
+                name="register-email"
                 placeholder="you@email.com"
                 type="email"
                 required
@@ -61,6 +125,7 @@ function RouteComponent() {
               Password
               <Input
                 id="register-password"
+                name="register-password"
                 placeholder="Create a strong passphrase"
                 type="password"
                 autoComplete="new-password"
@@ -72,6 +137,7 @@ function RouteComponent() {
               Confirm password
               <Input
                 id="register-confirm-password"
+                name="register-confirm-password"
                 placeholder="Re-enter your password"
                 type="password"
                 autoComplete="new-password"
@@ -86,8 +152,19 @@ function RouteComponent() {
               </p>
             </div>
 
-            <Button className="w-full" size="lg" type="submit">
-              Create account
+            {submissionError ? (
+              <p className="text-sm text-destructive" role="alert">
+                {submissionError}
+              </p>
+            ) : null}
+
+            <Button
+              className="w-full"
+              size="lg"
+              type="submit"
+              disabled={registerMutation.isPending}
+            >
+              {registerMutation.isPending ? "Creating..." : "Create account"}
             </Button>
           </form>
         </CardContent>

@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import { usersTable } from "@/db/schema";
+import { getUserByEmail } from "@/lib/auth";
 import { SALT_ROUNDS } from "@/lib/auth/constant";
 import { useAppSession } from "@/lib/auth/session";
 import type { UserWithoutSensitiveInfo } from "@/types";
@@ -10,21 +11,23 @@ export const registerFn = createServerFn({ method: "POST" })
   .inputValidator((data: UserWithoutSensitiveInfo) => data)
   .handler(async ({ data }) => {
     try {
-      const { password } = data;
+      const { email, displayName, password } = data;
+
+      const userWithEmail = await getUserByEmail(email);
+      if (userWithEmail) {
+        throw new Error("A user with this email already exists.");
+      }
 
       const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
       const [insertedUser] = await db
         .insert(usersTable)
         .values({
-          email: data.email,
+          email,
+          displayName,
           passwordHash: hashedPassword,
-          displayName: data.displayName,
         })
         .returning();
-
-      console.log("Registration scuessful ✅");
-      console.log("Inserted User:", insertedUser);
 
       // Create session
       const session = await useAppSession();

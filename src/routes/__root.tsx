@@ -14,6 +14,7 @@ import Footer from "../components/layouts/Footer";
 import Header from "../components/layouts/Header";
 import { MainContent } from "../components/layouts/MainContent";
 import Sidebar from "../components/layouts/Sidebar";
+import { Toaster } from "../components/ui/sonner";
 
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
@@ -92,6 +93,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             ]}
           />
         )}
+        <Toaster />
         <Scripts />
       </body>
     </html>
