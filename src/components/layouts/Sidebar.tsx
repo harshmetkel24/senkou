@@ -15,6 +15,8 @@ import {
   ChevronRight,
   Film,
   Home,
+  LogIn,
+  UserPlus,
   Users,
 } from "lucide-react";
 import { useEffect } from "react";
@@ -26,8 +28,8 @@ const navItems = [
   { to: "/characters", label: "Characters", icon: Users },
 ];
 const authItems = [
-  { to: "/login", label: "Log in" },
-  { to: "/register", label: "Register" },
+  { to: "/login", label: "Log in", icon: LogIn },
+  { to: "/register", label: "Register", icon: UserPlus },
 ];
 
 export default function Sidebar() {
@@ -74,6 +76,29 @@ export default function Sidebar() {
                 </Button>
               );
             })}
+            <div className="mt-4 flex flex-col gap-2 border-t border-border/60 pt-4">
+              {authItems.map(({ to, label, icon: Icon }) => {
+                const isActive = pathname === to;
+                return (
+                  <Button
+                    key={to}
+                    asChild
+                    variant={isActive ? "secondary" : "ghost"}
+                    className={`w-full justify-start ${
+                      label === "Register"
+                        ? "text-xs uppercase tracking-[0.3em]"
+                        : ""
+                    }`}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <Link to={to}>
+                      <Icon className="mr-2 h-4 w-4" />
+                      {label}
+                    </Link>
+                  </Button>
+                );
+              })}
+            </div>
           </nav>
         </SheetContent>
       </Sheet>
@@ -139,22 +164,26 @@ export default function Sidebar() {
               collapsed ? "items-center" : ""
             }`}
           >
-            {authItems.map(({ to, label }) => {
+            {authItems.map(({ to, label, icon: Icon }) => {
               const isActive = pathname === to;
               return (
                 <Button
                   key={to}
                   asChild
                   variant={isActive ? "secondary" : "ghost"}
-                  className={`w-full ${
-                    collapsed ? "justify-center px-2" : ""
-                  } ${
+                  className={cn(
+                    "w-full",
+                    collapsed ? "justify-center px-2" : "justify-start",
                     label === "Register"
                       ? "text-xs uppercase tracking-[0.3em]"
                       : ""
-                  }`}
+                  )}
+                  title={collapsed ? label : undefined}
                 >
-                  <Link to={to}>{label}</Link>
+                  <Link to={to}>
+                    <Icon className={`${collapsed ? "" : "mr-2"} h-4 w-4`} />
+                    {!collapsed && label}
+                  </Link>
                 </Button>
               );
             })}

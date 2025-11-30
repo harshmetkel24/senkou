@@ -66,6 +66,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="relative min-h-screen  bg-background text-foreground">
+        {/* WIP: enbling this makes input in /login and /register forms unusable */}
         {/* <StarlightBackground /> */}
         <HotkeysHandlers />
         {!sidebarVisible ? (
