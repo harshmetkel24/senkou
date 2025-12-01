@@ -60,20 +60,24 @@ export default function Sidebar() {
           </SheetHeader>
           <nav className="mt-6 space-y-2">
             {navItems.map(({ to, label, icon: Icon }) => {
-              const isActive = pathname === to || pathname.startsWith(`${to}/`);
               return (
-                <Button
-                  key={to}
-                  asChild
-                  variant={isActive ? "secondary" : "ghost"}
-                  className="w-full justify-start"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  <Link to={to}>
-                    <Icon className="mr-2 h-4 w-4" />
-                    {label}
-                  </Link>
-                </Button>
+                <Link to={to}>
+                  {({ isActive }) => {
+                    console.log({ pathname, isActive });
+                    return (
+                      <Button
+                        key={to}
+                        asChild
+                        variant={isActive ? "secondary" : "ghost"}
+                        className="w-full justify-start"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <Icon className="mr-2 h-4 w-4" />
+                        {label}
+                      </Button>
+                    );
+                  }}
+                </Link>
               );
             })}
             <div className="mt-4 flex flex-col gap-2 border-t border-border/60 pt-4">
