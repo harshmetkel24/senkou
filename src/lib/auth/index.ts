@@ -37,7 +37,9 @@ export async function getUserByEmail(email: User["email"]) {
 
 export async function authenticateUser(email: string, password: string) {
   const user = await getUserByEmail(email);
-  if (!user) return null;
+  if (!user) {
+    throw new Error("User with this email does not exist");
+  }
 
   const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
   return isPasswordValid ? user : null;

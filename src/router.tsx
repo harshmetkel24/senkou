@@ -3,6 +3,8 @@ import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query
 import * as TanstackQuery from "./integrations/tanstack-query/root-provider";
 
 // Import the generated route tree
+import { NotFound } from "@/components/helpers/NotFound";
+import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import { routeTree } from "./routeTree.gen";
 
 // Create a new router instance
@@ -13,12 +15,12 @@ export const getRouter = async () => {
     routeTree,
     context: { ...rqContext },
     defaultPreload: "intent",
+    defaultNotFoundComponent: NotFound,
+    defaultErrorComponent: RouteErrorBoundary,
     scrollRestoration: true,
     Wrap: (props: { children: React.ReactNode }) => {
       return (
         <TanstackQuery.Provider {...rqContext}>
-          {/* FIXME: always redirecting user to home route: / */}
-          {/* <AuthProvider>{props.children}</AuthProvider> */}
           {props.children}
         </TanstackQuery.Provider>
       );
