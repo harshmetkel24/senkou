@@ -2,6 +2,7 @@ import { keepPreviousData, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
 
+import { PendingComponent } from "@/components/helpers/PendingComponent";
 import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import { MediaGrid } from "@/components/media/media-grid";
 import { SearchBar } from "@/components/ui/search-bar";
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) =>
     context.queryClient.ensureQueryData(trendingAnimeQueryOptions()),
   component: App,
+  pendingComponent: PendingComponent,
   errorComponent: (props) => (
     <RouteErrorBoundary
       {...props}
