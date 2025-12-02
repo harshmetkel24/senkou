@@ -42,7 +42,6 @@ function App() {
             alt="Senkou Logo"
             width={1024}
             height={1024}
-            priority
             className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6"
           />
           <h1 className="text-4xl md:text-6xl font-black mb-4 uppercase [letter-spacing:-0.08em]">
