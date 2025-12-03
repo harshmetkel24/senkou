@@ -1,4 +1,3 @@
-import { authenticateUser } from "@/lib/auth";
 import { useAppSession } from "@/lib/auth/session";
 import { redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
@@ -6,6 +5,8 @@ import { createServerFn } from "@tanstack/react-start";
 export const loginFn = createServerFn({ method: "POST" })
   .inputValidator((data: { email: string; password: string }) => data)
   .handler(async ({ data }) => {
+    const { authenticateUser } = await import("@/lib/auth");
+
     try {
       const user = await authenticateUser(data.email, data.password);
 
@@ -29,6 +30,7 @@ export const loginFn = createServerFn({ method: "POST" })
 
 // Logout server function
 export const logoutFn = createServerFn({ method: "POST" }).handler(async () => {
+  const { useAppSession } = await import("@/lib/auth/session");
   const session = await useAppSession();
   await session.clear();
   throw redirect({ to: "/" });

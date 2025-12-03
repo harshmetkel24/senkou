@@ -21,14 +21,29 @@ import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import appCss from "../styles.css?url";
 
 import { NotFound } from "@/components/helpers/NotFound";
+
+import { getCurrentUserFn } from "@/lib/auth";
+import type { AuthContextType } from "@/types";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactNode } from "react";
 
 interface MyRouterContext {
   queryClient: QueryClient;
+  user: AuthContextType;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
+  beforeLoad: async ({ context }) => {
+    const user = (await getCurrentUserFn()) || context.user;
+    const userContextValue: AuthContextType = user
+      ? {
+          id: user?.id,
+          email: user?.email,
+          displayName: user?.displayName,
+        }
+      : undefined;
+    return { user: userContextValue };
+  },
   head: () => ({
     meta: [
       {

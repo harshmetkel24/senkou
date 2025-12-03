@@ -14,3 +14,7 @@ export type SessionData = {
   userId: User["id"];
   email: User["email"];
 };
+
+export type AuthContextType =
+  | Pick<User, "id" | "email" | "displayName">
+  | undefined;

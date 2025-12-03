@@ -13,7 +13,7 @@ export const getRouter = async () => {
 
   const router = createRouter({
     routeTree,
-    context: { ...rqContext },
+    context: { ...rqContext, user: undefined },
     defaultPreload: "intent",
     defaultNotFoundComponent: NotFound,
     defaultErrorComponent: RouteErrorBoundary,

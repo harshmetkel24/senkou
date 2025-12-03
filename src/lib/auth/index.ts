@@ -1,13 +1,7 @@
-import { createServerFn } from "@tanstack/react-start";
-
-import { db } from "@/db";
-import { usersTable } from "@/db/schema";
 import { useAppSession } from "@/lib/auth/session";
-import type { User } from "@/types";
+import type { User } from "@/types"; // Get current user
+import { createServerFn } from "@tanstack/react-start";
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
-
-// Get current user
 export const getCurrentUserFn = createServerFn({ method: "GET" }).handler(
   async () => {
     const session = await useAppSession();
@@ -22,6 +16,12 @@ export const getCurrentUserFn = createServerFn({ method: "GET" }).handler(
 );
 
 async function getUserById(id: User["id"]) {
+  const [{ db }, { usersTable }, { eq }] = await Promise.all([
+    import("@/db"),
+    import("@/db/schema"),
+    import("drizzle-orm"),
+  ]);
+
   const user = await db.query.usersTable.findFirst({
     where: eq(usersTable.id, id),
   });
@@ -29,6 +29,12 @@ async function getUserById(id: User["id"]) {
 }
 
 export async function getUserByEmail(email: User["email"]) {
+  const [{ db }, { usersTable }, { eq }] = await Promise.all([
+    import("@/db"),
+    import("@/db/schema"),
+    import("drizzle-orm"),
+  ]);
+
   const user = await db.query.usersTable.findFirst({
     where: eq(usersTable.email, email),
   });

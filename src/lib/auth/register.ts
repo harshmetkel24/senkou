@@ -1,6 +1,3 @@
-import { db } from "@/db";
-import { usersTable } from "@/db/schema";
-import { getUserByEmail } from "@/lib/auth";
 import { SALT_ROUNDS } from "@/lib/auth/constant";
 import { useAppSession } from "@/lib/auth/session";
 import type { UserWithoutSensitiveInfo } from "@/types";
@@ -10,6 +7,12 @@ import bcrypt from "bcryptjs";
 export const registerFn = createServerFn({ method: "POST" })
   .inputValidator((data: UserWithoutSensitiveInfo) => data)
   .handler(async ({ data }) => {
+    const [{ getUserByEmail }, { db }, { usersTable }] = await Promise.all([
+      import("@/lib/auth"),
+      import("@/db"),
+      import("@/db/schema"),
+    ]);
+
     try {
       const { email, displayName, password } = data;
 

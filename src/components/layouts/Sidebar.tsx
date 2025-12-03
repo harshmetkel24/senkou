@@ -20,6 +20,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect } from "react";
+import { useAuth } from "../../hooks/useAuth";
 
 const navItems = [
   { to: "/", label: "Home", icon: Home },
@@ -33,6 +34,8 @@ const authItems = [
 ];
 
 export default function Sidebar() {
+  const { user } = useAuth();
+
   const collapsed = useSidebarStore((state) => state.collapsed);
   const setCollapsed = useSidebarStore((state) => state.setCollapsed);
   const mobileOpen = useSidebarStore((state) => state.mobileOpen);
@@ -168,29 +171,33 @@ export default function Sidebar() {
               collapsed ? "items-center" : ""
             }`}
           >
-            {authItems.map(({ to, label, icon: Icon }) => {
-              const isActive = pathname === to;
-              return (
-                <Button
-                  key={to}
-                  asChild
-                  variant={isActive ? "secondary" : "ghost"}
-                  className={cn(
-                    "w-full",
-                    collapsed ? "justify-center px-2" : "justify-start",
-                    label === "Register"
-                      ? "text-xs uppercase tracking-[0.3em]"
-                      : ""
-                  )}
-                  title={collapsed ? label : undefined}
-                >
-                  <Link to={to}>
-                    <Icon className={`${collapsed ? "" : "mr-2"} h-4 w-4`} />
-                    {!collapsed && label}
-                  </Link>
-                </Button>
-              );
-            })}
+            {user
+              ? null
+              : authItems.map(({ to, label, icon: Icon }) => {
+                  const isActive = pathname === to;
+                  return (
+                    <Button
+                      key={to}
+                      asChild
+                      variant={isActive ? "secondary" : "ghost"}
+                      className={cn(
+                        "w-full",
+                        collapsed ? "justify-center px-2" : "justify-start",
+                        label === "Register"
+                          ? "text-xs uppercase tracking-[0.3em]"
+                          : ""
+                      )}
+                      title={collapsed ? label : undefined}
+                    >
+                      <Link to={to}>
+                        <Icon
+                          className={`${collapsed ? "" : "mr-2"} h-4 w-4`}
+                        />
+                        {!collapsed && label}
+                      </Link>
+                    </Button>
+                  );
+                })}
           </div>
         </nav>
       </aside>
