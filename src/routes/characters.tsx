@@ -15,6 +15,7 @@ import {
   CharacterGrid,
   CharacterGridSkeleton,
 } from "@/components/characters/character-grid";
+import { PendingComponent } from "@/components/helpers/PendingComponent";
 import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import { SearchResultsPanel } from "@/components/search/search-results-panel";
 import { Button } from "@/components/ui/button";
@@ -75,6 +76,7 @@ export const Route = createFileRoute("/characters")({
     return Promise.all(tasks);
   },
   component: CharactersRoute,
+  pendingComponent: PendingComponent,
   errorComponent: (props) => (
     <RouteErrorBoundary
       {...props}

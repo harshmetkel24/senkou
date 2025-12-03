@@ -16,6 +16,7 @@ import {
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
+import { PendingComponent } from "@/components/helpers/PendingComponent";
 import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import { HighlightCard } from "@/components/media/highlight-card";
 import {
@@ -79,6 +80,7 @@ export const Route = createFileRoute("/manga")({
     return Promise.all(tasks);
   },
   component: MangaRoute,
+  pendingComponent: PendingComponent,
   errorComponent: (props) => (
     <RouteErrorBoundary
       {...props}

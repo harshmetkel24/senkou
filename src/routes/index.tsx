@@ -2,6 +2,7 @@ import { keepPreviousData, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
 
+import { PendingComponent } from "@/components/helpers/PendingComponent";
 import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import { MediaGrid } from "@/components/media/media-grid";
 import { SearchBar } from "@/components/ui/search-bar";
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) =>
     context.queryClient.ensureQueryData(trendingAnimeQueryOptions()),
   component: App,
+  pendingComponent: PendingComponent,
   errorComponent: (props) => (
     <RouteErrorBoundary
       {...props}
@@ -40,7 +42,6 @@ function App() {
             alt="Senkou Logo"
             width={1024}
             height={1024}
-            priority
             className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6"
           />
           <h1 className="text-4xl md:text-6xl font-black mb-4 uppercase [letter-spacing:-0.08em]">

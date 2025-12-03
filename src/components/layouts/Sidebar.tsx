@@ -15,9 +15,13 @@ import {
   ChevronRight,
   Film,
   Home,
+  LogIn,
+  User,
+  UserPlus,
   Users,
 } from "lucide-react";
 import { useEffect } from "react";
+import { useAuth } from "../../hooks/useAuth";
 
 const navItems = [
   { to: "/", label: "Home", icon: Home },
@@ -26,11 +30,14 @@ const navItems = [
   { to: "/characters", label: "Characters", icon: Users },
 ];
 const authItems = [
-  { to: "/login", label: "Log in" },
-  { to: "/register", label: "Register" },
+  { to: "/login", label: "Log in", icon: LogIn },
+  { to: "/register", label: "Register", icon: UserPlus },
 ];
+const profileItem = { to: "/profile", label: "Profile", icon: User };
 
 export default function Sidebar() {
+  const { user } = useAuth();
+
   const collapsed = useSidebarStore((state) => state.collapsed);
   const setCollapsed = useSidebarStore((state) => state.setCollapsed);
   const mobileOpen = useSidebarStore((state) => state.mobileOpen);
@@ -58,22 +65,64 @@ export default function Sidebar() {
           </SheetHeader>
           <nav className="mt-6 space-y-2">
             {navItems.map(({ to, label, icon: Icon }) => {
-              const isActive = pathname === to || pathname.startsWith(`${to}/`);
               return (
-                <Button
-                  key={to}
-                  asChild
-                  variant={isActive ? "secondary" : "ghost"}
-                  className="w-full justify-start"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  <Link to={to}>
-                    <Icon className="mr-2 h-4 w-4" />
-                    {label}
-                  </Link>
-                </Button>
+                <Link to={to}>
+                  {({ isActive }) => {
+                    console.log({ pathname, isActive });
+                    return (
+                      <Button
+                        key={to}
+                        asChild
+                        variant={isActive ? "secondary" : "ghost"}
+                        className="w-full justify-start"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <Icon className="mr-2 h-4 w-4" />
+                        {label}
+                      </Button>
+                    );
+                  }}
+                </Link>
               );
             })}
+            <div className="mt-4 flex flex-col gap-2 border-t border-border/60 pt-4">
+              {user ? (
+                <Link to={profileItem.to}>
+                  {({ isActive }) => (
+                    <Button
+                      variant={isActive ? "secondary" : "ghost"}
+                      className="w-full justify-start"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <profileItem.icon className="mr-2 h-4 w-4" />
+                      {profileItem.label}
+                    </Button>
+                  )}
+                </Link>
+              ) : (
+                authItems.map(({ to, label, icon: Icon }) => {
+                  const isActive = pathname === to;
+                  return (
+                    <Button
+                      key={to}
+                      asChild
+                      variant={isActive ? "secondary" : "ghost"}
+                      className={`w-full justify-start ${
+                        label === "Register"
+                          ? "text-xs uppercase tracking-[0.3em]"
+                          : ""
+                      }`}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <Link to={to}>
+                        <Icon className="mr-2 h-4 w-4" />
+                        {label}
+                      </Link>
+                    </Button>
+                  );
+                })
+              )}
+            </div>
           </nav>
         </SheetContent>
       </Sheet>
@@ -139,25 +188,52 @@ export default function Sidebar() {
               collapsed ? "items-center" : ""
             }`}
           >
-            {authItems.map(({ to, label }) => {
-              const isActive = pathname === to;
-              return (
-                <Button
-                  key={to}
-                  asChild
-                  variant={isActive ? "secondary" : "ghost"}
-                  className={`w-full ${
-                    collapsed ? "justify-center px-2" : ""
-                  } ${
-                    label === "Register"
-                      ? "text-xs uppercase tracking-[0.3em]"
-                      : ""
-                  }`}
-                >
-                  <Link to={to}>{label}</Link>
-                </Button>
-              );
-            })}
+            {user ? (
+              <Button
+                asChild
+                variant={
+                  pathname === profileItem.to ? "secondary" : "ghost"
+                }
+                className={cn(
+                  "w-full",
+                  collapsed ? "justify-center px-2" : "justify-start"
+                )}
+                title={collapsed ? profileItem.label : undefined}
+              >
+                <Link to={profileItem.to}>
+                  <profileItem.icon
+                    className={`${collapsed ? "" : "mr-2"} h-4 w-4`}
+                  />
+                  {!collapsed && profileItem.label}
+                </Link>
+              </Button>
+            ) : (
+              authItems.map(({ to, label, icon: Icon }) => {
+                const isActive = pathname === to;
+                return (
+                  <Button
+                    key={to}
+                    asChild
+                    variant={isActive ? "secondary" : "ghost"}
+                    className={cn(
+                      "w-full",
+                      collapsed ? "justify-center px-2" : "justify-start",
+                      label === "Register"
+                        ? "text-xs uppercase tracking-[0.3em]"
+                        : ""
+                    )}
+                    title={collapsed ? label : undefined}
+                  >
+                    <Link to={to}>
+                      <Icon
+                        className={`${collapsed ? "" : "mr-2"} h-4 w-4`}
+                      />
+                      {!collapsed && label}
+                    </Link>
+                  </Button>
+                );
+              })
+            )}
           </div>
         </nav>
       </aside>

@@ -9,6 +9,7 @@ import { Activity, Film, RefreshCw, Sparkles, Wand2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
+import { PendingComponent } from "@/components/helpers/PendingComponent";
 import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import { HighlightCard } from "@/components/media/highlight-card";
 import {
@@ -64,14 +65,15 @@ export const Route = createFileRoute("/anime")({
     if (resolvedSearch.q) {
       tasks.push(
         context.queryClient.ensureQueryData(
-          searchAnimeQueryOptions(resolvedSearch.q),
-        ),
+          searchAnimeQueryOptions(resolvedSearch.q)
+        )
       );
     }
 
     return Promise.all(tasks);
   },
   component: AnimeRoute,
+  pendingComponent: PendingComponent,
   errorComponent: (props) => (
     <RouteErrorBoundary
       {...props}
@@ -125,9 +127,9 @@ function AnimeRoute() {
         searchResults,
         normalizedSearchQuery,
         (item) => [item.title],
-        { limit: 6 },
+        { limit: 6 }
       ),
-    [searchResults, normalizedSearchQuery],
+    [searchResults, normalizedSearchQuery]
   );
 
   const searchDescription = searchTotal
@@ -305,8 +307,10 @@ function AnimeRoute() {
                             label="Season"
                             value={
                               spotlight.seasonYear
-                                ? `${spotlight.season ?? ""} ${spotlight.seasonYear}`.trim()
-                                : (spotlight.season ?? "TBA")
+                                ? `${spotlight.season ?? ""} ${
+                                    spotlight.seasonYear
+                                  }`.trim()
+                                : spotlight.season ?? "TBA"
                             }
                             icon={<Wand2 className="h-5 w-5 text-violet-300" />}
                           />
