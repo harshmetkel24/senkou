@@ -8,7 +8,7 @@ export const registerFn = createServerFn({ method: "POST" })
   .inputValidator((data: UserWithoutSensitiveInfo) => data)
   .handler(async ({ data }) => {
     const [{ getUserByEmail }, { db }, { usersTable }] = await Promise.all([
-      import("@/lib/auth"),
+      import("@/lib/server/user"),
       import("@/db"),
       import("@/db/schema"),
     ]);
@@ -34,7 +34,10 @@ export const registerFn = createServerFn({ method: "POST" })
 
       // Create session
       const session = await useAppSession();
-      await session.update({ userId: insertedUser.id });
+      await session.update({
+        userId: insertedUser.id,
+        email: insertedUser.email,
+      });
 
       return {
         success: true,

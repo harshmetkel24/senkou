@@ -16,7 +16,7 @@ export const loginFn = createServerFn({ method: "POST" })
 
       // Create session
       const session = await useAppSession();
-      await session.update({ userId: user.id });
+      await session.update({ userId: user.id, email: user.email });
 
       return {
         success: true,
