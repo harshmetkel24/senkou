@@ -94,8 +94,13 @@ function ProfilePage() {
 
   return (
     <div className="container mx-auto p-6">
-      <Card className="max-w-md mx-auto">
+      <Card className="max-w-lg mx-auto">
         <CardHeader>
+          <div className="flex flex-col items-center space-y-4 mb-4">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-3xl font-bold shadow-lg">
+              {user?.displayName?.charAt(0).toUpperCase() || 'U'}
+            </div>
+          </div>
           <CardTitle className="flex items-center justify-between">
             Profile
             {!editMode ? (
