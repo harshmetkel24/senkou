@@ -8,6 +8,7 @@ import { updateUserFn } from "@/lib/server/user";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { Image } from "@unpic/react";
 import { Edit, Save, X } from "lucide-react";
 import { useState } from "react";
 
@@ -22,14 +23,33 @@ function ProfilePage() {
   const [profileData, setProfileData] = useState(() => ({
     displayName: user?.displayName || "",
     email: user?.email || "",
+    profileImg: user?.profileImg || null,
   }));
   const [draftData, setDraftData] = useState(profileData);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 256 * 1024) {
+      toast.error("File too large", {
+        description: "Max allowed size is 256KB.",
+      });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      setDraftData({ ...draftData, profileImg: base64 });
+    };
+    reader.readAsDataURL(file);
+  };
 
   const updateUserMutation = useMutation({
     mutationFn: async (payload: {
       id: number;
       displayName: string;
       email: string;
+      profileImg: string | null;
     }) => {
       return await updateUser({ data: payload });
     },
@@ -44,6 +64,7 @@ function ProfilePage() {
       const nextProfile = {
         displayName: response.user.displayName || "",
         email: response.user.email || "",
+        profileImg: response.user.profileImg || null,
       };
 
       setProfileData(nextProfile);
@@ -83,6 +104,7 @@ function ProfilePage() {
       id: user.id,
       displayName: trimmedDisplayName,
       email: trimmedEmail,
+      profileImg: draftData.profileImg,
     });
   };
 
@@ -94,8 +116,24 @@ function ProfilePage() {
 
   return (
     <div className="container mx-auto p-6">
-      <Card className="max-w-md mx-auto">
+      <Card className="max-w-lg mx-auto">
         <CardHeader>
+          <div className="flex flex-col items-center space-y-4 mb-4">
+            {profileData.profileImg ? (
+              <Image
+                src={profileData.profileImg}
+                alt="Profile"
+                className="w-24 h-24 rounded-full object-cover shadow-lg"
+                width={96}
+                height={96}
+                loading="lazy"
+              />
+            ) : (
+              <div className="rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-3xl font-bold shadow-lg">
+                {user?.displayName?.charAt(0).toUpperCase() || "U"}
+              </div>
+            )}
+          </div>
           <CardTitle className="flex items-center justify-between">
             Profile
             {!editMode ? (
@@ -175,6 +213,16 @@ function ProfilePage() {
                     setDraftData({ ...draftData, email: e.target.value })
                   }
                 />
+              </div>
+              <div>
+                <Label htmlFor="profileImg">Profile Image</Label>
+                <Input
+                  id="profileImg"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+                <p className="text-xs text-muted-foreground">Max size: 500KB</p>
               </div>
             </>
           )}

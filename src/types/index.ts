@@ -16,5 +16,5 @@ export type SessionData = {
 };
 
 export type AuthContextType =
-  | Pick<User, "id" | "email" | "displayName">
+  | Pick<User, "id" | "email" | "displayName" | "profileImg">
   | undefined;

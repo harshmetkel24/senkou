@@ -40,6 +40,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
           id: user?.id,
           email: user?.email,
           displayName: user?.displayName,
+          profileImg: user?.profileImg,
         }
       : undefined;
     return { user: userContextValue };

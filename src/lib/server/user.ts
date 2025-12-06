@@ -35,6 +35,7 @@ export const updateUserFn = createServerFn({ method: "POST" })
         .set({
           email: data.email,
           displayName: data.displayName,
+          profileImg: data.profileImg,
           updatedAt: sql`NOW()`,
         })
         .where(eq(usersTable.id, data.id))
@@ -51,6 +52,7 @@ export const updateUserFn = createServerFn({ method: "POST" })
           id: updatedUser.id,
           email: updatedUser.email,
           displayName: updatedUser.displayName,
+          profileImg: updatedUser.profileImg,
         },
       };
     } catch (error) {
