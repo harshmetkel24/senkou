@@ -2,7 +2,7 @@ import { useAppSession } from "@/lib/auth/session";
 import type { User } from "@/types";
 import { createServerFn } from "@tanstack/react-start";
 
-type UpdateUserType = Pick<User, "id" | "displayName" | "email">;
+type UpdateUserType = Pick<User, "id" | "displayName" | "email" | "profileImg">;
 
 export const updateUserFn = createServerFn({ method: "POST" })
   .inputValidator((data: UpdateUserType) => data)
