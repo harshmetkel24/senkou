@@ -1,12 +1,18 @@
 import { keepPreviousData, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { Suspense } from "react";
 import { Image } from "@unpic/react";
 
 import { PendingComponent } from "@/components/helpers/PendingComponent";
 import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import { MediaGrid } from "@/components/media/media-grid";
+import {
+  WatchlistShelf,
+  WatchlistShelfSkeleton,
+} from "@/components/watchlist/watchlist-shelf";
 import { SearchBar } from "@/components/ui/search-bar";
 import { fetchTrendingAnime } from "@/data/queries/anime";
+import { useAuth } from "@/hooks/useAuth";
 
 const trendingAnimeQueryOptions = () => ({
   queryKey: ["anime", "trending", 1],
@@ -30,6 +36,7 @@ export const Route = createFileRoute("/")({
 });
 
 function App() {
+  const { user } = useAuth();
   const { data } = useSuspenseQuery(trendingAnimeQueryOptions());
 
   return (
@@ -57,6 +64,14 @@ function App() {
         <div className="mb-12 w-full justify-center flex">
           <SearchBar variant="hero" />
         </div>
+
+        {user ? (
+          <Suspense
+            fallback={<WatchlistShelfSkeleton displayName={user.displayName} />}
+          >
+            <WatchlistShelf />
+          </Suspense>
+        ) : null}
 
         {/* Trending Anime */}
         <section className="w-full max-w-6xl mx-auto">

@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/carousel";
 import { fetchMangaSearch, fetchTrendingManga } from "@/data/queries/manga";
 import { useSpotlightDeck } from "@/hooks/use-spotlight-deck";
+import { useWatchlistAdd } from "@/hooks/use-watchlist-add";
 import { deriveRelatedResults } from "@/lib/search-helpers";
 
 const trendingMangaQueryOptions = () => ({
@@ -93,6 +94,7 @@ export const Route = createFileRoute("/manga")({
 function MangaRoute() {
   const navigate = useNavigate();
   const { data, isFetching } = useSuspenseQuery(trendingMangaQueryOptions());
+  const watchlistActions = useWatchlistAdd({ kind: "MANGA" });
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [activeMedia, setActiveMedia] = useState<MediaDetailData | undefined>();
   const { q: searchQuery } = Route.useSearch();
@@ -353,6 +355,10 @@ function MangaRoute() {
         media={activeMedia}
         open={isPanelOpen}
         onClose={() => setIsPanelOpen(false)}
+        onAddToWatchlist={watchlistActions.onAddToWatchlist}
+        addIsLoading={watchlistActions.addIsLoading}
+        addLabel={watchlistActions.addLabel}
+        addHelperText={watchlistActions.addHelperText}
       />
     </main>
   );

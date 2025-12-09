@@ -26,6 +26,11 @@ type MediaDetailPanelProps = {
   media?: MediaDetailData;
   open: boolean;
   onClose: () => void;
+  onAddToWatchlist?: (media: MediaDetailData) => void;
+  addLabel?: string;
+  addIsLoading?: boolean;
+  addDisabled?: boolean;
+  addHelperText?: string;
 };
 
 type DetailStat = {
@@ -76,6 +81,11 @@ export function MediaDetailPanel({
   media,
   open,
   onClose,
+  onAddToWatchlist,
+  addLabel = "Add to watchlist",
+  addIsLoading = false,
+  addDisabled = false,
+  addHelperText,
 }: MediaDetailPanelProps) {
   const seasonLabel = useMemo(() => {
     if (!media?.season && !media?.seasonYear) return undefined;
@@ -174,6 +184,24 @@ export function MediaDetailPanel({
           </section>
 
           <section className="space-y-6">
+            {onAddToWatchlist ? (
+              <div className="space-y-2">
+                <Button
+                  type="button"
+                  className="w-full justify-center rounded-2xl"
+                  onClick={() => onAddToWatchlist(media)}
+                  disabled={addDisabled || addIsLoading}
+                >
+                  {addIsLoading ? "Saving..." : addLabel}
+                </Button>
+                {addHelperText ? (
+                  <p className="text-xs text-muted-foreground">
+                    {addHelperText}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+
             <div className="grid grid-cols-2 gap-4">
               {detailStats.map(({ key, getLabel, icon: Icon, formatter }) => {
                 const value = formatter(media);

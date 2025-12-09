@@ -1,8 +1,4 @@
-import {
-  keepPreviousData,
-  useQuery,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
 import { Activity, Film, RefreshCw, Sparkles, Wand2 } from "lucide-react";
@@ -29,6 +25,7 @@ import {
 } from "@/components/ui/carousel";
 import { fetchAnimeSearch, fetchTrendingAnime } from "@/data/queries/anime";
 import { useSpotlightDeck } from "@/hooks/use-spotlight-deck";
+import { useWatchlistAdd } from "@/hooks/use-watchlist-add";
 import { deriveRelatedResults } from "@/lib/search-helpers";
 
 const trendingAnimeQueryOptions = () => ({
@@ -86,6 +83,7 @@ export const Route = createFileRoute("/anime")({
 function AnimeRoute() {
   const navigate = useNavigate();
   const { data, isFetching } = useSuspenseQuery(trendingAnimeQueryOptions());
+  const watchlistActions = useWatchlistAdd({ kind: "ANIME" });
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [activeMedia, setActiveMedia] = useState<MediaDetailData | undefined>();
   const { q: searchQuery } = Route.useSearch();
@@ -355,6 +353,10 @@ function AnimeRoute() {
         media={activeMedia}
         open={isPanelOpen}
         onClose={closePanel}
+        onAddToWatchlist={watchlistActions.onAddToWatchlist}
+        addIsLoading={watchlistActions.addIsLoading}
+        addLabel={watchlistActions.addLabel}
+        addHelperText={watchlistActions.addHelperText}
       />
     </main>
   );
