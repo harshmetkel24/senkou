@@ -262,8 +262,8 @@ export function SearchBar({
           className={cn(
             "px-8",
             isHero
-              ? "py-6 text-2xl rounded-3xl border-2 shadow-lg focus:ring-4"
-              : "py-2 text-base rounded-2xl border focus:ring-2",
+              ? "py-6 text-3xl rounded-4xl border-2 shadow-lg focus:ring-4"
+              : "py-6 text-base rounded-2xl border focus:ring-2",
             inputPaddingRight,
             "border-border bg-card/95 text-foreground placeholder-muted-foreground focus:ring-primary/50"
           )}

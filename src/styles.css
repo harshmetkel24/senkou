@@ -14,23 +14,23 @@
 @import "@radix-ui/colors/yellow-dark.css";
 @import "@radix-ui/colors/amber.css";
 @import "@radix-ui/colors/amber-dark.css";
-@import "@radix-ui/colors/crimson.css";
-@import "@radix-ui/colors/crimson-dark.css";
+@import "@radix-ui/colors/orange.css";
+@import "@radix-ui/colors/orange-dark.css";
 
 @custom-variant dark (&:is(.dark *, [data-theme='senkou-dark'] *));
 
 body {
   @apply m-0;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family:
-    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
 }
 
 :root {
@@ -62,16 +62,25 @@ code {
   --card-foreground: var(--yellow-10);
   --popover: var(--slate-3);
   --popover-foreground: var(--yellow-3);
-  --primary: var(--yellow-8);
+  --primary: var(--yellow-9);
   --primary-foreground: var(--slate-1);
-  --secondary: var(--gray-7);
+  --primary-hover: var(--yellow-1);
+  --primary-pressed: var(--yellow-11);
+  --primary-muted: var(--yellow-4);
+  --secondary: var(--gray-8);
   --secondary-foreground: var(--gray-1);
+  --secondary-hover: var(--gray-9);
+  --secondary-pressed: var(--gray-10);
   --muted: var(--slate-4);
   --muted-foreground: var(--gray-9);
-  --accent: var(--amber-8);
+  --accent: var(--amber-9);
   --accent-foreground: var(--amber-1);
-  --destructive: var(--crimson-7);
-  --destructive-foreground: var(--crimson-1);
+  --accent-hover: var(--amber-10);
+  --accent-pressed: var(--amber-11);
+  --destructive: var(--orange-9);
+  --destructive-foreground: var(--orange-1);
+  --destructive-hover: var(--orange-11);
+  --destructive-pressed: var(--orange-10);
   --border: var(--slate-6);
   --input: var(--slate-5);
   --ring: var(--yellow-7);
@@ -79,7 +88,7 @@ code {
   --chart-2: var(--amber-8);
   --chart-3: var(--gray-8);
   --chart-4: var(--mauve-8);
-  --chart-5: var(--crimson-7);
+  --chart-5: var(--orange-7);
   --sidebar: var(--slate-3);
   --sidebar-foreground: var(--yellow-4);
   --sidebar-primary: var(--yellow-8);
@@ -90,8 +99,6 @@ code {
   --sidebar-ring: var(--yellow-7);
 }
 
-
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -101,14 +108,22 @@ code {
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-pressed: var(--primary-pressed);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-pressed: var(--secondary-pressed);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-pressed: var(--accent-pressed);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-hover: var(--destructive-hover);
+  --color-destructive-pressed: var(--destructive-pressed);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
