@@ -2,6 +2,7 @@ import { usersTable } from "@/db/schema";
 
 // user
 export type User = typeof usersTable.$inferSelect;
+export type UserInfo = Pick<User, "email" | "displayName" | "profileImg">;
 export type UserWithoutSensitiveInfo = Omit<
   typeof usersTable.$inferInsert,
   "passwordHash" | "id"
@@ -16,5 +17,5 @@ export type SessionData = {
 };
 
 export type AuthContextType =
-  | Pick<User, "id" | "email" | "displayName" | "profileImg">
+  | Pick<User, "id" | "email" | "displayName">
   | undefined;

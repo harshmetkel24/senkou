@@ -61,6 +61,29 @@ export const updateUserFn = createServerFn({ method: "POST" })
     }
   });
 
+export const getUserInfo = createServerFn({ method: "GET" })
+  .inputValidator((id: User["id"]) => id)
+  .handler(async ({ data: id }) => {
+    try {
+      const user = await getUserById(id);
+      if (!user) {
+        throw new Error("User not found");
+      }
+      const fullUser = {
+        email: user.email,
+        displayName: user.displayName,
+        profileImg: user.profileImg,
+      };
+      return {
+        success: true,
+        user: fullUser,
+      };
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      throw error;
+    }
+  });
+
 export async function getUserById(id: User["id"]) {
   const [{ db }, { usersTable }, { eq }] = await Promise.all([
     import("@/db"),
