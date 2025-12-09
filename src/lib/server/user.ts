@@ -2,7 +2,7 @@ import { useAppSession } from "@/lib/auth/session";
 import type { User } from "@/types";
 import { createServerFn } from "@tanstack/react-start";
 
-type UpdateUserType = Pick<User, "id" | "displayName" | "email">;
+type UpdateUserType = Pick<User, "id" | "displayName" | "email" | "profileImg">;
 
 export const updateUserFn = createServerFn({ method: "POST" })
   .inputValidator((data: UpdateUserType) => data)
@@ -57,6 +57,29 @@ export const updateUserFn = createServerFn({ method: "POST" })
       };
     } catch (error) {
       console.error("Error updating user:", error);
+      throw error;
+    }
+  });
+
+export const getUserInfo = createServerFn({ method: "GET" })
+  .inputValidator((id: User["id"]) => id)
+  .handler(async ({ data: id }) => {
+    try {
+      const user = await getUserById(id);
+      if (!user) {
+        throw new Error("User not found");
+      }
+      const fullUser = {
+        email: user.email,
+        displayName: user.displayName,
+        profileImg: user.profileImg,
+      };
+      return {
+        success: true,
+        user: fullUser,
+      };
+    } catch (error) {
+      console.error("Error fetching user:", error);
       throw error;
     }
   });

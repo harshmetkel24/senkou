@@ -1,3 +1,7 @@
+import {
+  ProfileAvatar,
+  getUserInfoQueryKey,
+} from "@/components/helpers/ProfileAvatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -5,10 +9,10 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { updateUserFn } from "@/lib/server/user";
-import { useMutation } from "@tanstack/react-query";
+import type { UserInfo } from "@/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Image } from "@unpic/react";
 import { Edit, Save, X } from "lucide-react";
 import { useState } from "react";
 
@@ -18,14 +22,28 @@ export const Route = createFileRoute("/_authed/profile")({
 
 function ProfilePage() {
   const { user } = useAuth();
+  const userId = user?.id;
   const updateUser = useServerFn(updateUserFn);
+  const queryClient = useQueryClient();
   const [editMode, setEditMode] = useState(false);
   const [profileData, setProfileData] = useState(() => ({
     displayName: user?.displayName || "",
     email: user?.email || "",
-    profileImg: user?.profileImg || null,
+    profileImg: null as string | null,
   }));
   const [draftData, setDraftData] = useState(profileData);
+  const fullUserQueryKey = getUserInfoQueryKey(userId);
+
+  const handleUserLoaded = (fullUser: UserInfo) => {
+    if (editMode) return;
+    const nextProfile = {
+      displayName: fullUser.displayName || "",
+      email: fullUser.email || "",
+      profileImg: fullUser.profileImg || null,
+    };
+    setProfileData(nextProfile);
+    setDraftData(nextProfile);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,11 +79,23 @@ function ProfilePage() {
         return;
       }
 
-      const nextProfile = {
+      const updatedUserInfo: UserInfo = {
         displayName: response.user.displayName || "",
         email: response.user.email || "",
         profileImg: response.user.profileImg || null,
       };
+
+      if (userId) {
+        queryClient.setQueryData(
+          fullUserQueryKey,
+          (prev?: UserInfo | null) => ({
+            ...(prev ?? {}),
+            ...updatedUserInfo,
+          })
+        );
+      }
+
+      const nextProfile = updatedUserInfo;
 
       setProfileData(nextProfile);
       setDraftData(nextProfile);
@@ -88,7 +118,7 @@ function ProfilePage() {
   }
 
   const handleSave = () => {
-    if (!user.id || updateUserMutation.isPending) return;
+    if (!userId || updateUserMutation.isPending) return;
 
     const trimmedDisplayName = draftData.displayName.trim();
     const trimmedEmail = draftData.email.trim();
@@ -101,7 +131,7 @@ function ProfilePage() {
     }
 
     updateUserMutation.mutate({
-      id: user.id,
+      id: userId,
       displayName: trimmedDisplayName,
       email: trimmedEmail,
       profileImg: draftData.profileImg,
@@ -119,20 +149,14 @@ function ProfilePage() {
       <Card className="max-w-lg mx-auto">
         <CardHeader>
           <div className="flex flex-col items-center space-y-4 mb-4">
-            {profileData.profileImg ? (
-              <Image
-                src={profileData.profileImg}
-                alt="Profile"
-                className="w-24 h-24 rounded-full object-cover shadow-lg"
-                width={96}
-                height={96}
-                loading="lazy"
-              />
-            ) : (
-              <div className="rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-3xl font-bold shadow-lg">
-                {user?.displayName?.charAt(0).toUpperCase() || "U"}
-              </div>
-            )}
+            <ProfileAvatar
+              userId={userId}
+              draftImage={editMode ? draftData.profileImg : null}
+              fallbackInitial={
+                profileData.displayName || user?.displayName || ""
+              }
+              onUserLoaded={handleUserLoaded}
+            />
           </div>
           <CardTitle className="flex items-center justify-between">
             Profile
@@ -222,7 +246,7 @@ function ProfilePage() {
                   accept="image/*"
                   onChange={handleFileChange}
                 />
-                <p className="text-xs text-muted-foreground">Max size: 500KB</p>
+                <p className="text-xs text-muted-foreground">Max size: 256KB</p>
               </div>
             </>
           )}
