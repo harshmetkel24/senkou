@@ -5,9 +5,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { toast } from "@/components/ui/sonner";
+import { logoutFn } from "@/lib/auth/login";
 import { useSidebarStore } from "@/lib/stores";
 import { cn } from "@/lib/utils";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
 import {
   BookOpen,
@@ -16,6 +19,7 @@ import {
   Film,
   Home,
   LogIn,
+  LogOut,
   User,
   UserPlus,
   Users,
@@ -44,6 +48,30 @@ export default function Sidebar() {
   const setMobileOpen = useSidebarStore((state) => state.setMobileOpen);
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
+  });
+
+  const navigate = useNavigate();
+
+  const logoutMutation = useMutation({
+    mutationFn: logoutFn,
+    onSuccess: (response) => {
+      if (!response?.success) {
+        toast.error("User logged out failed", {
+          description: "Please try again in a moment.",
+        });
+        return;
+      }
+
+      toast.success("Signed in", {
+        description: "Redirecting you to your dashboard.",
+      });
+      navigate({ to: "/" });
+    },
+    onError: (error) => {
+      const description =
+        error instanceof Error ? error.message : "Please try again.";
+      toast.error("Logout failed", { description });
+    },
   });
 
   useEffect(() => {
@@ -87,18 +115,29 @@ export default function Sidebar() {
             })}
             <div className="mt-4 flex flex-col gap-2 border-t border-border/60 pt-4">
               {user ? (
-                <Link to={profileItem.to}>
-                  {({ isActive }) => (
-                    <Button
-                      variant={isActive ? "secondary" : "ghost"}
-                      className="w-full justify-start"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      <profileItem.icon className="mr-2 h-4 w-4" />
-                      {profileItem.label}
-                    </Button>
-                  )}
-                </Link>
+                <>
+                  <Link to={profileItem.to}>
+                    {({ isActive }) => (
+                      <Button
+                        variant={isActive ? "secondary" : "ghost"}
+                        className="w-full justify-start"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <profileItem.icon className="mr-2 h-4 w-4" />
+                        {profileItem.label}
+                      </Button>
+                    )}
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    disabled={logoutMutation.isPending}
+                    className="w-full justify-start"
+                    onClick={() => logoutMutation.mutate()}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </Button>
+                </>
               ) : (
                 authItems.map(({ to, label, icon: Icon }) => {
                   const isActive = pathname === to;
@@ -189,24 +228,36 @@ export default function Sidebar() {
             }`}
           >
             {user ? (
-              <Button
-                asChild
-                variant={
-                  pathname === profileItem.to ? "secondary" : "ghost"
-                }
-                className={cn(
-                  "w-full",
-                  collapsed ? "justify-center px-2" : "justify-start"
-                )}
-                title={collapsed ? profileItem.label : undefined}
-              >
-                <Link to={profileItem.to}>
-                  <profileItem.icon
-                    className={`${collapsed ? "" : "mr-2"} h-4 w-4`}
-                  />
-                  {!collapsed && profileItem.label}
-                </Link>
-              </Button>
+              <>
+                <Button
+                  asChild
+                  variant={pathname === profileItem.to ? "secondary" : "ghost"}
+                  className={cn(
+                    "w-full",
+                    collapsed ? "justify-center px-2" : "justify-start"
+                  )}
+                  title={collapsed ? profileItem.label : undefined}
+                >
+                  <Link to={profileItem.to}>
+                    <profileItem.icon
+                      className={`${collapsed ? "" : "mr-2"} h-4 w-4`}
+                    />
+                    {!collapsed && profileItem.label}
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full",
+                    collapsed ? "justify-center px-2" : "justify-start"
+                  )}
+                  title={collapsed ? "Logout" : undefined}
+                  onClick={() => logoutFn()}
+                >
+                  <LogOut className={cn("h-4 w-4", { "mr-2": !collapsed })} />
+                  {!collapsed && "Logout"}
+                </Button>
+              </>
             ) : (
               authItems.map(({ to, label, icon: Icon }) => {
                 const isActive = pathname === to;
@@ -225,9 +276,7 @@ export default function Sidebar() {
                     title={collapsed ? label : undefined}
                   >
                     <Link to={to}>
-                      <Icon
-                        className={`${collapsed ? "" : "mr-2"} h-4 w-4`}
-                      />
+                      <Icon className={cn("h-4 w-4", { "mr-2": !collapsed })} />
                       {!collapsed && label}
                     </Link>
                   </Button>
