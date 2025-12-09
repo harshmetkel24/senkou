@@ -47,7 +47,7 @@ export function SearchBar({
   const locationQuery = locationState.search?.q ?? "";
   const locationCategories = useMemo(
     () => decodeSearchCategoriesParam(locationState.search?.categories),
-    [locationState.search],
+    [locationState.search]
   );
   const [searchQuery, setSearchQuery] = useState(locationQuery);
   const [rawSelectedCategories, setRawSelectedCategories] =
@@ -55,18 +55,18 @@ export function SearchBar({
   const selectedCategories = rawSelectedCategories;
   const setSelectedCategories = useCallback(
     (
-      value: SearchCategory[] | ((prev: SearchCategory[]) => SearchCategory[]),
+      value: SearchCategory[] | ((prev: SearchCategory[]) => SearchCategory[])
     ) => {
       setRawSelectedCategories((current) => {
         const nextValue = typeof value === "function" ? value(current) : value;
         return sortSearchCategories(nextValue);
       });
     },
-    [],
+    []
   );
   const shouldFocusSearch = useSidebar((state) => state.shouldFocusSearch);
   const setShouldFocusSearch = useSidebar(
-    (state) => state.setShouldFocusSearch,
+    (state) => state.setShouldFocusSearch
   );
 
   const resolveSearchRoute = (pathname: string) => {
@@ -83,27 +83,27 @@ export function SearchBar({
   const showInlineCategoryChips = showCategoryChips && !isHero;
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(() =>
-    searchQuery.trim(),
+    searchQuery.trim()
   );
   const debouncedUpdater = useMemo(
     () =>
       debounce((value: string) => {
         setDebouncedSearchQuery(value.trim());
       }, AUTOCOMPLETE_DEBOUNCE_MS),
-    [],
+    []
   );
   const normalizedDebouncedQuery = debouncedSearchQuery.trim();
   const autocompleteScope: SearchAutocompleteScope = showCategoryChips
     ? selectedCategories.length === 0
       ? "all"
       : selectedCategories.length === 1
-        ? selectedCategories[0]
-        : selectedCategories
+      ? selectedCategories[0]
+      : selectedCategories
     : searchTarget === "/manga"
-      ? "manga"
-      : searchTarget === "/characters"
-        ? "characters"
-        : "anime";
+    ? "manga"
+    : searchTarget === "/characters"
+    ? "characters"
+    : "anime";
   const shouldFetchAutocomplete =
     normalizedDebouncedQuery.length >= AUTOCOMPLETE_MIN_QUERY_LENGTH;
 
@@ -148,14 +148,14 @@ export function SearchBar({
 
   useEffect(() => {
     setSearchQuery((current) =>
-      current === locationQuery ? current : locationQuery,
+      current === locationQuery ? current : locationQuery
     );
   }, [locationQuery]);
 
   useEffect(() => {
     const trimmedLocation = locationQuery.trim();
     setDebouncedSearchQuery((current) =>
-      current === trimmedLocation ? current : trimmedLocation,
+      current === trimmedLocation ? current : trimmedLocation
     );
   }, [locationQuery]);
 
@@ -163,7 +163,7 @@ export function SearchBar({
     setSelectedCategories((current) =>
       areCategoryArraysEqual(current, locationCategories)
         ? current
-        : locationCategories,
+        : locationCategories
     );
   }, [locationCategories, setSelectedCategories]);
 
@@ -248,9 +248,6 @@ export function SearchBar({
   return (
     <form onSubmit={handleSearch} className="w-full max-w-2xl">
       <div className="relative">
-        <SearchIcon
-          className={`absolute left-6 top-1/2 transform -translate-y-1/2 ${isHero ? "w-8 h-8" : "w-5 h-5"} text-muted-foreground`}
-        />
         <Input
           ref={focusInputRefCallback}
           type="text"
@@ -263,18 +260,19 @@ export function SearchBar({
           onFocus={() => setIsInputFocused(true)}
           onBlur={() => setIsInputFocused(false)}
           className={cn(
+            "px-8",
             isHero
-              ? "pl-20 py-6 text-2xl rounded-3xl border-2 shadow-lg focus:ring-4"
-              : "pl-12 py-2 text-base rounded-2xl border focus:ring-2",
+              ? "py-6 text-3xl rounded-4xl border-2 shadow-lg focus:ring-4"
+              : "py-6 text-base rounded-2xl border focus:ring-2",
             inputPaddingRight,
-            "border-border bg-card/95 text-foreground placeholder-muted-foreground focus:ring-primary/50",
+            "border-border bg-card/95 text-foreground placeholder-muted-foreground focus:ring-primary/50"
           )}
         />
         {showInlineCategoryChips ? (
           <div
             className={cn(
               "absolute inset-y-2 flex items-center",
-              isHero ? "right-32" : "right-24",
+              isHero ? "right-32" : "right-24"
             )}
           >
             <div className="pointer-events-auto rounded-full border border-border/60 bg-background/90 px-2 py-1 shadow-sm">
@@ -287,13 +285,16 @@ export function SearchBar({
             </div>
           </div>
         ) : null}
+
         <Button
           type="submit"
-          size="sm"
+          size="icon"
           variant="outline"
-          className={`absolute top-1/2 -translate-y-1/2 transform px-2  ${isHero ? "right-4 py-2" : "right-2 py-1 text-sm"} rounded-2xl`}
+          className={`absolute top-1/2 -translate-y-1/2 transform px-2  ${
+            isHero ? "right-4 py-2" : "right-2 py-1 text-sm"
+          } rounded-2xl`}
         >
-          Search
+          <SearchIcon />
         </Button>
         {shouldRenderAutocompletePanel ? (
           <SearchAutocompletePanel
@@ -343,8 +344,8 @@ function SearchAutocompletePanel({
     groups.length >= 3
       ? "lg:grid-cols-3"
       : groups.length === 2
-        ? "lg:grid-cols-2"
-        : "lg:grid-cols-1";
+      ? "lg:grid-cols-2"
+      : "lg:grid-cols-1";
 
   return (
     <div
@@ -478,7 +479,7 @@ export function CategoryChipGroup({
               "transition focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/40",
               isActive
                 ? "border-primary bg-primary/15 text-primary"
-                : "border-border/70 bg-card/70 text-muted-foreground hover:text-foreground",
+                : "border-border/70 bg-card/70 text-muted-foreground hover:text-foreground"
             )}
           >
             {category.label}
@@ -491,7 +492,7 @@ export function CategoryChipGroup({
 
 function areCategoryArraysEqual(
   a: SearchCategory[],
-  b: SearchCategory[],
+  b: SearchCategory[]
 ): boolean {
   if (a.length !== b.length) return false;
   for (let index = 0; index < a.length; index += 1) {
@@ -501,7 +502,7 @@ function areCategoryArraysEqual(
 }
 
 function encodeCategoriesParam(
-  categories: SearchCategory[],
+  categories: SearchCategory[]
 ): SearchCategory[] | SearchCategory | undefined {
   if (categories.length === 0) return undefined;
   return categories.length === 1 ? categories[0] : categories;

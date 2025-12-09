@@ -12,11 +12,11 @@ const buttonVariants = cva(
         default:
           "bg-primary text-primary-foreground hover:bg-[var(--yellow-9)] active:bg-[var(--yellow-10)]",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-[var(--crimson-8)] active:bg-[var(--crimson-9)] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
+          "bg-destructive text-destructive-foreground hover:bg-[var(--destructive-hover)] active:bg-[var(--crimson-9)] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
         outline:
           "border bg-background shadow-xs hover:bg-[var(--amber-9)] hover:text-accent-foreground active:bg-[var(--amber-10)] active:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-[var(--amber-9)] dark:active:bg-[var(--amber-10)]",
         secondary:
-          "bg-accent text-secondary-foreground hover:bg-[var(--gray-10)] active:bg-[var(--gray-10)]",
+          "bg-accent text-secondary-foreground hover:bg-[var(--amber-10)] active:bg-[var(--amber-10)]",
         ghost:
           "hover:bg-[var(--amber-12)] hover:text-accent-foreground active:bg-[var(--amber-10)] active:text-accent-foreground dark:hover:bg-[var(--amber-9)] dark:active:bg-[var(--amber-10)]",
         link: "text-primary underline-offset-4 hover:underline active:text-[var(--yellow-9)]",
@@ -34,7 +34,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  },
+  }
 );
 
 function Button({

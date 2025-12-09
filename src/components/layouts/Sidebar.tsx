@@ -129,7 +129,7 @@ export default function Sidebar() {
                     )}
                   </Link>
                   <Button
-                    variant="ghost"
+                    variant="destructive"
                     disabled={logoutMutation.isPending}
                     className="w-full justify-start"
                     onClick={() => logoutMutation.mutate(undefined)}
@@ -246,7 +246,7 @@ export default function Sidebar() {
                   </Link>
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="destructive"
                   className={cn(
                     "w-full",
                     collapsed ? "justify-center px-2" : "justify-start"
