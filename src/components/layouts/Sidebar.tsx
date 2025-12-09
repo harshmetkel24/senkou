@@ -132,7 +132,7 @@ export default function Sidebar() {
                     variant="ghost"
                     disabled={logoutMutation.isPending}
                     className="w-full justify-start"
-                    onClick={() => logoutMutation.mutate()}
+                    onClick={() => logoutMutation.mutate(undefined)}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
