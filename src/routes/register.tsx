@@ -16,6 +16,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/sonner";
 import { registerFn } from "@/lib/auth/register";
+import {
+  DisplayNameInput,
+  EmailInput,
+  PasswordInput,
+} from "@/lib/auth/validation";
 
 export const Route = createFileRoute("/register")({
   component: RouteComponent,
@@ -26,9 +31,9 @@ function RouteComponent() {
   const register = useServerFn(registerFn);
   const registerMutation = useMutation({
     mutationFn: async (payload: {
-      displayName: string;
-      email: string;
-      password: string;
+      displayName: DisplayNameInput;
+      email: EmailInput;
+      password: PasswordInput;
     }) => {
       return await register({ data: payload });
     },

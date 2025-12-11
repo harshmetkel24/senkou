@@ -1,8 +1,18 @@
 import { useAppSession } from "@/lib/auth/session";
+import { emailSchema, passwordSchema } from "@/lib/auth/validation";
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+
+const loginInputSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+  rememberMe: z.boolean().optional(),
+});
+
+type LoginInput = z.infer<typeof loginInputSchema>;
 
 export const loginFn = createServerFn({ method: "POST" })
-  .inputValidator((data: { email: string; password: string }) => data)
+  .inputValidator((data: LoginInput) => loginInputSchema.parse(data))
   .handler(async ({ data }) => {
     const { authenticateUser } = await import("@/lib/auth");
 
@@ -14,7 +24,7 @@ export const loginFn = createServerFn({ method: "POST" })
       }
 
       // Create session
-      const session = await useAppSession();
+      const session = await useAppSession(data.rememberMe);
       await session.update({ userId: user.id, email: user.email });
 
       return {

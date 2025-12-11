@@ -1,7 +1,7 @@
 import { FormEvent } from "react";
 
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/sonner";
 import { loginFn } from "@/lib/auth/login";
+import { EmailInput, PasswordInput } from "@/lib/auth/validation";
 
 export const Route = createFileRoute("/login")({
   component: RouteComponent,
@@ -25,7 +26,11 @@ function RouteComponent() {
   const navigate = useNavigate();
   const login = useServerFn(loginFn);
   const loginMutation = useMutation({
-    mutationFn: async (payload: { email: string; password: string }) => {
+    mutationFn: async (payload: {
+      email: EmailInput;
+      password: PasswordInput;
+      rememberMe?: boolean;
+    }) => {
       return await login({ data: payload });
     },
     onSuccess: (response) => {
@@ -62,10 +67,12 @@ function RouteComponent() {
     const formData = new FormData(event.currentTarget);
     const email = (formData.get("login-email") as string) || "";
     const password = (formData.get("login-password") as string) || "";
+    const rememberMe = formData.get("remember-me") === "on";
 
     loginMutation.mutate({
       email: email.trim(),
       password,
+      rememberMe,
     });
   };
 
@@ -120,7 +127,7 @@ function RouteComponent() {
                   type="checkbox"
                   className="h-4 w-4 rounded border-border bg-background text-primary outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                 />
-                Remember me
+                Remember me 30 days
               </label>
             </div>
 

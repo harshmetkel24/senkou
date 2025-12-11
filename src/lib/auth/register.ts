@@ -1,11 +1,24 @@
 import { SALT_ROUNDS } from "@/lib/auth/constant";
 import { useAppSession } from "@/lib/auth/session";
-import type { UserWithoutSensitiveInfo } from "@/types";
+import {
+  displayNameSchema,
+  emailSchema,
+  passwordSchema,
+} from "@/lib/auth/validation";
 import { createServerFn } from "@tanstack/react-start";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
+
+const registerInputSchema = z.object({
+  displayName: displayNameSchema,
+  email: emailSchema,
+  password: passwordSchema,
+});
+
+type RegisterInput = z.infer<typeof registerInputSchema>;
 
 export const registerFn = createServerFn({ method: "POST" })
-  .inputValidator((data: UserWithoutSensitiveInfo) => data)
+  .inputValidator((data: RegisterInput) => registerInputSchema.parse(data))
   .handler(async ({ data }) => {
     const [{ getUserByEmail }, { db }, { usersTable }] = await Promise.all([
       import("@/lib/server/user"),
