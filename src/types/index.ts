@@ -20,6 +20,7 @@ export type SessionData = {
   email: User["email"];
 };
 
+// FIXME: make this object as Light weight as possible. We may remove email, displayName also from this context
 export type AuthContextType =
   | Pick<User, "id" | "email" | "displayName">
   | undefined;
