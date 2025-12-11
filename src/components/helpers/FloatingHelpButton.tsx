@@ -1,4 +1,5 @@
 import { HotkeysModal } from "@/components/helpers/ShortcutsModal";
+import { ThemeToggle } from "@/components/helpers/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useSidebarStore } from "@/lib/stores";
 
@@ -7,7 +8,8 @@ export function FloatingHelpButton() {
   const setHelpDialogOpen = useSidebarStore((state) => state.setHelpDialogOpen);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 hidden md:block">
+    <div className="fixed bottom-6 right-6 z-50 hidden md:flex gap-2">
+      <ThemeToggle />
       <HotkeysModal open={helpDialogOpen} onOpenChange={setHelpDialogOpen}>
         <Button
           variant="outline"
