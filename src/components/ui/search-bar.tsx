@@ -251,7 +251,7 @@ export function SearchBar({
         <Input
           ref={focusInputRefCallback}
           type="text"
-          placeholder="Type 4 or more letter to see suggestions"
+          placeholder="Type 4 or more letter to see suggestions (⌘ + K to search)"
           value={searchQuery}
           onChange={(e) => {
             setSearchQuery(e.target.value);
