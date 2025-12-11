@@ -88,81 +88,85 @@ export default function Sidebar() {
           className="w-64 px-0"
           aria-label="Primary navigation"
         >
-          <SheetHeader>
-            <SheetTitle className="text-left">Navigation</SheetTitle>
-          </SheetHeader>
-          <nav className="mt-6 space-y-2">
-            {navItems.map(({ to, label, icon: Icon }) => {
-              return (
-                <Link to={to}>
-                  {({ isActive }) => {
-                    console.log({ pathname, isActive });
+          <div className="flex h-full flex-col">
+            <SheetHeader className="px-4">
+              <SheetTitle className="text-left">Navigation</SheetTitle>
+            </SheetHeader>
+            <nav className="mt-6 flex flex-1 flex-col space-y-2 px-4">
+              <div className="space-y-2">
+                {navItems.map(({ to, label, icon: Icon }) => {
+                  return (
+                    <Link to={to}>
+                      {({ isActive }) => {
+                        console.log({ pathname, isActive });
+                        return (
+                          <Button
+                            key={to}
+                            asChild
+                            variant={isActive ? "secondary" : "ghost"}
+                            className="w-full justify-start"
+                            onClick={() => setMobileOpen(false)}
+                          >
+                            <Icon className="mr-2 h-4 w-4" />
+                            {label}
+                          </Button>
+                        );
+                      }}
+                    </Link>
+                  );
+                })}
+              </div>
+              <div className="mt-auto flex flex-col gap-2 border-t border-border/60 pb-6 pt-4">
+                {user ? (
+                  <>
+                    <Link to={profileItem.to}>
+                      {({ isActive }) => (
+                        <Button
+                          variant={isActive ? "secondary" : "ghost"}
+                          className="w-full justify-start"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          <profileItem.icon className="mr-2 h-4 w-4" />
+                          {profileItem.label}
+                        </Button>
+                      )}
+                    </Link>
+                    <Button
+                      variant="destructive"
+                      disabled={logoutMutation.isPending}
+                      className="w-full justify-start"
+                      onClick={() => logoutMutation.mutate(undefined)}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  authItems.map(({ to, label, icon: Icon }) => {
+                    const isActive = pathname === to;
                     return (
                       <Button
                         key={to}
                         asChild
                         variant={isActive ? "secondary" : "ghost"}
-                        className="w-full justify-start"
+                        className={`w-full justify-start ${
+                          label === "Register"
+                            ? "text-xs uppercase tracking-[0.3em]"
+                            : ""
+                        }`}
                         onClick={() => setMobileOpen(false)}
                       >
-                        <Icon className="mr-2 h-4 w-4" />
-                        {label}
+                        <Link to={to}>
+                          <Icon className="mr-2 h-4 w-4" />
+                          {label}
+                        </Link>
                       </Button>
                     );
-                  }}
-                </Link>
-              );
-            })}
-            <div className="mt-4 flex flex-col gap-2 border-t border-border/60 pt-4">
-              {user ? (
-                <>
-                  <Link to={profileItem.to}>
-                    {({ isActive }) => (
-                      <Button
-                        variant={isActive ? "secondary" : "ghost"}
-                        className="w-full justify-start"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        <profileItem.icon className="mr-2 h-4 w-4" />
-                        {profileItem.label}
-                      </Button>
-                    )}
-                  </Link>
-                  <Button
-                    variant="destructive"
-                    disabled={logoutMutation.isPending}
-                    className="w-full justify-start"
-                    onClick={() => logoutMutation.mutate(undefined)}
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Logout
-                  </Button>
-                </>
-              ) : (
-                authItems.map(({ to, label, icon: Icon }) => {
-                  const isActive = pathname === to;
-                  return (
-                    <Button
-                      key={to}
-                      asChild
-                      variant={isActive ? "secondary" : "ghost"}
-                      className={`w-full justify-start ${
-                        label === "Register"
-                          ? "text-xs uppercase tracking-[0.3em]"
-                          : ""
-                      }`}
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      <Link to={to}>
-                        <Icon className="mr-2 h-4 w-4" />
-                        {label}
-                      </Link>
-                    </Button>
-                  );
-                })
-              )}
-            </div>
-          </nav>
+                  })
+                )}
+              </div>
+            </nav>
+          </div>
         </SheetContent>
       </Sheet>
 
@@ -200,32 +204,35 @@ export default function Sidebar() {
             )}
           </Button>
         </div>
-        <nav className="flex-1 p-4 space-y-2">
-          {navItems.map(({ to, label, icon: Icon }) => {
-            const isActive =
-              pathname === to || (to !== "/" && pathname.startsWith(`${to}/`));
-            return (
-              <Button
-                key={to}
-                asChild
-                variant={isActive ? "secondary" : "ghost"}
-                className={cn(
-                  "w-full",
-                  collapsed ? "justify-center px-2" : "justify-start"
-                )}
-                title={collapsed ? label : undefined}
-              >
-                <Link to={to}>
-                  <Icon className={`${collapsed ? "" : "mr-2"} h-4 w-4`} />
-                  {!collapsed && label}
-                </Link>
-              </Button>
-            );
-          })}
+        <nav className="flex flex-1 flex-col p-4">
+          <div className="space-y-2">
+            {navItems.map(({ to, label, icon: Icon }) => {
+              const isActive =
+                pathname === to || (to !== "/" && pathname.startsWith(`${to}/`));
+              return (
+                <Button
+                  key={to}
+                  asChild
+                  variant={isActive ? "secondary" : "ghost"}
+                  className={cn(
+                    "w-full",
+                    collapsed ? "justify-center px-2" : "justify-start"
+                  )}
+                  title={collapsed ? label : undefined}
+                >
+                  <Link to={to}>
+                    <Icon className={`${collapsed ? "" : "mr-2"} h-4 w-4`} />
+                    {!collapsed && label}
+                  </Link>
+                </Button>
+              );
+            })}
+          </div>
           <div
-            className={`mt-4 flex flex-col gap-2 border-t border-border/60 pt-4 ${
+            className={cn(
+              "mt-auto flex flex-col gap-2 border-t border-border/60 pt-4",
               collapsed ? "items-center" : ""
-            }`}
+            )}
           >
             {user ? (
               <>
@@ -254,7 +261,9 @@ export default function Sidebar() {
                   title={collapsed ? "Logout" : undefined}
                   onClick={() => logoutFn()}
                 >
-                  <LogOut className={cn("h-4 w-4", { "mr-2": !collapsed })} />
+                  <LogOut
+                    className={cn("h-4 w-4", { "mr-2": !collapsed })}
+                  />
                   {!collapsed && "Logout"}
                 </Button>
               </>
@@ -276,7 +285,9 @@ export default function Sidebar() {
                     title={collapsed ? label : undefined}
                   >
                     <Link to={to}>
-                      <Icon className={cn("h-4 w-4", { "mr-2": !collapsed })} />
+                      <Icon
+                        className={cn("h-4 w-4", { "mr-2": !collapsed })}
+                      />
                       {!collapsed && label}
                     </Link>
                   </Button>
