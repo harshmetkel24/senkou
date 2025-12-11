@@ -98,11 +98,13 @@ function RootComponent() {
       {!sidebarVisible ? (
         <>
           <Sidebar />
-          <Header />
-          <MainContent>
-            <Outlet />
-          </MainContent>
-          <Footer />
+          <div className="flex min-h-screen flex-col">
+            <Header />
+            <MainContent>
+              <Outlet />
+            </MainContent>
+            <Footer />
+          </div>
           <FloatingHelpButton />
         </>
       ) : (
