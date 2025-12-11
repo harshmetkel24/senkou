@@ -207,7 +207,7 @@ export default function Sidebar() {
             size="icon"
             onClick={() => setCollapsed(!collapsed)}
             className={cn("h-8 w-8", {
-              "absolute -right-4 top-6 z-50 h-9 w-9 rounded-full border border-border bg-background shadow-lg":
+              "absolute -right-4 top-6 z-50 rounded-full border border-border bg-background shadow-lg":
                 collapsed,
             })}
             aria-label="Toggle Sidebar"
