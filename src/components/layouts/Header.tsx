@@ -21,9 +21,9 @@ export default function Header() {
     <header
       className={cn(
         "border-b border-border bg-background/90 px-4 backdrop-blur md:px-6 transition-all duration-300 flex items-center",
-        collapsed ? "md:ml-16" : "md:ml-64",
+        collapsed ? "md-[5rem]" : "md:ml-64",
         {
-          "h-16": !isIndexRoute,
+          "h-[5rem]": !isIndexRoute,
         }
       )}
     >
