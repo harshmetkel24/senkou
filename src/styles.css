@@ -18,6 +18,7 @@
 @import "@radix-ui/colors/orange-dark.css";
 
 @custom-variant dark (&:is(.dark *, [data-theme='senkou-dark'] *));
+@custom-variant light (&:is(.light *, [data-theme='senkou-light'] *));
 
 body {
   @apply m-0;
@@ -96,6 +97,53 @@ code {
   --sidebar-accent: var(--slate-4);
   --sidebar-accent-foreground: var(--slate-1);
   --sidebar-border: var(--slate-6);
+  --sidebar-ring: var(--yellow-7);
+}
+
+:root.light,
+[data-theme="senkou-light"] {
+  color-scheme: light;
+
+  --background: var(--gray-1);
+  --foreground: var(--gray-12);
+  --card: var(--gray-2);
+  --card-foreground: var(--gray-11);
+  --popover: var(--gray-3);
+  --popover-foreground: var(--gray-12);
+  --primary: var(--yellow-9);
+  --primary-foreground: var(--gray-1);
+  --primary-hover: var(--yellow-10);
+  --primary-pressed: var(--yellow-11);
+  --primary-muted: var(--yellow-6);
+  --secondary: var(--gray-8);
+  --secondary-foreground: var(--gray-1);
+  --secondary-hover: var(--gray-9);
+  --secondary-pressed: var(--gray-10);
+  --muted: var(--gray-4);
+  --muted-foreground: var(--gray-11);
+  --accent: var(--amber-9);
+  --accent-foreground: var(--amber-1);
+  --accent-hover: var(--amber-10);
+  --accent-pressed: var(--amber-11);
+  --destructive: var(--orange-9);
+  --destructive-foreground: var(--orange-1);
+  --destructive-hover: var(--orange-10);
+  --destructive-pressed: var(--orange-11);
+  --border: var(--gray-6);
+  --input: var(--gray-5);
+  --ring: var(--yellow-7);
+  --chart-1: var(--yellow-8);
+  --chart-2: var(--amber-8);
+  --chart-3: var(--gray-8);
+  --chart-4: var(--mauve-8);
+  --chart-5: var(--orange-7);
+  --sidebar: var(--gray-3);
+  --sidebar-foreground: var(--gray-12);
+  --sidebar-primary: var(--yellow-9);
+  --sidebar-primary-foreground: var(--gray-1);
+  --sidebar-accent: var(--gray-4);
+  --sidebar-accent-foreground: var(--gray-1);
+  --sidebar-border: var(--gray-6);
   --sidebar-ring: var(--yellow-7);
 }
 

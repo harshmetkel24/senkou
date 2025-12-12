@@ -33,7 +33,7 @@ interface MyRouterContext {
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
-  beforeLoad: async ({ context }) => {
+  loader: async ({ context }) => {
     const user = (await getCurrentUserFn()) || context.user;
     const userContextValue: AuthContextType = user
       ? {

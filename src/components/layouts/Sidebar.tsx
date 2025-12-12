@@ -95,24 +95,28 @@ export default function Sidebar() {
             <nav className="mt-6 flex flex-1 flex-col space-y-2 px-4">
               <div className="space-y-2">
                 {navItems.map(({ to, label, icon: Icon }) => {
+                  // FIXME: should use route matching here to find active route
+                  const isActive =
+                    pathname === to ||
+                    (to !== "/" && pathname.startsWith(`${to}/`));
                   return (
-                    <Link to={to}>
-                      {({ isActive }) => {
-                        console.log({ pathname, isActive });
-                        return (
-                          <Button
-                            key={to}
-                            asChild
-                            variant={isActive ? "secondary" : "ghost"}
-                            className="w-full justify-start"
-                            onClick={() => setMobileOpen(false)}
-                          >
-                            <Icon className="mr-2 h-4 w-4" />
-                            {label}
-                          </Button>
-                        );
-                      }}
-                    </Link>
+                    <Button
+                      key={to}
+                      asChild
+                      variant={isActive ? "secondary" : "ghost"}
+                      className={cn(
+                        "w-full",
+                        collapsed ? "justify-center px-2" : "justify-start"
+                      )}
+                      title={collapsed ? label : undefined}
+                    >
+                      <Link to={to}>
+                        <Icon
+                          className={`${collapsed ? "" : "mr-2"} h-4 w-4`}
+                        />
+                        {!collapsed && label}
+                      </Link>
+                    </Button>
                   );
                 })}
               </div>
@@ -143,6 +147,7 @@ export default function Sidebar() {
                   </>
                 ) : (
                   authItems.map(({ to, label, icon: Icon }) => {
+                    // FIXME: should use route matching here to find active route
                     const isActive = pathname === to;
                     return (
                       <Button
@@ -172,30 +177,40 @@ export default function Sidebar() {
 
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:bg-background md:border-r md:border-border transition-all duration-300 ${
-          collapsed ? "md:w-16" : "md:w-64"
+        className={`relative hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:bg-background md:border-r md:border-border md:overflow-visible md:z-30 transition-all duration-300 ${
+          collapsed ? "md:w-[5rem]" : "md:w-64"
         }`}
       >
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          {!collapsed && (
-            <div className="flex items-center gap-3">
-              <Image
-                src="/senkou-circle-logo.png"
-                alt="Senkou Logo"
-                width={1024}
-                height={1024}
-                className="h-8 w-8"
-              />
+        <div
+          className={cn(
+            "flex items-center border-b border-border p-4",
+            collapsed ? "justify-center" : "justify-between"
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <Image
+              src="/senkou-circle-logo.png"
+              alt="Senkou Logo"
+              width={1024}
+              height={1024}
+              className="h-12 w-12"
+            />
+            {!collapsed && (
               <span className="text-lg font-bold uppercase tracking-tighter">
                 senkō!
               </span>
-            </div>
-          )}
+            )}
+          </div>
+
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setCollapsed(!collapsed)}
-            className="h-8 w-8"
+            className={cn("h-8 w-8", {
+              "absolute -right-4 top-6 z-50 rounded-full border border-border bg-background shadow-lg":
+                collapsed,
+            })}
+            aria-label="Toggle Sidebar"
           >
             {collapsed ? (
               <ChevronRight className="h-4 w-4" />
@@ -204,11 +219,14 @@ export default function Sidebar() {
             )}
           </Button>
         </div>
+
         <nav className="flex flex-1 flex-col p-4">
           <div className="space-y-2">
             {navItems.map(({ to, label, icon: Icon }) => {
+              // FIXME: should use route matching here to find active route
               const isActive =
-                pathname === to || (to !== "/" && pathname.startsWith(`${to}/`));
+                pathname === to ||
+                (to !== "/" && pathname.startsWith(`${to}/`));
               return (
                 <Button
                   key={to}
@@ -261,9 +279,7 @@ export default function Sidebar() {
                   title={collapsed ? "Logout" : undefined}
                   onClick={() => logoutFn()}
                 >
-                  <LogOut
-                    className={cn("h-4 w-4", { "mr-2": !collapsed })}
-                  />
+                  <LogOut className={cn("h-4 w-4", { "mr-2": !collapsed })} />
                   {!collapsed && "Logout"}
                 </Button>
               </>
@@ -285,9 +301,7 @@ export default function Sidebar() {
                     title={collapsed ? label : undefined}
                   >
                     <Link to={to}>
-                      <Icon
-                        className={cn("h-4 w-4", { "mr-2": !collapsed })}
-                      />
+                      <Icon className={cn("h-4 w-4", { "mr-2": !collapsed })} />
                       {!collapsed && label}
                     </Link>
                   </Button>
