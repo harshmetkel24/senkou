@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PasswordField } from "@/components/ui/password-field";
 import { toast } from "@/components/ui/sonner";
 import { registerFn } from "@/lib/auth/register";
 import {
@@ -126,29 +127,23 @@ function RouteComponent() {
               />
             </label>
 
-            <label className="flex flex-col gap-1 text-sm font-semibold text-foreground">
-              Password
-              <Input
-                id="register-password"
-                name="register-password"
-                placeholder="Create a strong passphrase"
-                type="password"
-                autoComplete="new-password"
-                required
-              />
-            </label>
+            <PasswordField
+              id="register-password"
+              label="Password"
+              name="register-password"
+              placeholder="Create a strong passphrase"
+              autoComplete="new-password"
+              required
+            />
 
-            <label className="flex flex-col gap-1 text-sm font-semibold text-foreground">
-              Confirm password
-              <Input
-                id="register-confirm-password"
-                name="register-confirm-password"
-                placeholder="Re-enter your password"
-                type="password"
-                autoComplete="new-password"
-                required
-              />
-            </label>
+            <PasswordField
+              id="register-confirm-password"
+              label="Confirm password"
+              name="register-confirm-password"
+              placeholder="Re-enter your password"
+              autoComplete="new-password"
+              required
+            />
 
             <div className="text-[0.7rem] text-muted-foreground">
               <p>

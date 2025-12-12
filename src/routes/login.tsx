@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PasswordField } from "@/components/ui/password-field";
 import { toast } from "@/components/ui/sonner";
 import { loginFn } from "@/lib/auth/login";
 import { EmailInput, PasswordInput } from "@/lib/auth/validation";
@@ -103,17 +104,14 @@ function RouteComponent() {
               />
             </label>
 
-            <label className="flex flex-col gap-1 text-sm font-semibold text-foreground">
-              Password
-              <Input
-                id="login-password"
-                name="login-password"
-                placeholder="••••••••"
-                type="password"
-                autoComplete="current-password"
-                required
-              />
-            </label>
+            <PasswordField
+              id="login-password"
+              label="Password"
+              name="login-password"
+              placeholder="••••••••"
+              autoComplete="current-password"
+              required
+            />
 
             <div className="flex items-center justify-between text-[0.75rem] text-muted-foreground">
               {/* WIP: check how this will be implemented */}

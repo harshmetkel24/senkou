@@ -19,6 +19,7 @@ const buttonVariants = cva(
           "bg-accent text-secondary-foreground hover:bg-[var(--amber-10)] active:bg-[var(--amber-10)]",
         ghost:
           "hover:bg-[var(--amber-12)] hover:text-accent-foreground active:bg-[var(--amber-10)] active:text-accent-foreground dark:hover:bg-[var(--amber-9)] dark:active:bg-[var(--amber-10)]",
+        icon: "bg-transparent text-foreground hover:bg-transparent active:bg-transparent focus-visible:ring-ring/40",
         link: "text-primary underline-offset-4 hover:underline active:text-[var(--yellow-9)]",
       },
       size: {
