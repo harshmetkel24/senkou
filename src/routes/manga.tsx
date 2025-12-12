@@ -13,6 +13,7 @@ import {
   ScrollText,
   Sparkles,
 } from "lucide-react";
+import Autoplay from "embla-carousel-autoplay";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
@@ -29,7 +30,6 @@ import { Button } from "@/components/ui/button";
 import {
   Carousel,
   CarouselContent,
-  CarouselIndicators,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
@@ -97,6 +97,7 @@ function MangaRoute() {
   const watchlistActions = useWatchlistAdd({ kind: "MANGA" });
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [activeMedia, setActiveMedia] = useState<MediaDetailData | undefined>();
+  const [autoplayPlugin] = useState(() => Autoplay({ delay: 2000 }));
   const { q: searchQuery } = Route.useSearch();
   const normalizedSearchQuery = searchQuery ?? "";
 
@@ -212,8 +213,9 @@ function MangaRoute() {
         ) : spotlightItems.length ? (
           <section className="space-y-4">
             <Carousel
-              autoPlayInterval={2000}
               className="overflow-hidden rounded-[36px] border border-border/60 bg-card/70 shadow-[0_45px_120px_rgba(0,0,0,0.55)] md:h-[520px]"
+              opts={{ loop: true }}
+              plugins={[autoplayPlugin]}
             >
               <CarouselContent className="md:h-full">
                 {spotlightItems.map((spotlight) => (
@@ -322,7 +324,6 @@ function MangaRoute() {
               </CarouselContent>
               <CarouselPrevious className="hidden md:flex" />
               <CarouselNext className="hidden md:flex" />
-              <CarouselIndicators className="bottom-4 md:bottom-6" />
             </Carousel>
           </section>
         ) : null}

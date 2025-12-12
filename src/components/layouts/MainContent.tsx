@@ -11,7 +11,7 @@ export function MainContent({ children }: MainContentProps) {
     <main
       className={cn(
         "flex-1 transition-all duration-300",
-        collapsed ? "md:ml-16" : "md:ml-64"
+        collapsed ? "md:ml-[5rem]" : "md:ml-64"
       )}
     >
       {children}

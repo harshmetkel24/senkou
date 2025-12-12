@@ -41,7 +41,7 @@ export function WatchlistShelf() {
   }));
 
   return (
-    <section className="mx-auto w-full max-w-6xl">
+    <section className="mx-auto w-full max-w-6xl p-8">
       <div className="mb-4 flex flex-col gap-2 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
           Welcome back{user.displayName ? `, ${user.displayName}` : ""}
@@ -85,7 +85,9 @@ export function WatchlistShelf() {
                         {item.title}
                       </h3>
                       {item.status ? (
-                        <p className="text-xs text-primary">Status: {item.status}</p>
+                        <p className="text-xs text-primary">
+                          Status: {item.status}
+                        </p>
                       ) : null}
                     </div>
                   </article>
@@ -98,7 +100,8 @@ export function WatchlistShelf() {
         </>
       ) : (
         <div className="rounded-3xl border border-border/60 bg-card/60 px-6 py-8 text-center text-muted-foreground">
-          Nothing saved yet. Jump into the Anime tab to start building your list.
+          Nothing saved yet. Jump into the Anime tab to start building your
+          list.
         </div>
       )}
     </section>

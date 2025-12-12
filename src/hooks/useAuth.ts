@@ -1,7 +1,7 @@
-import { useRouteContext } from "@tanstack/react-router";
+import { useLoaderData } from "@tanstack/react-router";
 
 export function useAuth() {
-  const context = useRouteContext({
+  const context = useLoaderData({
     from: "__root__",
   });
   if (!context) {
