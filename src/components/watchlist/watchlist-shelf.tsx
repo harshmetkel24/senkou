@@ -7,6 +7,7 @@ import {
   Loader,
   PauseCircle,
   PlayCircle,
+  Trash2,
   XCircle,
   type LucideIcon,
 } from "lucide-react";
@@ -27,6 +28,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useWatchlistRemove } from "@/hooks/use-watchlist-remove";
 import { useWatchlistStatus } from "@/hooks/use-watchlist-status";
 import { useAuth } from "@/hooks/useAuth";
 import { getWatchlistFn } from "@/lib/server/watchlist";
@@ -69,6 +71,7 @@ export function WatchlistShelf() {
   const { user } = useAuth();
   const { onUpdateStatus, isUpdating, pendingEntryId, pendingStatus } =
     useWatchlistStatus();
+  const { onRemoveEntry, isRemoving, pendingRemovalId } = useWatchlistRemove();
   const [selectedEntryId, setSelectedEntryId] = useState<number | null>(null);
   const watchlistQuery = useQuery<WatchlistRows>({
     ...watchlistQueryOptions(),
@@ -102,7 +105,10 @@ export function WatchlistShelf() {
     setSelectedEntryId(item.entryId);
   };
 
-  const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>, item: WatchlistItem) => {
+  const handleCardKeyDown = (
+    event: KeyboardEvent<HTMLDivElement>,
+    item: WatchlistItem
+  ) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       handleCardSelect(item);
@@ -192,9 +198,12 @@ export function WatchlistShelf() {
             item={selectedItem}
             onClose={closeDialog}
             onUpdateStatus={onUpdateStatus}
+            onRemoveEntry={onRemoveEntry}
             isUpdating={isUpdating}
+            isRemoving={isRemoving}
             pendingEntryId={pendingEntryId}
             pendingStatus={pendingStatus}
+            pendingRemovalId={pendingRemovalId}
           />
         </>
       ) : (
@@ -255,21 +264,29 @@ type WatchlistDetailDialogProps = {
     status: WatchStatus;
     title: string;
   }) => void;
+  onRemoveEntry: (payload: { entryId: number; title: string }) => void;
   isUpdating: boolean;
+  isRemoving: boolean;
   pendingEntryId: number | null;
   pendingStatus: WatchStatus | null;
+  pendingRemovalId: number | null;
 };
 
 function WatchlistDetailDialog({
   item,
   onClose,
   onUpdateStatus,
+  onRemoveEntry,
   isUpdating,
+  isRemoving,
   pendingEntryId,
   pendingStatus,
+  pendingRemovalId,
 }: WatchlistDetailDialogProps) {
   const isEntryUpdating =
     Boolean(item) && isUpdating && pendingEntryId === item?.entryId;
+  const isEntryRemoving =
+    Boolean(item) && isRemoving && pendingRemovalId === item?.entryId;
   const statusBadgeClass = cn(
     buttonVariants({ variant: "outline", size: "sm" }),
     "rounded-full border-border/70 bg-background/80 text-[11px] font-semibold uppercase tracking-[0.25em]"
@@ -343,7 +360,9 @@ function WatchlistDetailDialog({
                               title: item.title,
                             })
                           }
-                          disabled={isEntryUpdating && !isActive && isUpdating}
+                          disabled={
+                            (isEntryUpdating && !isActive) || isEntryRemoving
+                          }
                         >
                           <div className="flex items-center gap-3">
                             <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -366,6 +385,32 @@ function WatchlistDetailDialog({
                       );
                     })}
                   </div>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="w-full justify-between rounded-lg border border-destructive/50 bg-transparent text-left text-destructive hover:bg-destructive/15 focus-visible:ring-destructive/40"
+                    onClick={() =>
+                      onRemoveEntry({
+                        entryId: item.entryId,
+                        title: item.title,
+                      })
+                    }
+                    disabled={isEntryRemoving || isEntryUpdating}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="flex size-8 items-center justify-center rounded-lg bg-destructive/20 text-destructive">
+                        <Trash2 className="size-4" />
+                      </span>
+                      <div className="space-y-0.5">
+                        <p className="text-sm font-semibold">
+                          Remove from watchlist
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-xs tracking-[0.2em]">
+                      {isEntryRemoving ? <Loader /> : null}
+                    </span>
+                  </Button>
                 </CardContent>
               </Card>
 

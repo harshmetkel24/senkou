@@ -1,6 +1,10 @@
 import { entityKindEnum, visibilityEnum, watchStatusEnum } from "@/db/schema";
 import { useAppSession } from "@/lib/auth/session";
-import { AddWatchlistInput, UpdateWatchlistStatusInput } from "@/types";
+import {
+  AddWatchlistInput,
+  RemoveWatchlistEntryInput,
+  UpdateWatchlistStatusInput,
+} from "@/types";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -36,6 +40,11 @@ const updateWatchlistStatusSchema: z.ZodType<UpdateWatchlistStatusInput> =
   z.object({
     entryId: z.number().int().positive(),
     status: z.enum(watchStatusEnum.enumValues),
+  });
+
+const removeWatchlistEntrySchema: z.ZodType<RemoveWatchlistEntryInput> =
+  z.object({
+    entryId: z.number().int().positive(),
   });
 
 export const addToWatchlistFn = createServerFn({ method: "POST" })
@@ -207,6 +216,50 @@ export const updateWatchlistStatusFn = createServerFn({ method: "POST" })
       return updatedEntry;
     } catch (error) {
       console.error("Error updating watchlist status:", error);
+      throw error;
+    }
+  });
+
+export const removeFromWatchlistFn = createServerFn({ method: "POST" })
+  .inputValidator((data: RemoveWatchlistEntryInput) =>
+    removeWatchlistEntrySchema.parse(data)
+  )
+  .handler(async ({ data }) => {
+    const session = await useAppSession();
+    const userId = session.data.userId;
+
+    if (!userId) {
+      throw new Error("You must be signed in to manage your watchlist.");
+    }
+
+    const [
+      { db },
+      { watchlistEntriesTable },
+      { and, eq },
+    ] = await Promise.all([
+      import("@/db"),
+      import("@/db/schema"),
+      import("drizzle-orm"),
+    ]);
+
+    try {
+      const [removedEntry] = await db
+        .delete(watchlistEntriesTable)
+        .where(
+          and(
+            eq(watchlistEntriesTable.id, data.entryId),
+            eq(watchlistEntriesTable.userId, userId)
+          )
+        )
+        .returning();
+
+      if (!removedEntry) {
+        throw new Error("Watchlist entry not found or already removed.");
+      }
+
+      return { success: true, entryId: removedEntry.id };
+    } catch (error) {
+      console.error("Error removing watchlist entry:", error);
       throw error;
     }
   });

@@ -44,3 +44,7 @@ export type WatchStatus = WatchlistEntry["status"];
 export type UpdateWatchlistStatusInput = Pick<WatchlistEntry, "status"> & {
   entryId: WatchlistEntry["id"];
 };
+
+export type RemoveWatchlistEntryInput = {
+  entryId: WatchlistEntry["id"];
+};
