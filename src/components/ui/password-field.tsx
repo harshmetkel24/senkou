@@ -31,7 +31,7 @@ export function PasswordField({
         <Button
           type="button"
           size="icon-sm"
-          variant="plain"
+          variant="icon"
           onClick={toggleVisibility}
           className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           aria-label={isVisible ? "Hide password" : "Show password"}

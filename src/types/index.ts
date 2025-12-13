@@ -28,6 +28,8 @@ export type AuthContextType =
 // watchlist
 type CatalogEntityInsert = typeof catalogEntitiesTable.$inferInsert;
 type WatchlistEntryInsert = typeof watchlistEntriesTable.$inferInsert;
+export type WatchlistEntry = typeof watchlistEntriesTable.$inferSelect;
+export type WatchlistEntity = typeof catalogEntitiesTable.$inferSelect;
 
 export type AddWatchlistInput = Pick<
   CatalogEntityInsert,
@@ -37,3 +39,12 @@ export type AddWatchlistInput = Pick<
 
 export type WatchListEntryKind = AddWatchlistInput["kind"];
 export type WatchListEntryProgress = AddWatchlistInput["progress"];
+export type WatchStatus = WatchlistEntry["status"];
+
+export type UpdateWatchlistStatusInput = Pick<WatchlistEntry, "status"> & {
+  entryId: WatchlistEntry["id"];
+};
+
+export type RemoveWatchlistEntryInput = {
+  entryId: WatchlistEntry["id"];
+};

@@ -1,17 +1,22 @@
 import { keepPreviousData, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Suspense } from "react";
 import { Image } from "@unpic/react";
+import { Suspense, useState } from "react";
 
 import { PendingComponent } from "@/components/helpers/PendingComponent";
 import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
+import {
+  MediaDetailPanel,
+  type MediaDetailData,
+} from "@/components/media/media-detail-panel";
 import { MediaGrid } from "@/components/media/media-grid";
+import { SearchBar } from "@/components/ui/search-bar";
 import {
   WatchlistShelf,
   WatchlistShelfSkeleton,
 } from "@/components/watchlist/watchlist-shelf";
-import { SearchBar } from "@/components/ui/search-bar";
 import { fetchTrendingAnime } from "@/data/queries/anime";
+import { useWatchlistAdd } from "@/hooks/use-watchlist-add";
 import { useAuth } from "@/hooks/useAuth";
 
 const trendingAnimeQueryOptions = () => ({
@@ -38,6 +43,14 @@ export const Route = createFileRoute("/")({
 function App() {
   const { user } = useAuth();
   const { data } = useSuspenseQuery(trendingAnimeQueryOptions());
+  const watchlistActions = useWatchlistAdd({ kind: "ANIME" });
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [activeMedia, setActiveMedia] = useState<MediaDetailData | undefined>();
+
+  const handleSelect = (media: MediaDetailData) => {
+    setActiveMedia(media);
+    setIsPanelOpen(true);
+  };
 
   return (
     <div className="relative min-h-screen">
@@ -61,7 +74,7 @@ function App() {
         </div>
 
         {/* Search Bar */}
-        <div className="mb-12 w-full justify-center flex">
+        <div className="w-full justify-center flex">
           <SearchBar variant="hero" />
         </div>
 
@@ -76,9 +89,18 @@ function App() {
         {/* Trending Anime */}
         <section className="w-full max-w-6xl mx-auto">
           <h2 className="text-2xl font-bold text-center mb-6">Trending Now</h2>
-          <MediaGrid items={data.items.slice(1)} />
+          <MediaGrid items={data.items.slice(1)} onSelect={handleSelect} />
         </section>
       </div>
+      <MediaDetailPanel
+        media={activeMedia}
+        open={isPanelOpen}
+        onClose={() => setIsPanelOpen(false)}
+        onAddToWatchlist={watchlistActions.onAddToWatchlist}
+        addIsLoading={watchlistActions.addIsLoading}
+        addLabel={watchlistActions.addLabel}
+        addHelperText={watchlistActions.addHelperText}
+      />
     </div>
   );
 }
