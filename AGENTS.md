@@ -47,6 +47,7 @@
 ## Styling & Components
 - Use Tailwind CSS v4 with design tokens defined in `src/lib/theme`.
 - Lean on shadcn/ui components (install via `pnpx shadcn@latest init`) and grow variants with `class-variance-authority`.
+- Prefer shadcn/ui primitives and their variants over custom utility stacks; keep bespoke CSS to a minimum and add new primitives (e.g., badges) via the shadcn generator when needed.
 - Keep themes ready from day one (default dark cinematic) by importing Radix UI color scales into `src/styles.css`, aliasing them to CSS variables per `data-theme`, extending those blocks for new palettes, and syncing both `document.documentElement.dataset.theme` and the Radix `.dark/.light` class when toggling.
 
 ## Testing & Quality

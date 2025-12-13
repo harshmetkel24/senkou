@@ -1,6 +1,6 @@
 import { entityKindEnum, visibilityEnum, watchStatusEnum } from "@/db/schema";
 import { useAppSession } from "@/lib/auth/session";
-import { AddWatchlistInput } from "@/types";
+import { AddWatchlistInput, UpdateWatchlistStatusInput } from "@/types";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -31,6 +31,12 @@ const addWatchlistInputSchema: z.ZodType<AddWatchlistInput> = z.object({
     .transform((value) => (value && value.length ? value : undefined)),
   visibility: z.enum(visibilityEnum.enumValues).default("PRIVATE"),
 });
+
+const updateWatchlistStatusSchema: z.ZodType<UpdateWatchlistStatusInput> =
+  z.object({
+    entryId: z.number().int().positive(),
+    status: z.enum(watchStatusEnum.enumValues),
+  });
 
 export const addToWatchlistFn = createServerFn({ method: "POST" })
   .inputValidator((data: AddWatchlistInput) =>
@@ -156,3 +162,51 @@ export const getWatchlistFn = createServerFn({ method: "GET" }).handler(
     return rows;
   }
 );
+
+export const updateWatchlistStatusFn = createServerFn({ method: "POST" })
+  .inputValidator((data: UpdateWatchlistStatusInput) =>
+    updateWatchlistStatusSchema.parse(data)
+  )
+  .handler(async ({ data }) => {
+    const session = await useAppSession();
+    const userId = session.data.userId;
+
+    if (!userId) {
+      throw new Error("You must be signed in to manage your watchlist.");
+    }
+
+    const [
+      { db },
+      { watchlistEntriesTable },
+      { and, eq, sql },
+    ] = await Promise.all([
+      import("@/db"),
+      import("@/db/schema"),
+      import("drizzle-orm"),
+    ]);
+
+    try {
+      const [updatedEntry] = await db
+        .update(watchlistEntriesTable)
+        .set({
+          status: data.status,
+          updatedAt: sql`NOW()`,
+        })
+        .where(
+          and(
+            eq(watchlistEntriesTable.id, data.entryId),
+            eq(watchlistEntriesTable.userId, userId)
+          )
+        )
+        .returning();
+
+      if (!updatedEntry) {
+        throw new Error("Watchlist entry not found.");
+      }
+
+      return updatedEntry;
+    } catch (error) {
+      console.error("Error updating watchlist status:", error);
+      throw error;
+    }
+  });
