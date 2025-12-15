@@ -4,6 +4,8 @@ import {
   Check,
   CheckCircle2,
   Clock3,
+  ExternalLink,
+  FileText,
   Loader,
   PauseCircle,
   PlayCircle,
@@ -50,6 +52,11 @@ type WatchlistItem = {
   bannerImage?: string;
   format?: string;
   status: WatchStatus;
+  kind: "ANIME" | "MANGA";
+  progress?: number;
+  notes?: string;
+  visibility?: string;
+  updatedAt?: string | Date;
 };
 
 const statusIcons: Record<WatchStatus, LucideIcon> = {
@@ -87,11 +94,16 @@ export function WatchlistShelf() {
       watchlistEntries.map<WatchlistItem>(({ entity, entry }) => ({
         entryId: entry.id,
         anilistId: entity.anilistId,
+        kind: entity.kind,
         title: entity.title,
         coverImage: entity.coverImage ?? "/senkou-circle-logo.png",
         bannerImage: entity.bannerImage ?? undefined,
         format: entity.format ?? undefined,
         status: entry.status,
+        progress: entry.progress,
+        notes: entry.notes ?? undefined,
+        visibility: entry.visibility ?? undefined,
+        updatedAt: entry.updatedAt ?? undefined,
       })),
     [watchlistEntries]
   );
@@ -222,7 +234,7 @@ export function WatchlistShelfSkeleton({
   displayName?: string;
 }) {
   return (
-    <section className="mx-auto w-full max-w-6xl">
+    <section className="mx-auto w-full max-w-6xl cursor-not-allowed">
       <div className="mb-4 flex flex-col gap-2 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
           Welcome back{displayName ? `, ${displayName}` : ""}
@@ -291,159 +303,246 @@ function WatchlistDetailDialog({
     buttonVariants({ variant: "outline", size: "sm" }),
     "rounded-full border-border/70 bg-background/80 text-[11px] font-semibold uppercase tracking-[0.25em]"
   );
+  const formatUpdatedAt = (value?: string | Date) => {
+    if (!value) return "Just updated";
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return "Just updated";
+    return new Intl.DateTimeFormat("en", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(date);
+  };
 
   return (
     <Dialog open={Boolean(item)} onOpenChange={(open) => !open && onClose()}>
       {item ? (
-        <DialogContent className="max-w-4xl gap-6 border-border/60">
+        <DialogContent className="max-w-5xl gap-6 border-border/60">
           <DialogHeader className="space-y-2 text-left">
             <DialogTitle className="text-2xl font-bold leading-tight">
               {item.title}
             </DialogTitle>
           </DialogHeader>
 
-          <div className="grid gap-4">
-            <div className="space-y-4">
-              <Card className="overflow-hidden border-border/70 shadow-sm">
-                <CardContent className="p-0">
-                  <div className="relative h-56 w-full">
-                    <Image
-                      src={item.bannerImage ?? item.coverImage}
-                      alt={`${item.title} banner art`}
-                      width={1200}
-                      height={520}
-                      className="h-full w-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4">
-                      <div>
-                        <p className="text-[11px] uppercase tracking-[0.3em] text-white/80">
+          <div className="space-y-5">
+            <Card className="overflow-hidden border-border/70 shadow-sm">
+              <CardContent className="p-0">
+                <div className="relative h-72 w-full">
+                  <Image
+                    src={item.bannerImage ?? item.coverImage}
+                    alt={`${item.title} banner art`}
+                    width={1200}
+                    height={520}
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/40 to-background" />
+
+                  <div className="absolute right-4 top-4 flex gap-2">
+                    <a
+                      href={`https://anilist.co/${
+                        item.kind === "MANGA" ? "manga" : "anime"
+                      }/${item.anilistId}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={cn(
+                        buttonVariants({ variant: "secondary", size: "sm" }),
+                        "rounded-full border-border/70 bg-background/70 text-foreground/80 backdrop-blur"
+                      )}
+                    >
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      View on AniList
+                    </a>
+                  </div>
+
+                  <div className="absolute bottom-5 left-4 right-4 flex items-end gap-4">
+                    <div className="relative hidden w-28 shrink-0 overflow-hidden rounded-2xl border border-border/60 shadow-2xl sm:block sm:w-32">
+                      <Image
+                        src={item.coverImage}
+                        alt={`${item.title} cover art`}
+                        width={360}
+                        height={480}
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-background/15 to-transparent" />
+                    </div>
+
+                    <div className="flex flex-1 flex-col gap-2 text-white">
+                      <p className="text-[11px] uppercase tracking-[0.3em] text-white/70">
+                        {item.format ?? "Saved title"}
+                      </p>
+                      <h3 className="text-2xl font-semibold leading-tight line-clamp-2">
+                        {item.title}
+                      </h3>
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        <span
+                          className={cn(
+                            statusBadgeClass,
+                            getWatchStatusBadgeClass(item.status),
+                            "border-white/30 bg-white/10 text-white shadow-lg backdrop-blur"
+                          )}
+                        >
+                          {formatWatchStatusLabel(item.status)}
+                        </span>
+                        <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-white">
+                          AniList #{item.anilistId}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid gap-4">
+              <div className="space-y-4">
+                <Card className="border-border/70 shadow-sm">
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+                        Quick details
+                      </p>
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-xl border border-border/60 bg-card/60 p-3">
+                        <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+                          Format
+                        </p>
+                        <p className="mt-1 text-sm font-semibold">
                           {item.format ?? "Saved title"}
                         </p>
-                        <h3 className="text-xl font-semibold text-white line-clamp-2">
-                          {item.title}
-                        </h3>
                       </div>
-                      <span
-                        className={cn(
-                          statusBadgeClass,
-                          getWatchStatusBadgeClass(item.status)
-                        )}
-                      >
-                        {formatWatchStatusLabel(item.status)}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="space-y-4">
-              <Card className="border-border/70 shadow-sm">
-                <CardContent className="space-y-3">
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {WATCH_STATUS_OPTIONS.map((option) => {
-                      const Icon = statusIcons[option.value];
-                      const isActive = item.status === option.value;
-                      const isPending =
-                        isEntryUpdating && pendingStatus === option.value;
-                      return (
-                        <Button
-                          key={option.value}
-                          type="button"
-                          variant={"icon"}
-                          className="h-full justify-between rounded-lg text-left"
-                          onClick={() =>
-                            onUpdateStatus({
-                              entryId: item.entryId,
-                              status: option.value,
-                              title: item.title,
-                            })
-                          }
-                          disabled={
-                            (isEntryUpdating && !isActive) || isEntryRemoving
-                          }
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                              <Icon className="size-4 hover:text-black" />
-                            </span>
-                            <div className="space-y-0.5">
-                              <p className="text-sm font-semibold">
-                                {option.label}
-                              </p>
-                            </div>
-                          </div>
-                          <span className="text-xs tracking-[0.2em]">
-                            {isPending ? (
-                              <Loader />
-                            ) : isActive ? (
-                              <Check />
-                            ) : null}
-                          </span>
-                        </Button>
-                      );
-                    })}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    className="w-full justify-between rounded-lg border border-destructive/50 bg-transparent text-left text-destructive hover:bg-destructive/15 focus-visible:ring-destructive/40"
-                    onClick={() =>
-                      onRemoveEntry({
-                        entryId: item.entryId,
-                        title: item.title,
-                      })
-                    }
-                    disabled={isEntryRemoving || isEntryUpdating}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="flex size-8 items-center justify-center rounded-lg bg-destructive/20 text-destructive">
-                        <Trash2 className="size-4" />
-                      </span>
-                      <div className="space-y-0.5">
-                        <p className="text-sm font-semibold">
-                          Remove from watchlist
+                      <div className="rounded-xl border border-border/60 bg-card/60 p-3">
+                        <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+                          Watch status
+                        </p>
+                        <div className="mt-1 inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
+                          {formatWatchStatusLabel(item.status)}
+                        </div>
+                      </div>
+                      <div className="rounded-xl border border-border/60 bg-card/60 p-3">
+                        <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+                          Visibility
+                        </p>
+                        <p className="mt-1 text-sm font-semibold">
+                          {item.visibility ?? "Private"}
                         </p>
                       </div>
+                      <div className="rounded-xl border border-border/60 bg-card/60 p-3">
+                        <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+                          Progress
+                        </p>
+                        <p className="mt-1 text-sm font-semibold">
+                          {typeof item.progress === "number" &&
+                          item.progress > 0
+                            ? `${item.progress} tracked`
+                            : "Progress tracking coming soon"}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-border/60 bg-card/60 p-3">
+                        <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+                          Last updated
+                        </p>
+                        <p className="mt-1 text-sm font-semibold">
+                          {formatUpdatedAt(item.updatedAt)}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-border/60 bg-card/60 p-3">
+                        <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+                          Full entry
+                        </p>
+                        <a
+                          href={`https://anilist.co/${
+                            item.kind === "MANGA" ? "manga" : "anime"
+                          }/${item.anilistId}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-1 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
+                        >
+                          View on AniList
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </div>
                     </div>
-                    <span className="text-xs tracking-[0.2em]">
-                      {isEntryRemoving ? <Loader /> : null}
-                    </span>
-                  </Button>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
 
-              {/* <Card className="border-border/70 shadow-sm">
-                <CardHeader className="space-y-1 pb-2">
-                  <CardTitle className="flex items-center gap-2 text-sm uppercase tracking-[0.25em] text-muted-foreground">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    Future actions
-                  </CardTitle>
-                  <CardDescription>
-                    Progress tracking, notes, and sharing wire in here.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
-                  <div className="rounded-md border border-dashed border-border/70 p-3">
-                    <p className="font-semibold text-foreground">
-                      Track progress
-                    </p>
-                    <p className="text-xs">
-                      Episode and volume tracking hooks in here.
-                    </p>
-                  </div>
-                  <div className="rounded-md border border-dashed border-border/70 p-3">
-                    <p className="font-semibold text-foreground">
-                      Notes & sharing
-                    </p>
-                    <p className="text-xs">
-                      Personal notes, visibility, and sharing controls live
-                      together.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card> */}
+                <Card className="border-border/70 shadow-sm">
+                  <CardContent className="space-y-3">
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {WATCH_STATUS_OPTIONS.map((option) => {
+                        const Icon = statusIcons[option.value];
+                        const isActive = item.status === option.value;
+                        const isPending =
+                          isEntryUpdating && pendingStatus === option.value;
+                        return (
+                          <Button
+                            key={option.value}
+                            type="button"
+                            variant={"icon"}
+                            className="h-full justify-between rounded-lg text-left"
+                            onClick={() =>
+                              onUpdateStatus({
+                                entryId: item.entryId,
+                                status: option.value,
+                                title: item.title,
+                              })
+                            }
+                            disabled={
+                              (isEntryUpdating && !isActive) || isEntryRemoving
+                            }
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <Icon className="size-4 hover:text-black" />
+                              </span>
+                              <div className="space-y-0.5">
+                                <p className="text-sm font-semibold">
+                                  {option.label}
+                                </p>
+                              </div>
+                            </div>
+                            <span className="text-xs tracking-[0.2em]">
+                              {isPending ? (
+                                <Loader />
+                              ) : isActive ? (
+                                <Check />
+                              ) : null}
+                            </span>
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      className="w-full justify-between rounded-lg border border-destructive/50 bg-transparent text-left text-destructive hover:bg-destructive/15 focus-visible:ring-destructive/40"
+                      onClick={() =>
+                        onRemoveEntry({
+                          entryId: item.entryId,
+                          title: item.title,
+                        })
+                      }
+                      disabled={isEntryRemoving || isEntryUpdating}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="flex size-8 items-center justify-center rounded-lg bg-destructive/20 text-destructive">
+                          <Trash2 className="size-4" />
+                        </span>
+                        <div className="space-y-0.5">
+                          <p className="text-sm font-semibold">
+                            Remove from watchlist
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-xs tracking-[0.2em]">
+                        {isEntryRemoving ? <Loader /> : null}
+                      </span>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </DialogContent>
