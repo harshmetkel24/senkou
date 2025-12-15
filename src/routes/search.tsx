@@ -171,8 +171,16 @@ function SearchRoute() {
   const [activeCharacter, setActiveCharacter] =
     useState<CharacterCardData | null>(null);
   const [isCharacterPanelOpen, setIsCharacterPanelOpen] = useState(false);
-  const animeWatchlist = useWatchlistAdd({ kind: "ANIME" });
-  const mangaWatchlist = useWatchlistAdd({ kind: "MANGA" });
+  const animeWatchlist = useWatchlistAdd({
+    kind: "ANIME",
+    activeMediaId:
+      activeMedia?.kind === "ANIME" ? activeMedia.media.id : undefined,
+  });
+  const mangaWatchlist = useWatchlistAdd({
+    kind: "MANGA",
+    activeMediaId:
+      activeMedia?.kind === "MANGA" ? activeMedia.media.id : undefined,
+  });
   const normalizedQuery = q ?? "";
   const hasQuery = Boolean(normalizedQuery);
   const normalizedCategories = categories ?? [];

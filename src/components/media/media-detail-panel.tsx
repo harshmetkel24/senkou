@@ -82,7 +82,7 @@ export function MediaDetailPanel({
   open,
   onClose,
   onAddToWatchlist,
-  addLabel = "Add to watchlist",
+  addLabel,
   addIsLoading = false,
   addDisabled = false,
   addHelperText,
@@ -96,6 +96,9 @@ export function MediaDetailPanel({
   }, [media]);
 
   if (!media) return null;
+
+  const resolvedAddLabel =
+    addLabel ?? (addIsLoading ? "Saving..." : "Add to watchlist");
 
   return (
     <div
@@ -192,7 +195,7 @@ export function MediaDetailPanel({
                   onClick={() => onAddToWatchlist(media)}
                   disabled={addDisabled || addIsLoading}
                 >
-                  {addIsLoading ? "Saving..." : addLabel}
+                  {resolvedAddLabel}
                 </Button>
                 {addHelperText ? (
                   <p className="text-xs text-muted-foreground">

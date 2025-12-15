@@ -94,9 +94,12 @@ export const Route = createFileRoute("/manga")({
 function MangaRoute() {
   const navigate = useNavigate();
   const { data, isFetching } = useSuspenseQuery(trendingMangaQueryOptions());
-  const watchlistActions = useWatchlistAdd({ kind: "MANGA" });
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [activeMedia, setActiveMedia] = useState<MediaDetailData | undefined>();
+  const watchlistActions = useWatchlistAdd({
+    kind: "MANGA",
+    activeMediaId: activeMedia?.id,
+  });
   const [autoplayPlugin] = useState(() => Autoplay({ delay: 2000 }));
   const { q: searchQuery } = Route.useSearch();
   const normalizedSearchQuery = searchQuery ?? "";

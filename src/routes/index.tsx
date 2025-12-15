@@ -43,9 +43,12 @@ export const Route = createFileRoute("/")({
 function App() {
   const { user } = useAuth();
   const { data } = useSuspenseQuery(trendingAnimeQueryOptions());
-  const watchlistActions = useWatchlistAdd({ kind: "ANIME" });
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [activeMedia, setActiveMedia] = useState<MediaDetailData | undefined>();
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const watchlistActions = useWatchlistAdd({
+    kind: "ANIME",
+    activeMediaId: activeMedia?.id,
+  });
 
   const handleSelect = (media: MediaDetailData) => {
     setActiveMedia(media);

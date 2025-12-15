@@ -83,9 +83,12 @@ export const Route = createFileRoute("/anime")({
 function AnimeRoute() {
   const navigate = useNavigate();
   const { data, isFetching } = useSuspenseQuery(trendingAnimeQueryOptions());
-  const watchlistActions = useWatchlistAdd({ kind: "ANIME" });
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [activeMedia, setActiveMedia] = useState<MediaDetailData | undefined>();
+  const watchlistActions = useWatchlistAdd({
+    kind: "ANIME",
+    activeMediaId: activeMedia?.id,
+  });
   const [autoplayPlugin] = useState(() => Autoplay({ delay: 2000 }));
   const { q: searchQuery } = Route.useSearch();
   const normalizedSearchQuery = searchQuery ?? "";
