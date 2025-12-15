@@ -5,16 +5,26 @@ import {
 } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, RefreshCw, Search as SearchIcon } from "lucide-react";
-import { type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { z } from "zod";
 
-import { CharacterGrid, CharacterGridSkeleton } from "@/components/characters/character-grid";
+import type { CharacterCardData } from "@/components/characters/character-card";
+import { CharacterDetailPanel } from "@/components/characters/character-detail-panel";
+import {
+  CharacterGrid,
+  CharacterGridSkeleton,
+} from "@/components/characters/character-grid";
 import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
+import {
+  MediaDetailPanel,
+  type MediaDetailData,
+} from "@/components/media/media-detail-panel";
 import { MediaGrid, MediaGridSkeleton } from "@/components/media/media-grid";
 import { Button } from "@/components/ui/button";
 import { fetchAnimeSearch } from "@/data/queries/anime";
 import { fetchCharacterSearch } from "@/data/queries/characters";
 import { fetchMangaSearch } from "@/data/queries/manga";
+import { useWatchlistAdd } from "@/hooks/use-watchlist-add";
 import {
   getSearchCategoryLabel,
   SEARCH_CATEGORY_VALUES,
@@ -66,7 +76,7 @@ const characterOverviewQueryOptions = (query: string) => ({
 });
 
 function withLegacyCategorySupport(
-  search: Record<string, unknown> | null | undefined,
+  search: Record<string, unknown> | null | undefined
 ) {
   if (!search) return undefined;
   if ("categories" in search || !("category" in search)) return search;
@@ -83,7 +93,7 @@ function withLegacyCategorySupport(
 
 function formatCategoryList(
   categories: SearchCategory[],
-  options: { lowercase?: boolean } = {},
+  options: { lowercase?: boolean } = {}
 ) {
   const labels = categories.map((category) => {
     const label = getSearchCategoryLabel(category);
@@ -104,12 +114,13 @@ export const Route = createFileRoute("/search")({
     searchSchema.parse(withLegacyCategorySupport(search) ?? {}),
   loader: ({ context, search }) => {
     const resolvedSearch = searchSchema.parse(
-      withLegacyCategorySupport(search) ?? {},
+      withLegacyCategorySupport(search) ?? {}
     );
 
     if (!resolvedSearch.q) return null;
 
-    const categoriesToPreload: SearchCategory[] = resolvedSearch.categories.length
+    const categoriesToPreload: SearchCategory[] = resolvedSearch.categories
+      .length
       ? resolvedSearch.categories
       : [...SEARCH_CATEGORY_VALUES];
     const tasks: Array<Promise<unknown>> = [];
@@ -118,20 +129,20 @@ export const Route = createFileRoute("/search")({
       if (category === "anime") {
         tasks.push(
           context.queryClient.ensureQueryData(
-            animeOverviewQueryOptions(resolvedSearch.q),
-          ),
+            animeOverviewQueryOptions(resolvedSearch.q)
+          )
         );
       } else if (category === "manga") {
         tasks.push(
           context.queryClient.ensureQueryData(
-            mangaOverviewQueryOptions(resolvedSearch.q),
-          ),
+            mangaOverviewQueryOptions(resolvedSearch.q)
+          )
         );
       } else {
         tasks.push(
           context.queryClient.ensureQueryData(
-            characterOverviewQueryOptions(resolvedSearch.q),
-          ),
+            characterOverviewQueryOptions(resolvedSearch.q)
+          )
         );
       }
     }
@@ -151,6 +162,17 @@ export const Route = createFileRoute("/search")({
 function SearchRoute() {
   const { q, categories } = Route.useSearch();
   const navigate = useNavigate();
+  const [activeMedia, setActiveMedia] = useState<
+    | { kind: "ANIME"; media: MediaDetailData }
+    | { kind: "MANGA"; media: MediaDetailData }
+    | null
+  >(null);
+  const [isMediaPanelOpen, setIsMediaPanelOpen] = useState(false);
+  const [activeCharacter, setActiveCharacter] =
+    useState<CharacterCardData | null>(null);
+  const [isCharacterPanelOpen, setIsCharacterPanelOpen] = useState(false);
+  const animeWatchlist = useWatchlistAdd({ kind: "ANIME" });
+  const mangaWatchlist = useWatchlistAdd({ kind: "MANGA" });
   const normalizedQuery = q ?? "";
   const hasQuery = Boolean(normalizedQuery);
   const normalizedCategories = categories ?? [];
@@ -199,6 +221,31 @@ function SearchRoute() {
       search: () => ({}),
     });
 
+  const handleSelectAnime = (media: MediaDetailData) => {
+    setActiveMedia({ kind: "ANIME", media });
+    setIsMediaPanelOpen(true);
+  };
+
+  const handleSelectManga = (media: MediaDetailData) => {
+    setActiveMedia({ kind: "MANGA", media });
+    setIsMediaPanelOpen(true);
+  };
+
+  const handleSelectCharacter = (character: CharacterCardData) => {
+    setActiveCharacter(character);
+    setIsCharacterPanelOpen(true);
+  };
+
+  const closeMediaPanel = () => setIsMediaPanelOpen(false);
+  const closeCharacterPanel = () => setIsCharacterPanelOpen(false);
+
+  const activeWatchlist =
+    activeMedia?.kind === "ANIME"
+      ? animeWatchlist
+      : activeMedia?.kind === "MANGA"
+      ? mangaWatchlist
+      : undefined;
+
   const viewAnime = () =>
     navigate({
       to: "/anime",
@@ -220,105 +267,135 @@ function SearchRoute() {
   const characterTotal = charactersQuery.data?.pageInfo.total ?? 0;
 
   return (
-    <main className="relative min-h-screen px-4 py-10 md:px-10">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 opacity-50"
-      >
-        <div className="absolute left-16 top-10 h-80 w-80 rounded-full bg-primary/10 blur-[150px]" />
-        <div className="absolute bottom-10 right-8 h-64 w-64 rounded-full bg-rose-500/15 blur-[160px]" />
-      </div>
+    <>
+      <main className="relative min-h-screen px-4 py-10 md:px-10">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 opacity-50"
+        >
+          <div className="absolute left-16 top-10 h-80 w-80 rounded-full bg-primary/10 blur-[150px]" />
+          <div className="absolute bottom-10 right-8 h-64 w-64 rounded-full bg-rose-500/15 blur-[160px]" />
+        </div>
 
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
-        <header className="rounded-[36px] border border-border/60 bg-card/80 p-6 shadow-[0_45px_120px_rgba(0,0,0,0.55)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-            Cinematic discovery
-          </p>
-          <h1 className="mt-3 text-3xl font-bold">{headerTitle}</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {headerDescription}
-          </p>
-          {hasQuery ? (
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Button type="button" variant="outline" onClick={handleClear}>
-                Clear query
-              </Button>
-            </div>
-          ) : null}
-        </header>
-
-        {hasQuery ? (
-          <div className="flex flex-col gap-8">
-            {showAnimeScope ? (
-              <CategorySection
-                label="Anime"
-                title="Animated epics"
-                description={
-                  animeTotal
-                    ? `${animeTotal} titles match this energy — here are the top ones.`
-                    : "We will surface the closest anime matches once AniList responds."
-                }
-                queryResult={animeQuery}
-                skeleton={<MediaGridSkeleton />}
-                emptyTitle="No anime matched this search"
-                emptyDescription="Try a different spelling or pivot to a new format."
-                onViewAll={viewAnime}
-                viewAllLabel="View all anime"
-                render={(items) => <MediaGrid items={items} />}
-              />
-            ) : null}
-
-            {showMangaScope ? (
-              <CategorySection
-                label="Manga"
-                title="Printed legends"
-                description={
-                  mangaTotal
-                    ? `${mangaTotal} manga showed up for this query.`
-                    : "We'll pull in manga hits the moment AniList shares them."
-                }
-                queryResult={mangaQuery}
-                skeleton={<MediaGridSkeleton />}
-                emptyTitle="No manga surfaced"
-                emptyDescription="Tweak the query or head straight to the manga route for deeper filters."
-                onViewAll={viewManga}
-                viewAllLabel="View all manga"
-                render={(items) => <MediaGrid items={items} />}
-              />
-            ) : null}
-
-            {showCharacterScope ? (
-              <CategorySection
-                label="Characters"
-                title="Icons & personas"
-                description={
-                  characterTotal
-                    ? `${characterTotal} character profiles fit this vibe.`
-                    : "AniList is searching character bios for matching names."
-                }
-                queryResult={charactersQuery}
-                skeleton={<CharacterGridSkeleton />}
-                emptyTitle="Nobody matched"
-                emptyDescription="Double-check spellings or open the characters view for advanced filters."
-                onViewAll={viewCharacters}
-                viewAllLabel="View all characters"
-                render={(items) => <CharacterGrid items={items} />}
-              />
-            ) : null}
-          </div>
-        ) : (
-          <div className="rounded-[36px] border border-dashed border-border/60 bg-background/30 p-10 text-center">
-            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-border/60 bg-card/60">
-              <SearchIcon className="h-10 w-10 text-muted-foreground" />
-            </div>
-            <h2 className="mt-6 text-2xl font-semibold">Start typing to explore everything</h2>
-            <p className="mt-2 text-muted-foreground">
-              Pick a category chip on the home hero search to lock the scope or leave it open to query all content types here.
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
+          <header className="rounded-[36px] border border-border/60 bg-card/80 p-6 shadow-[0_45px_120px_rgba(0,0,0,0.55)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+              Cinematic discovery
             </p>
-          </div>
-        )}
-      </div>
-    </main>
+            <h1 className="mt-3 text-3xl font-bold">{headerTitle}</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {headerDescription}
+            </p>
+            {hasQuery ? (
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Button type="button" variant="outline" onClick={handleClear}>
+                  Clear query
+                </Button>
+              </div>
+            ) : null}
+          </header>
+
+          {hasQuery ? (
+            <div className="flex flex-col gap-8">
+              {showAnimeScope ? (
+                <CategorySection
+                  label="Anime"
+                  title="Animated epics"
+                  description={
+                    animeTotal
+                      ? `${animeTotal} titles match this energy — here are the top ones.`
+                      : "We will surface the closest anime matches once AniList responds."
+                  }
+                  queryResult={animeQuery}
+                  skeleton={<MediaGridSkeleton />}
+                  emptyTitle="No anime matched this search"
+                  emptyDescription="Try a different spelling or pivot to a new format."
+                  onViewAll={viewAnime}
+                  viewAllLabel="View all anime"
+                  render={(items) => (
+                    <MediaGrid items={items} onSelect={handleSelectAnime} />
+                  )}
+                />
+              ) : null}
+
+              {showMangaScope ? (
+                <CategorySection
+                  label="Manga"
+                  title="Printed legends"
+                  description={
+                    mangaTotal
+                      ? `${mangaTotal} manga showed up for this query.`
+                      : "We'll pull in manga hits the moment AniList shares them."
+                  }
+                  queryResult={mangaQuery}
+                  skeleton={<MediaGridSkeleton />}
+                  emptyTitle="No manga surfaced"
+                  emptyDescription="Tweak the query or head straight to the manga route for deeper filters."
+                  onViewAll={viewManga}
+                  viewAllLabel="View all manga"
+                  render={(items) => (
+                    <MediaGrid items={items} onSelect={handleSelectManga} />
+                  )}
+                />
+              ) : null}
+
+              {showCharacterScope ? (
+                <CategorySection
+                  label="Characters"
+                  title="Icons & personas"
+                  description={
+                    characterTotal
+                      ? `${characterTotal} character profiles fit this vibe.`
+                      : "AniList is searching character bios for matching names."
+                  }
+                  queryResult={charactersQuery}
+                  skeleton={<CharacterGridSkeleton />}
+                  emptyTitle="Nobody matched"
+                  emptyDescription="Double-check spellings or open the characters view for advanced filters."
+                  onViewAll={viewCharacters}
+                  viewAllLabel="View all characters"
+                  render={(items) => (
+                    <CharacterGrid
+                      items={items}
+                      onSelect={handleSelectCharacter}
+                    />
+                  )}
+                />
+              ) : null}
+            </div>
+          ) : (
+            <div className="rounded-[36px] border border-dashed border-border/60 bg-background/30 p-10 text-center">
+              <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-border/60 bg-card/60">
+                <SearchIcon className="h-10 w-10 text-muted-foreground" />
+              </div>
+              <h2 className="mt-6 text-2xl font-semibold">
+                Start typing to explore everything
+              </h2>
+              <p className="mt-2 text-muted-foreground">
+                Pick a category chip on the home hero search to lock the scope
+                or leave it open to query all content types here.
+              </p>
+            </div>
+          )}
+        </div>
+      </main>
+
+      <MediaDetailPanel
+        media={activeMedia?.media}
+        open={isMediaPanelOpen}
+        onClose={closeMediaPanel}
+        onAddToWatchlist={activeWatchlist?.onAddToWatchlist}
+        addLabel={activeWatchlist?.addLabel}
+        addHelperText={activeWatchlist?.addHelperText}
+        addIsLoading={activeWatchlist?.addIsLoading}
+      />
+
+      <CharacterDetailPanel
+        character={activeCharacter ?? undefined}
+        open={isCharacterPanelOpen}
+        onClose={closeCharacterPanel}
+      />
+    </>
   );
 }
 
@@ -400,7 +477,9 @@ function CategorySection({
               </div>
             </div>
             <div className="flex gap-3">
-              <Button type="button" onClick={() => refetch()}>Retry</Button>
+              <Button type="button" onClick={() => refetch()}>
+                Retry
+              </Button>
               <Button type="button" variant="outline" onClick={onViewAll}>
                 Go to {label}
               </Button>
@@ -415,7 +494,9 @@ function CategorySection({
             <SearchIcon className="h-6 w-6 text-muted-foreground" />
           </div>
           <h4 className="mt-4 text-xl font-semibold">{emptyTitle}</h4>
-          <p className="mt-2 text-sm text-muted-foreground">{emptyDescription}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {emptyDescription}
+          </p>
         </div>
       ) : null}
 
