@@ -266,7 +266,7 @@ export function SearchBar({
             isHero
               ? "py-6 text-3xl rounded-4xl border-2 shadow-lg focus:ring-4"
               : "py-6 text-base rounded-2xl border focus:ring-2",
-            "pr-[17rem] border-border bg-card/95 text-foreground placeholder-muted-foreground focus:ring-primary/50"
+            "border-border bg-card/95 text-foreground placeholder-muted-foreground focus:ring-primary/50"
           )}
         />
 
