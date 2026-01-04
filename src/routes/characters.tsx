@@ -3,10 +3,10 @@ import {
   useQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
-import { Heart, RefreshCw, Sparkles, Star } from "lucide-react";
 import Autoplay from "embla-carousel-autoplay";
+import { Heart, RefreshCw, Sparkles, Star } from "lucide-react";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
@@ -18,6 +18,7 @@ import {
 } from "@/components/characters/character-grid";
 import { PendingComponent } from "@/components/helpers/PendingComponent";
 import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
+import { SearchPlusUltraCallout } from "@/components/search/search-plus-ultra-callout";
 import { SearchResultsPanel } from "@/components/search/search-results-panel";
 import { Button } from "@/components/ui/button";
 import {
@@ -68,8 +69,8 @@ export const Route = createFileRoute("/characters")({
     if (resolvedSearch.q) {
       tasks.push(
         context.queryClient.ensureQueryData(
-          searchCharacterQueryOptions(resolvedSearch.q),
-        ),
+          searchCharacterQueryOptions(resolvedSearch.q)
+        )
       );
     }
 
@@ -89,7 +90,7 @@ export const Route = createFileRoute("/characters")({
 function CharactersRoute() {
   const navigate = useNavigate();
   const { data, isFetching } = useSuspenseQuery(
-    trendingCharactersQueryOptions(),
+    trendingCharactersQueryOptions()
   );
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [activeCharacter, setActiveCharacter] = useState<
@@ -99,6 +100,13 @@ function CharactersRoute() {
 
   const { q: searchQuery } = Route.useSearch();
   const normalizedSearchQuery = searchQuery ?? "";
+  const plusUltraSearch = {
+    to: "/search",
+    search: () => ({
+      q: normalizedSearchQuery || undefined,
+      categories: "characters",
+    }),
+  };
   const shouldShowSearch = Boolean(searchQuery);
   const {
     data: searchData,
@@ -134,9 +142,9 @@ function CharactersRoute() {
         searchResults,
         normalizedSearchQuery,
         (item) => [item.name, item.nativeName],
-        { limit: 6 },
+        { limit: 6 }
       ),
-    [searchResults, normalizedSearchQuery],
+    [searchResults, normalizedSearchQuery]
   );
 
   const searchDescription = searchTotal
@@ -173,6 +181,15 @@ function CharactersRoute() {
       </div>
 
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-12">
+        {!shouldShowSearch ? (
+          <SearchPlusUltraCallout
+            action={
+              <Button asChild className="rounded-full">
+                <Link {...plusUltraSearch}>Go for Characters</Link>
+              </Button>
+            }
+          />
+        ) : null}
         {shouldShowSearch ? (
           <SearchResultsPanel
             heading={`Character hits for "${normalizedSearchQuery}"`}
@@ -188,6 +205,11 @@ function CharactersRoute() {
             emptyDescription="Try alternate spellings or clear the filter to browse trending favorites."
             onRetry={() => refetchSearch()}
             onClear={handleClearSearch}
+            actions={
+              <Button asChild variant="outline" className="rounded-2xl">
+                <Link {...plusUltraSearch}>Search Plus Ultra</Link>
+              </Button>
+            }
             showResults={showSearchResults}
             results={curatedResults}
             renderGrid={(items) => (

@@ -1,4 +1,5 @@
 import { fetchAniList } from "@/lib/anilist-client";
+import type { SearchMediaFormat } from "@/lib/constants/search";
 
 import { sanitizeDescription, sanitizeSearchTerm } from "./utils";
 
@@ -180,7 +181,12 @@ export const fetchTrendingManga = async (
 };
 
 const SEARCH_MANGA_QUERY = /* GraphQL */ `
-  query SearchManga($page: Int!, $perPage: Int!, $search: String!) {
+  query SearchManga(
+    $page: Int!
+    $perPage: Int!
+    $search: String!
+    $format: MediaFormat
+  ) {
     Page(page: $page, perPage: $perPage) {
       pageInfo {
         total
@@ -192,6 +198,7 @@ const SEARCH_MANGA_QUERY = /* GraphQL */ `
       media(
         type: MANGA
         search: $search
+        format: $format
         sort: [SEARCH_MATCH, POPULARITY_DESC]
         status_in: [RELEASING, FINISHED]
         isAdult: false
@@ -232,10 +239,15 @@ const SEARCH_MANGA_QUERY = /* GraphQL */ `
   }
 `;
 
+type MangaSearchFilters = {
+  format?: SearchMediaFormat;
+};
+
 export const fetchMangaSearch = async (
   searchTerm: string,
   page = 1,
   perPage = 20,
+  filters: MangaSearchFilters = {},
 ): Promise<MangaListPage> => {
   const sanitizedSearch = sanitizeSearchTerm(searchTerm);
 
@@ -254,7 +266,12 @@ export const fetchMangaSearch = async (
 
   const data = await fetchAniList<MangaPageQueryResult>({
     query: SEARCH_MANGA_QUERY,
-    variables: { page, perPage, search: sanitizedSearch },
+    variables: {
+      page,
+      perPage,
+      search: sanitizedSearch,
+      format: filters.format,
+    },
   });
 
   return {

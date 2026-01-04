@@ -3,8 +3,9 @@ import {
   useQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
+import Autoplay from "embla-carousel-autoplay";
 import {
   BookOpen,
   Layers,
@@ -13,7 +14,6 @@ import {
   ScrollText,
   Sparkles,
 } from "lucide-react";
-import Autoplay from "embla-carousel-autoplay";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
@@ -25,6 +25,7 @@ import {
   type MediaDetailData,
 } from "@/components/media/media-detail-panel";
 import { MediaGrid, MediaGridSkeleton } from "@/components/media/media-grid";
+import { SearchPlusUltraCallout } from "@/components/search/search-plus-ultra-callout";
 import { SearchResultsPanel } from "@/components/search/search-results-panel";
 import { Button } from "@/components/ui/button";
 import {
@@ -73,8 +74,8 @@ export const Route = createFileRoute("/manga")({
     if (resolvedSearch.q) {
       tasks.push(
         context.queryClient.ensureQueryData(
-          searchMangaQueryOptions(resolvedSearch.q),
-        ),
+          searchMangaQueryOptions(resolvedSearch.q)
+        )
       );
     }
 
@@ -103,6 +104,13 @@ function MangaRoute() {
   const [autoplayPlugin] = useState(() => Autoplay({ delay: 2000 }));
   const { q: searchQuery } = Route.useSearch();
   const normalizedSearchQuery = searchQuery ?? "";
+  const plusUltraSearch = {
+    to: "/search",
+    search: () => ({
+      q: normalizedSearchQuery || undefined,
+      categories: "manga",
+    }),
+  };
 
   const shouldShowSearch = Boolean(searchQuery);
   const {
@@ -139,9 +147,9 @@ function MangaRoute() {
         searchResults,
         normalizedSearchQuery,
         (item) => [item.title],
-        { limit: 6 },
+        { limit: 6 }
       ),
-    [searchResults, normalizedSearchQuery],
+    [searchResults, normalizedSearchQuery]
   );
 
   const searchDescription = searchTotal
@@ -178,6 +186,15 @@ function MangaRoute() {
       </div>
 
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-12">
+        {!shouldShowSearch ? (
+          <SearchPlusUltraCallout
+            action={
+              <Button asChild className="rounded-full">
+                <Link {...plusUltraSearch}>Go for Manga</Link>
+              </Button>
+            }
+          />
+        ) : null}
         {shouldShowSearch ? (
           <SearchResultsPanel
             heading={`Library results for "${normalizedSearchQuery}"`}
@@ -193,6 +210,11 @@ function MangaRoute() {
             emptyDescription="Adjust romanization, try author names, or clear the filter to go back to charts."
             onRetry={() => refetchSearch()}
             onClear={handleClearSearch}
+            actions={
+              <Button asChild variant="outline" className="rounded-2xl">
+                <Link {...plusUltraSearch}>Search Plus Ultra</Link>
+              </Button>
+            }
             showResults={showSearchResults}
             results={curatedResults}
             renderGrid={(items) => (
