@@ -24,14 +24,23 @@ import { cn } from "@/lib/utils";
 interface SearchBarProps {
   variant?: "header" | "hero";
   onQueryChange?: (value: string) => void;
+  placeholderSuggestions?: string[];
 }
 
 const AUTOCOMPLETE_MIN_QUERY_LENGTH = 4;
 const AUTOCOMPLETE_DEBOUNCE_MS = 350;
+const HERO_PLACEHOLDER_ROTATE_MS = 2800;
+const HERO_INPUT_TEXT_CLASS = "text-xl";
+const HERO_PLACEHOLDER_FALLBACKS = [
+  "Search One Piece...",
+  "Search Frieren...",
+  "Search Gojo Satoru...",
+];
 
 export function SearchBar({
   variant = "header",
   onQueryChange,
+  placeholderSuggestions,
 }: SearchBarProps) {
   const navigate = useNavigate();
   type RouterSearchState = {
@@ -81,8 +90,10 @@ export function SearchBar({
   const showCategoryChips =
     variant === "hero" || searchTarget === "/search" ? true : false;
   const isHero = variant === "hero";
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(() =>
     searchQuery.trim()
   );
@@ -150,6 +161,26 @@ export function SearchBar({
       : "AniList did not return suggestions. Try typing a different keyword.";
   const normalizedAutocompleteQuery =
     normalizedDebouncedQuery || searchQuery.trim();
+  const heroPlaceholderOptions = useMemo(() => {
+    if (!isHero) return HERO_PLACEHOLDER_FALLBACKS;
+    const trimmed = (placeholderSuggestions ?? [])
+      .map((value) => value.trim())
+      .filter(Boolean);
+    const unique = Array.from(new Set(trimmed));
+    return unique.length > 0 ? unique : HERO_PLACEHOLDER_FALLBACKS;
+  }, [isHero, placeholderSuggestions]);
+  const heroPlaceholderKey = heroPlaceholderOptions.join("|");
+  const activeHeroPlaceholder =
+    heroPlaceholderOptions[0] ?? HERO_PLACEHOLDER_FALLBACKS[0];
+  const hasHeroQuery = searchQuery.trim().length > 0;
+  const showAnimatedPlaceholder =
+    isHero &&
+    !isInputFocused &&
+    !hasHeroQuery &&
+    heroPlaceholderOptions.length > 0 &&
+    !prefersReducedMotion;
+  const shouldRotatePlaceholder =
+    showAnimatedPlaceholder && heroPlaceholderOptions.length > 1;
 
   useEffect(() => {
     setSearchQuery((current) =>
@@ -178,6 +209,23 @@ export function SearchBar({
       debouncedUpdater.cancel();
     };
   }, [searchQuery, debouncedUpdater]);
+
+  useEffect(() => {
+    setPlaceholderIndex(0);
+  }, [heroPlaceholderKey]);
+
+  useEffect(() => {
+    if (!shouldRotatePlaceholder) return;
+    const interval = window.setInterval(() => {
+      setPlaceholderIndex((current) =>
+        heroPlaceholderOptions.length === 0
+          ? 0
+          : (current + 1) % heroPlaceholderOptions.length
+      );
+    }, HERO_PLACEHOLDER_ROTATE_MS);
+
+    return () => window.clearInterval(interval);
+  }, [heroPlaceholderOptions.length, shouldRotatePlaceholder]);
 
   const handleSuggestionSelect = (suggestion: SearchAutocompleteItem) => {
     const trimmedSuggestion = suggestion.title.trim();
@@ -243,9 +291,12 @@ export function SearchBar({
     });
   };
 
-  const placeholderText = isSearchRoute
+  const defaultPlaceholderText = isSearchRoute
     ? "Type and press Enter to search (Cmd/Ctrl+K to focus)"
-    : "Type 4 or more letters to see suggestions (Cmd/Ctrl+K to search)";
+    : `Type ${AUTOCOMPLETE_MIN_QUERY_LENGTH} or more letters to see suggestions (Cmd/Ctrl+K to search)`;
+  const heroPlaceholderText =
+    heroPlaceholderOptions[placeholderIndex] ?? activeHeroPlaceholder;
+  const placeholderText = isHero ? heroPlaceholderText : defaultPlaceholderText;
 
   return (
     <form onSubmit={handleSearch} className="w-full max-w-2xl">
@@ -260,6 +311,7 @@ export function SearchBar({
           ref={focusInputRefCallback}
           type="text"
           placeholder={placeholderText}
+          aria-label="Search"
           value={searchQuery}
           onChange={(e) => {
             setSearchQuery(e.target.value);
@@ -270,11 +322,28 @@ export function SearchBar({
           className={cn(
             "relative z-10 px-8 rounded-4xl",
             isHero
-              ? "py-6 text-3xl border-2 shadow-lg focus:ring-4"
+              ? cn(
+                  "py-6 border-2 shadow-lg focus:ring-4",
+                  HERO_INPUT_TEXT_CLASS
+                )
               : "py-6 text-base border focus:ring-2",
-            "border-border bg-card/95 text-foreground placeholder-muted-foreground focus:ring-primary/50"
+            "border-border bg-card/95 text-foreground placeholder-muted-foreground focus:ring-primary/50",
+            showAnimatedPlaceholder && "placeholder:text-transparent"
           )}
         />
+        {isHero && showAnimatedPlaceholder ? (
+          <span
+            key={`${placeholderIndex}-${heroPlaceholderText}`}
+            aria-hidden
+            className={cn(
+              "pointer-events-none absolute inset-y-0 left-0 right-16 z-20 flex items-center px-8 text-muted-foreground/80 truncate",
+              "animate-placeholder-swap motion-reduce:animate-none",
+              isHero ? HERO_INPUT_TEXT_CLASS : "text-base"
+            )}
+          >
+            {heroPlaceholderText}
+          </span>
+        ) : null}
 
         <Button
           type="submit"
@@ -496,4 +565,25 @@ function encodeCategoriesParam(
 ): SearchCategory[] | SearchCategory | undefined {
   if (categories.length === 0) return undefined;
   return categories.length === 1 ? categories[0] : categories;
+}
+
+function usePrefersReducedMotion() {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setPrefersReducedMotion(media.matches);
+    update();
+
+    if (typeof media.addEventListener === "function") {
+      media.addEventListener("change", update);
+      return () => media.removeEventListener("change", update);
+    }
+
+    media.addListener(update);
+    return () => media.removeListener(update);
+  }, []);
+
+  return prefersReducedMotion;
 }

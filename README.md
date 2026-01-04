@@ -36,11 +36,17 @@ Senkou (線光) is an IMDB-style experience for anime, manga, and characters. St
 
 ## What you'll find today
 
-- Home hero with `⌘/Ctrl+K` quick search, a subtle focus glow on the search bar, trending grid, and a watchlist shelf for signed-in viewers (persisted via Neon + Drizzle).
+- Home hero with `⌘/Ctrl+K` quick search, a subtle focus glow, rotating trending placeholder prompts, a trending grid, and a watchlist shelf for signed-in viewers (persisted via Neon + Drizzle).
 - Anime, Manga, and Characters routes that preload AniList trending data in loaders, hydrate client search from URL params, and reuse cached list data inside detail panels with add-to-watchlist actions.
 - A universal `/search` route with Search Plus Ultra scope + format/season/year controls, category chips, shareable URL state, empty/error handling, and retry/backoff messaging when AniList hiccups.
 - Authentication preview: email/password registration + login with bcrypt hashes stored in Postgres, cookie sessions driven by `SESSION_SECRET`, and a “remember me” path ahead of the Stage 2 OAuth swap.
 - Keyboard and UX polish: skeleton grids, lazy media, spotlight carousels, and hotkeys (`⌘/Ctrl+K` to focus search, `⌘/Ctrl+S` to toggle the sidebar, Shift+? for help).
+
+## Hero Search Placeholder Rotation
+
+- The home hero search input cycles through trending anime titles when the field is empty and unfocused.
+- Suggestions are seeded with One Piece, Frieren, and Gojo Satoru and then matched against the current trending anime list; the seeds are used as fallbacks if nothing matches.
+- The animation pauses on focus/typing and honors `prefers-reduced-motion`.
 
 ## Roadmap
 

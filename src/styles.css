@@ -239,6 +239,22 @@ code {
   }
 }
 
+@keyframes placeholder-swap {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  12%,
+  88% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
 @layer utilities {
   .starfield-pan {
     animation: starfield-pan 90s linear infinite alternate;
@@ -252,5 +268,9 @@ code {
 
   .animate-fade-in {
     animation: fade-in 1s ease-out;
+  }
+
+  .animate-placeholder-swap {
+    animation: placeholder-swap 2800ms ease-in-out both;
   }
 }
