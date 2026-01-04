@@ -130,15 +130,12 @@ export function WatchlistShelf() {
   const closeDialog = () => setSelectedEntryId(null);
 
   return (
-    <section className="mx-auto w-full max-w-6xl p-8">
+    <section className="mx-auto w-full max-w-6xl px-8 mb-6">
       <div className="mb-4 flex flex-col gap-2 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
           Welcome back{user.displayName ? `, ${user.displayName}` : ""}
         </p>
         <h2 className="text-2xl font-bold">Your Watchlist</h2>
-        <p className="text-sm text-muted-foreground">
-          We&apos;ll surface your recent saves here—perfect for quick catch-ups.
-        </p>
       </div>
 
       {watchlistQuery.isError ? (
@@ -234,7 +231,7 @@ export function WatchlistShelfSkeleton({
   displayName?: string;
 }) {
   return (
-    <section className="mx-auto w-full max-w-6xl cursor-not-allowed">
+    <section className="mx-auto w-full max-w-6xl cursor-not-allowed mb-6">
       <div className="mb-4 flex flex-col gap-2 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
           Welcome back{displayName ? `, ${displayName}` : ""}
