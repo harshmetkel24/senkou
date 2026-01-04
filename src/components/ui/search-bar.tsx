@@ -249,7 +249,13 @@ export function SearchBar({
 
   return (
     <form onSubmit={handleSearch} className="w-full max-w-2xl">
-      <div className="relative">
+      <div className={cn("relative", isHero && "group")}>
+        {isHero ? (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -inset-1 rounded-4xl bg-primary/10 opacity-0 blur-xl transition-opacity duration-300 group-focus-within:opacity-70 group-focus-within:animate-[pulse_3s_ease-in-out_infinite] motion-reduce:animate-none"
+          />
+        ) : null}
         <Input
           ref={focusInputRefCallback}
           type="text"
@@ -262,10 +268,10 @@ export function SearchBar({
           onFocus={() => setIsInputFocused(true)}
           onBlur={() => setIsInputFocused(false)}
           className={cn(
-            "px-8",
+            "relative z-10 px-8 rounded-4xl",
             isHero
-              ? "py-6 text-3xl rounded-4xl border-2 shadow-lg focus:ring-4"
-              : "py-6 text-base rounded-2xl border focus:ring-2",
+              ? "py-6 text-3xl border-2 shadow-lg focus:ring-4"
+              : "py-6 text-base border focus:ring-2",
             "border-border bg-card/95 text-foreground placeholder-muted-foreground focus:ring-primary/50"
           )}
         />
@@ -274,7 +280,7 @@ export function SearchBar({
           type="submit"
           size="icon"
           variant="outline"
-          className={`absolute top-1/2 -translate-y-1/2 transform px-2  ${
+          className={`absolute top-1/2 -translate-y-1/2 transform px-2 z-10 ${
             isHero ? "right-4 py-2" : "right-2 py-1 text-sm"
           } rounded-2xl`}
         >
