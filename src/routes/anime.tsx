@@ -1,8 +1,12 @@
-import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  keepPreviousData,
+  useQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
-import { Activity, Film, RefreshCw, Sparkles, Wand2 } from "lucide-react";
 import Autoplay from "embla-carousel-autoplay";
+import { Activity, Film, RefreshCw, Sparkles, Wand2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
@@ -14,6 +18,7 @@ import {
   type MediaDetailData,
 } from "@/components/media/media-detail-panel";
 import { MediaGrid, MediaGridSkeleton } from "@/components/media/media-grid";
+import { SearchPlusUltraCallout } from "@/components/search/search-plus-ultra-callout";
 import { SearchResultsPanel } from "@/components/search/search-results-panel";
 import { Button } from "@/components/ui/button";
 import {
@@ -92,6 +97,13 @@ function AnimeRoute() {
   const [autoplayPlugin] = useState(() => Autoplay({ delay: 2000 }));
   const { q: searchQuery } = Route.useSearch();
   const normalizedSearchQuery = searchQuery ?? "";
+  const plusUltraSearch = {
+    to: "/search",
+    search: () => ({
+      q: normalizedSearchQuery || undefined,
+      categories: "anime",
+    }),
+  };
 
   const shouldShowSearch = Boolean(searchQuery);
   const {
@@ -172,6 +184,15 @@ function AnimeRoute() {
       </div>
 
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-12">
+        {!shouldShowSearch ? (
+          <SearchPlusUltraCallout
+            action={
+              <Button asChild className="rounded-full">
+                <Link {...plusUltraSearch}>Go for Anime</Link>
+              </Button>
+            }
+          />
+        ) : null}
         {shouldShowSearch ? (
           <SearchResultsPanel
             heading={`Matches for "${normalizedSearchQuery}"`}
@@ -187,6 +208,11 @@ function AnimeRoute() {
             emptyDescription="Try using a different spelling or jump back to the trending list."
             onRetry={() => refetchSearch()}
             onClear={handleClearSearch}
+            actions={
+              <Button asChild variant="outline" className="rounded-2xl">
+                <Link {...plusUltraSearch}>Search Plus Ultra</Link>
+              </Button>
+            }
             showResults={showSearchResults}
             results={curatedResults}
             renderGrid={(items) => (

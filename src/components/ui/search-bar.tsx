@@ -76,11 +76,12 @@ export function SearchBar({
     return "/anime" as const;
   };
 
+  const isSearchRoute = locationState.pathname.startsWith("/search");
   const searchTarget = resolveSearchRoute(locationState.pathname);
   const showCategoryChips =
     variant === "hero" || searchTarget === "/search" ? true : false;
   const isHero = variant === "hero";
-  const showInlineCategoryChips = showCategoryChips && !isHero;
+
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(() =>
     searchQuery.trim()
@@ -104,7 +105,9 @@ export function SearchBar({
     : searchTarget === "/characters"
     ? "characters"
     : "anime";
+  const autocompleteEnabled = !isSearchRoute;
   const shouldFetchAutocomplete =
+    autocompleteEnabled &&
     normalizedDebouncedQuery.length >= AUTOCOMPLETE_MIN_QUERY_LENGTH;
 
   const {
@@ -127,13 +130,15 @@ export function SearchBar({
 
   const autocompleteGroups = autocompleteData?.groups ?? [];
   const hasAutocompleteResults = autocompleteGroups.length > 0;
-  const showAutocomplete = isInputFocused && shouldFetchAutocomplete;
+  const showAutocomplete =
+    autocompleteEnabled && isInputFocused && shouldFetchAutocomplete;
   const showAutocompleteEmptyState =
     showAutocomplete &&
     !isFetchingAutocomplete &&
     !isAutocompleteError &&
     !hasAutocompleteResults;
   const shouldRenderAutocompletePanel =
+    autocompleteEnabled &&
     showAutocomplete &&
     (isFetchingAutocomplete ||
       isAutocompleteError ||
@@ -238,12 +243,9 @@ export function SearchBar({
     });
   };
 
-  const inputPaddingRight = useMemo(() => {
-    if (!showInlineCategoryChips) {
-      return isHero ? "pr-36" : "pr-24";
-    }
-    return "pr-[17rem]";
-  }, [isHero, showInlineCategoryChips]);
+  const placeholderText = isSearchRoute
+    ? "Type and press Enter to search (Cmd/Ctrl+K to focus)"
+    : "Type 4 or more letters to see suggestions (Cmd/Ctrl+K to search)";
 
   return (
     <form onSubmit={handleSearch} className="w-full max-w-2xl">
@@ -251,7 +253,7 @@ export function SearchBar({
         <Input
           ref={focusInputRefCallback}
           type="text"
-          placeholder="Type 4 or more letter to see suggestions (⌘ + K to search)"
+          placeholder={placeholderText}
           value={searchQuery}
           onChange={(e) => {
             setSearchQuery(e.target.value);
@@ -264,27 +266,9 @@ export function SearchBar({
             isHero
               ? "py-6 text-3xl rounded-4xl border-2 shadow-lg focus:ring-4"
               : "py-6 text-base rounded-2xl border focus:ring-2",
-            inputPaddingRight,
             "border-border bg-card/95 text-foreground placeholder-muted-foreground focus:ring-primary/50"
           )}
         />
-        {showInlineCategoryChips ? (
-          <div
-            className={cn(
-              "absolute inset-y-2 flex items-center",
-              isHero ? "right-32" : "right-24"
-            )}
-          >
-            <div className="pointer-events-auto rounded-full border border-border/60 bg-background/90 px-2 py-1 shadow-sm">
-              <CategoryChipGroup
-                selected={selectedCategories}
-                onChange={setSelectedCategories}
-                variant="inline"
-                className="flex-nowrap"
-              />
-            </div>
-          </div>
-        ) : null}
 
         <Button
           type="submit"

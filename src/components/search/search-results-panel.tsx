@@ -24,6 +24,7 @@ interface SearchResultsPanelProps<T> {
   emptyDescription: string;
   onRetry: () => void;
   onClear: () => void;
+  actions?: ReactNode;
   showResults: boolean;
   results: T[];
   renderGrid: (items: T[]) => ReactNode;
@@ -44,6 +45,7 @@ export function SearchResultsPanel<T>({
   emptyDescription,
   onRetry,
   onClear,
+  actions,
   showResults,
   results,
   renderGrid,
@@ -66,6 +68,7 @@ export function SearchResultsPanel<T>({
               Updating
             </span>
           ) : null}
+          {actions}
           <Button
             type="button"
             variant="ghost"

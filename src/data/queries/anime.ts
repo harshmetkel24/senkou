@@ -1,4 +1,5 @@
 import { fetchAniList } from "@/lib/anilist-client";
+import type { SearchMediaFormat, SearchSeason } from "@/lib/constants/search";
 
 import { sanitizeDescription, sanitizeSearchTerm } from "./utils";
 
@@ -163,7 +164,14 @@ export const fetchTrendingAnime = async (
 };
 
 const SEARCH_ANIME_QUERY = /* GraphQL */ `
-  query SearchAnime($page: Int!, $perPage: Int!, $search: String!) {
+  query SearchAnime(
+    $page: Int!
+    $perPage: Int!
+    $search: String!
+    $format: MediaFormat
+    $season: MediaSeason
+    $seasonYear: Int
+  ) {
     Page(page: $page, perPage: $perPage) {
       pageInfo {
         total
@@ -175,6 +183,9 @@ const SEARCH_ANIME_QUERY = /* GraphQL */ `
       media(
         type: ANIME
         search: $search
+        format: $format
+        season: $season
+        seasonYear: $seasonYear
         sort: [SEARCH_MATCH, POPULARITY_DESC]
         status_in: [RELEASING, FINISHED]
         isAdult: false
@@ -212,10 +223,17 @@ const SEARCH_ANIME_QUERY = /* GraphQL */ `
   }
 `;
 
+type AnimeSearchFilters = {
+  format?: SearchMediaFormat;
+  season?: SearchSeason;
+  seasonYear?: number;
+};
+
 export const fetchAnimeSearch = async (
   searchTerm: string,
   page = 1,
   perPage = 20,
+  filters: AnimeSearchFilters = {},
 ): Promise<AnimeListPage> => {
   const sanitizedSearch = sanitizeSearchTerm(searchTerm);
 
@@ -234,7 +252,14 @@ export const fetchAnimeSearch = async (
 
   const data = await fetchAniList<AnimePageQueryResult>({
     query: SEARCH_ANIME_QUERY,
-    variables: { page, perPage, search: sanitizedSearch },
+    variables: {
+      page,
+      perPage,
+      search: sanitizedSearch,
+      format: filters.format,
+      season: filters.season,
+      seasonYear: filters.seasonYear,
+    },
   });
 
   return {

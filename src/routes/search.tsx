@@ -20,6 +20,7 @@ import {
   type MediaDetailData,
 } from "@/components/media/media-detail-panel";
 import { MediaGrid, MediaGridSkeleton } from "@/components/media/media-grid";
+import { SearchPlusUltraPanel } from "@/components/search/search-plus-ultra";
 import { Button } from "@/components/ui/button";
 import { fetchAnimeSearch } from "@/data/queries/anime";
 import { fetchCharacterSearch } from "@/data/queries/characters";
@@ -27,12 +28,24 @@ import { fetchMangaSearch } from "@/data/queries/manga";
 import { useWatchlistAdd } from "@/hooks/use-watchlist-add";
 import {
   getSearchCategoryLabel,
+  SEARCH_ANIME_FORMAT_VALUES,
   SEARCH_CATEGORY_VALUES,
+  SEARCH_MANGA_FORMAT_VALUES,
+  SEARCH_MEDIA_FORMAT_VALUES,
+  SEARCH_SEASON_VALUES,
   sortSearchCategories,
   type SearchCategory,
+  type SearchMediaFormat,
+  type SearchSeason,
 } from "@/lib/constants/search";
 
 const OVERVIEW_PAGE_SIZE = 6;
+
+type SearchFilters = {
+  format?: SearchMediaFormat;
+  season?: SearchSeason;
+  year?: number;
+};
 
 const searchSchema = z.object({
   q: z
@@ -52,21 +65,67 @@ const searchSchema = z.object({
       const list = Array.isArray(value) ? value : [value];
       return sortSearchCategories(list);
     }),
+  format: z.enum(SEARCH_MEDIA_FORMAT_VALUES).optional(),
+  season: z.enum(SEARCH_SEASON_VALUES).optional(),
+  year: z.preprocess(
+    (value) => {
+      if (value === undefined || value === null || value === "") return undefined;
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : undefined;
+    },
+    z.number().int().min(1940).max(2100).optional()
+  ),
 });
 
-const animeOverviewQueryOptions = (query: string) => ({
-  queryKey: ["search", "overview", "anime", query],
-  queryFn: () => fetchAnimeSearch(query, 1, OVERVIEW_PAGE_SIZE),
-  staleTime: 1000 * 60 * 2,
-  placeholderData: keepPreviousData,
-});
+const animeOverviewQueryOptions = (query: string, filters: SearchFilters) => {
+  const isAnimeFormat =
+    filters.format &&
+    SEARCH_ANIME_FORMAT_VALUES.includes(filters.format);
+  const resolvedFormat = isAnimeFormat ? filters.format : undefined;
 
-const mangaOverviewQueryOptions = (query: string) => ({
-  queryKey: ["search", "overview", "manga", query],
-  queryFn: () => fetchMangaSearch(query, 1, OVERVIEW_PAGE_SIZE),
-  staleTime: 1000 * 60 * 2,
-  placeholderData: keepPreviousData,
-});
+  return {
+    queryKey: [
+      "search",
+      "overview",
+      "anime",
+      query,
+      resolvedFormat ?? null,
+      filters.season ?? null,
+      filters.year ?? null,
+    ],
+    queryFn: () =>
+      fetchAnimeSearch(query, 1, OVERVIEW_PAGE_SIZE, {
+        format: resolvedFormat,
+        season: filters.season,
+        seasonYear: filters.year,
+      }),
+    staleTime: 1000 * 60 * 2,
+    placeholderData: keepPreviousData,
+  };
+};
+
+const mangaOverviewQueryOptions = (query: string, filters: SearchFilters) => {
+  const isMangaFormat =
+    filters.format &&
+    SEARCH_MANGA_FORMAT_VALUES.includes(filters.format);
+  const resolvedFormat = isMangaFormat ? filters.format : undefined;
+
+  return {
+    queryKey: [
+      "search",
+      "overview",
+      "manga",
+      query,
+      resolvedFormat ?? null,
+    ],
+    queryFn: () =>
+      fetchMangaSearch(query, 1, OVERVIEW_PAGE_SIZE, {
+        format: resolvedFormat,
+      }),
+    staleTime: 1000 * 60 * 2,
+    placeholderData: keepPreviousData,
+  };
+};
 
 const characterOverviewQueryOptions = (query: string) => ({
   queryKey: ["search", "overview", "characters", query],
@@ -123,19 +182,24 @@ export const Route = createFileRoute("/search")({
       .length
       ? resolvedSearch.categories
       : [...SEARCH_CATEGORY_VALUES];
+    const filters: SearchFilters = {
+      format: resolvedSearch.format,
+      season: resolvedSearch.season,
+      year: resolvedSearch.year,
+    };
     const tasks: Array<Promise<unknown>> = [];
 
     for (const category of categoriesToPreload) {
       if (category === "anime") {
         tasks.push(
           context.queryClient.ensureQueryData(
-            animeOverviewQueryOptions(resolvedSearch.q)
+            animeOverviewQueryOptions(resolvedSearch.q, filters)
           )
         );
       } else if (category === "manga") {
         tasks.push(
           context.queryClient.ensureQueryData(
-            mangaOverviewQueryOptions(resolvedSearch.q)
+            mangaOverviewQueryOptions(resolvedSearch.q, filters)
           )
         );
       } else {
@@ -160,7 +224,7 @@ export const Route = createFileRoute("/search")({
 });
 
 function SearchRoute() {
-  const { q, categories } = Route.useSearch();
+  const { q, categories, format, season, year } = Route.useSearch();
   const navigate = useNavigate();
   const [activeMedia, setActiveMedia] = useState<
     | { kind: "ANIME"; media: MediaDetailData }
@@ -184,19 +248,24 @@ function SearchRoute() {
   const normalizedQuery = q ?? "";
   const hasQuery = Boolean(normalizedQuery);
   const normalizedCategories = categories ?? [];
-  const hasScopedCategories = normalizedCategories.length > 0;
+  const filters: SearchFilters = { format, season, year };
+  const scopedCategories =
+    normalizedCategories.length === SEARCH_CATEGORY_VALUES.length
+      ? []
+      : normalizedCategories;
+  const hasScopedCategories = scopedCategories.length > 0;
   const scopedCategoryLabel = hasScopedCategories
-    ? formatCategoryList(normalizedCategories)
+    ? formatCategoryList(scopedCategories)
     : null;
   const scopedCategoryLabelLowercase = hasScopedCategories
-    ? formatCategoryList(normalizedCategories, { lowercase: true })
+    ? formatCategoryList(scopedCategories, { lowercase: true })
     : null;
   const showAnimeScope =
-    !hasScopedCategories || normalizedCategories.includes("anime");
+    !hasScopedCategories || scopedCategories.includes("anime");
   const showMangaScope =
-    !hasScopedCategories || normalizedCategories.includes("manga");
+    !hasScopedCategories || scopedCategories.includes("manga");
   const showCharacterScope =
-    !hasScopedCategories || normalizedCategories.includes("characters");
+    !hasScopedCategories || scopedCategories.includes("characters");
   const headerTitle = hasQuery
     ? hasScopedCategories
       ? `${scopedCategoryLabel} hits for "${normalizedQuery}"`
@@ -206,15 +275,102 @@ function SearchRoute() {
     ? hasScopedCategories
       ? `Locked on ${scopedCategoryLabelLowercase} only. Toggle the chips to widen the search.`
       : "We aggregate the strongest anime, manga, and character matches before you dive deeper."
-    : "Use the hero search bar (⌘+K) or the chips at the top of the home page to get started.";
+    : "Use the hero search bar (Cmd/Ctrl+K) or the Search Plus Ultra scope chips to get started.";
+
+  const updateSearchParams = (updates: {
+    categories?: SearchCategory[];
+    format?: SearchMediaFormat | null;
+    season?: SearchSeason | null;
+    year?: number | null;
+  }) => {
+    navigate({
+      to: "/search",
+      search: (prev) => {
+        const next = { ...(prev ?? {}) } as Record<string, unknown>;
+
+        if ("categories" in updates) {
+          const nextCategories = updates.categories ?? [];
+          if (nextCategories.length) {
+            next.categories =
+              nextCategories.length === 1 ? nextCategories[0] : nextCategories;
+          } else {
+            delete next.categories;
+          }
+        }
+
+        if ("format" in updates) {
+          if (updates.format) {
+            next.format = updates.format;
+          } else {
+            delete next.format;
+          }
+        }
+
+        if ("season" in updates) {
+          if (updates.season) {
+            next.season = updates.season;
+          } else {
+            delete next.season;
+          }
+        }
+
+        if ("year" in updates) {
+          if (typeof updates.year === "number") {
+            next.year = updates.year;
+          } else {
+            delete next.year;
+          }
+        }
+
+        delete (next as { category?: unknown }).category;
+
+        return next;
+      },
+    });
+  };
+
+  const handleScopeChange = (value: SearchCategory | "all") => {
+    if (value === "all") {
+      updateSearchParams({ categories: [] });
+      return;
+    }
+
+    const nextSet = new Set(scopedCategories);
+
+    if (nextSet.has(value)) {
+      nextSet.delete(value);
+    } else {
+      nextSet.add(value);
+    }
+
+    let nextCategories = sortSearchCategories(nextSet);
+
+    if (nextCategories.length === SEARCH_CATEGORY_VALUES.length) {
+      nextCategories = [];
+    }
+
+    updateSearchParams({ categories: nextCategories });
+  };
+
+  const handleFormatChange = (nextFormat?: SearchMediaFormat) =>
+    updateSearchParams({ format: nextFormat ?? null });
+
+  const handleSeasonChange = (nextSeason?: SearchSeason) =>
+    updateSearchParams({ season: nextSeason ?? null });
+
+  const handleYearChange = (nextYear?: number) =>
+    updateSearchParams({ year: nextYear ?? null });
+
+  const handleClearFilters = () =>
+    updateSearchParams({ categories: [], format: null, season: null, year: null });
 
   const animeQuery = useQuery({
-    ...animeOverviewQueryOptions(normalizedQuery),
+    ...animeOverviewQueryOptions(normalizedQuery, filters),
     enabled: hasQuery && showAnimeScope,
   });
 
   const mangaQuery = useQuery({
-    ...mangaOverviewQueryOptions(normalizedQuery),
+    ...mangaOverviewQueryOptions(normalizedQuery, filters),
     enabled: hasQuery && showMangaScope,
   });
 
@@ -286,6 +442,17 @@ function SearchRoute() {
         </div>
 
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
+          <SearchPlusUltraPanel
+            categories={scopedCategories}
+            format={format}
+            season={season}
+            year={year}
+            onScopeChange={handleScopeChange}
+            onFormatChange={handleFormatChange}
+            onSeasonChange={handleSeasonChange}
+            onYearChange={handleYearChange}
+            onClearFilters={handleClearFilters}
+          />
           <header className="rounded-[36px] border border-border/60 bg-card/80 p-6 shadow-[0_45px_120px_rgba(0,0,0,0.55)]">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
               Cinematic discovery

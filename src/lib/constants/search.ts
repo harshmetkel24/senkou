@@ -15,6 +15,40 @@ export const SEARCH_CATEGORIES: ReadonlyArray<{
   { label: "Characters", value: "characters" },
 ] as const;
 
+export const SEARCH_ANIME_FORMAT_VALUES = [
+  "TV",
+  "TV_SHORT",
+  "MOVIE",
+  "SPECIAL",
+  "OVA",
+  "ONA",
+  "MUSIC",
+] as const;
+
+export const SEARCH_MANGA_FORMAT_VALUES = [
+  "MANGA",
+  "NOVEL",
+  "ONE_SHOT",
+  "MANHWA",
+  "MANHUA",
+] as const;
+
+export const SEARCH_MEDIA_FORMAT_VALUES = [
+  ...SEARCH_ANIME_FORMAT_VALUES,
+  ...SEARCH_MANGA_FORMAT_VALUES,
+] as const;
+
+export type SearchMediaFormat = (typeof SEARCH_MEDIA_FORMAT_VALUES)[number];
+
+export const SEARCH_SEASON_VALUES = [
+  "WINTER",
+  "SPRING",
+  "SUMMER",
+  "FALL",
+] as const;
+
+export type SearchSeason = (typeof SEARCH_SEASON_VALUES)[number];
+
 const CATEGORY_ORDER = new Map(
   SEARCH_CATEGORY_VALUES.map((value, index) => [value, index] as const),
 );
