@@ -236,14 +236,14 @@ function AnimeRoute() {
         ) : spotlightItems.length ? (
           <section className="space-y-4">
             <Carousel
-              className="overflow-hidden rounded-[36px] border border-border/60 bg-card/70 shadow-[0_45px_120px_rgba(0,0,0,0.55)] md:h-[520px]"
+              className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-[0_45px_120px_rgba(0,0,0,0.55)] md:h-[520px]"
               opts={{ loop: true }}
               plugins={[autoplayPlugin]}
             >
               <CarouselContent className="md:h-full">
                 {spotlightItems.map((spotlight) => (
                   <CarouselItem key={spotlight.id} className="md:h-full">
-                    <article className="relative overflow-hidden rounded-[36px] md:h-full">
+                    <article className="relative overflow-hidden rounded-2xl md:h-full">
                       <div className="absolute inset-0">
                         <Image
                           src={spotlight.bannerImage ?? spotlight.coverImage}

@@ -67,20 +67,16 @@ const searchSchema = z.object({
     }),
   format: z.enum(SEARCH_MEDIA_FORMAT_VALUES).optional(),
   season: z.enum(SEARCH_SEASON_VALUES).optional(),
-  year: z.preprocess(
-    (value) => {
-      if (value === undefined || value === null || value === "") return undefined;
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : undefined;
-    },
-    z.number().int().min(1940).max(2100).optional()
-  ),
+  year: z.preprocess((value) => {
+    if (value === undefined || value === null || value === "") return undefined;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }, z.number().int().min(1940).max(2100).optional()),
 });
 
 const animeOverviewQueryOptions = (query: string, filters: SearchFilters) => {
   const isAnimeFormat =
-    filters.format &&
-    SEARCH_ANIME_FORMAT_VALUES.includes(filters.format);
+    filters.format && SEARCH_ANIME_FORMAT_VALUES.includes(filters.format);
   const resolvedFormat = isAnimeFormat ? filters.format : undefined;
 
   return {
@@ -106,18 +102,11 @@ const animeOverviewQueryOptions = (query: string, filters: SearchFilters) => {
 
 const mangaOverviewQueryOptions = (query: string, filters: SearchFilters) => {
   const isMangaFormat =
-    filters.format &&
-    SEARCH_MANGA_FORMAT_VALUES.includes(filters.format);
+    filters.format && SEARCH_MANGA_FORMAT_VALUES.includes(filters.format);
   const resolvedFormat = isMangaFormat ? filters.format : undefined;
 
   return {
-    queryKey: [
-      "search",
-      "overview",
-      "manga",
-      query,
-      resolvedFormat ?? null,
-    ],
+    queryKey: ["search", "overview", "manga", query, resolvedFormat ?? null],
     queryFn: () =>
       fetchMangaSearch(query, 1, OVERVIEW_PAGE_SIZE, {
         format: resolvedFormat,
@@ -362,7 +351,12 @@ function SearchRoute() {
     updateSearchParams({ year: nextYear ?? null });
 
   const handleClearFilters = () =>
-    updateSearchParams({ categories: [], format: null, season: null, year: null });
+    updateSearchParams({
+      categories: [],
+      format: null,
+      season: null,
+      year: null,
+    });
 
   const animeQuery = useQuery({
     ...animeOverviewQueryOptions(normalizedQuery, filters),
@@ -453,7 +447,7 @@ function SearchRoute() {
             onYearChange={handleYearChange}
             onClearFilters={handleClearFilters}
           />
-          <header className="rounded-[36px] border border-border/60 bg-card/80 p-6 shadow-[0_45px_120px_rgba(0,0,0,0.55)]">
+          <header className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-[0_45px_120px_rgba(0,0,0,0.55)]">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
               Cinematic discovery
             </p>
@@ -539,7 +533,7 @@ function SearchRoute() {
               ) : null}
             </div>
           ) : (
-            <div className="rounded-[36px] border border-dashed border-border/60 bg-background/30 p-10 text-center">
+            <div className="rounded-2xl border border-dashed border-border/60 bg-background/30 p-10 text-center">
               <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-border/60 bg-card/60">
                 <SearchIcon className="h-10 w-10 text-muted-foreground" />
               </div>
@@ -610,7 +604,7 @@ function CategorySection({
       : "AniList couldn't respond fast enough. Retry in a moment.";
 
   return (
-    <section className="space-y-6 rounded-[36px] border border-border/60 bg-card/70 p-6 shadow-[0_35px_90px_rgba(0,0,0,0.5)]">
+    <section className="space-y-6 rounded-2xl border border-border/60 bg-card/70 p-6 shadow-[0_35px_90px_rgba(0,0,0,0.5)]">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">

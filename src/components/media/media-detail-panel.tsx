@@ -1,13 +1,5 @@
-import {
-  Calendar,
-  Clock,
-  Flame,
-  Play,
-  Sparkles,
-  Star,
-  X,
-} from "lucide-react";
 import { Image } from "@unpic/react";
+import { Calendar, Clock, Flame, Play, Sparkles, Star, X } from "lucide-react";
 import { type ComponentType, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -57,7 +49,7 @@ const detailStats: DetailStat[] = [
     formatter: (media) =>
       media.popularity
         ? Intl.NumberFormat("en", { notation: "compact" }).format(
-            media.popularity,
+            media.popularity
           )
         : undefined,
   },
@@ -104,14 +96,14 @@ export function MediaDetailPanel({
     <div
       className={cn(
         "fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6 transition-opacity",
-        open ? "opacity-100" : "pointer-events-none opacity-0",
+        open ? "opacity-100" : "pointer-events-none opacity-0"
       )}
       role="dialog"
       aria-modal="true"
       aria-label={`${media.title} details`}
     >
       <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
-      <article className="relative z-10 flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-[32px] border border-border/60 bg-gradient-to-b from-card/90 via-background/95 to-background shadow-[0_40px_90px_rgba(0,0,0,0.65)]">
+      <article className="relative z-10 flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-b from-card/90 via-background/95 to-background shadow-[0_40px_90px_rgba(0,0,0,0.65)]">
         <header className="relative h-64 overflow-hidden">
           <Image
             src={media.bannerImage ?? media.coverImage}
@@ -237,7 +229,7 @@ export function MediaDetailPanel({
                     >
                       {studio}
                     </span>
-                  ),
+                  )
                 )}
               </div>
             </div>

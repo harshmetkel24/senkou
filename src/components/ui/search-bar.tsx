@@ -337,8 +337,7 @@ export function SearchBar({
             aria-hidden
             className={cn(
               "pointer-events-none absolute inset-y-0 left-0 right-16 z-20 flex items-center px-8 text-muted-foreground/80 truncate",
-              "animate-placeholder-swap motion-reduce:animate-none",
-              isHero ? HERO_INPUT_TEXT_CLASS : "text-base"
+              "animate-placeholder-swap motion-reduce:animate-none"
             )}
           >
             {heroPlaceholderText}

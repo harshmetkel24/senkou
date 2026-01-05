@@ -1,4 +1,10 @@
-import { Calendar, Clock, Film, SlidersHorizontal, Sparkles } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Film,
+  SlidersHorizontal,
+  Sparkles,
+} from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -40,10 +46,7 @@ export function SearchPlusUltraPanel({
   const [isOpen, setIsOpen] = useState(true);
   const isAllActive = categories.length === 0;
   const activeCount =
-    categories.length +
-    (format ? 1 : 0) +
-    (season ? 1 : 0) +
-    (year ? 1 : 0);
+    categories.length + (format ? 1 : 0) + (season ? 1 : 0) + (year ? 1 : 0);
   const activeLabel = activeCount ? `${activeCount} active` : "All active";
   const formatLabels: Record<SearchMediaFormat, string> = {
     TV: "TV",
@@ -88,7 +91,7 @@ export function SearchPlusUltraPanel({
   ];
 
   return (
-    <section className="rounded-[32px] border border-border/60 bg-card/70 p-5 shadow-[0_30px_80px_rgba(0,0,0,0.5)] md:p-6">
+    <section className="rounded-3xl border border-border/60 bg-card/70 p-5 shadow-[0_30px_80px_rgba(0,0,0,0.5)] md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -145,17 +148,17 @@ export function SearchPlusUltraPanel({
                   ? isAllActive
                   : categories.includes(option.value);
 
-                return (
-                  <Chip
-                    key={option.value}
-                    aria-pressed={isActive}
-                    active={isActive}
-                    onClick={() => onScopeChange(option.value)}
-                  >
-                    {option.label}
-                  </Chip>
-                );
-              })}
+              return (
+                <Chip
+                  key={option.value}
+                  aria-pressed={isActive}
+                  active={isActive}
+                  onClick={() => onScopeChange(option.value)}
+                >
+                  {option.label}
+                </Chip>
+              );
+            })}
           </FilterSection>
 
           <FilterSection

@@ -1,12 +1,5 @@
-import {
-  Flame,
-  Heart,
-  ImageOff,
-  Sparkles,
-  User,
-  X,
-} from "lucide-react";
 import { Image } from "@unpic/react";
+import { Flame, Heart, ImageOff, Sparkles, User, X } from "lucide-react";
 
 import type { CharacterCardData } from "./character-card";
 
@@ -25,13 +18,15 @@ export function CharacterDetailPanel({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6 transition-opacity ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6 transition-opacity ${
+        open ? "opacity-100" : "pointer-events-none opacity-0"
+      }`}
       role="dialog"
       aria-modal="true"
       aria-label={`${character.name} details`}
     >
       <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
-      <article className="relative z-10 grid max-h-[92vh] w-full max-w-5xl grid-cols-1 overflow-hidden rounded-[32px] border border-border/70 bg-gradient-to-b from-card/90 via-background/95 to-background shadow-[0_40px_90px_rgba(0,0,0,0.65)] md:grid-cols-[320px_minmax(0,1fr)]">
+      <article className="relative z-10 grid max-h-[92vh] w-full max-w-5xl grid-cols-1 overflow-hidden rounded-3xl border border-border/70 bg-gradient-to-b from-card/90 via-background/95 to-background shadow-[0_40px_90px_rgba(0,0,0,0.65)] md:grid-cols-[320px_minmax(0,1fr)]">
         <div className="relative h-full bg-black/30">
           <Image
             src={character.image}
