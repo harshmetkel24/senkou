@@ -34,33 +34,39 @@
 
 Senkou (線光) is an IMDB-style experience for anime, manga, and characters. Stage 1 centers on a cinematic, URL-driven browsing surface powered by TanStack Start RSC loaders + React Query hydration, spotlight carousels, and infinite-scroll-ready grids. Later stages layer in auth, watchlists, recommendations, and social features while holding the performance budgets (TTFB < 200 ms cached, LCP < 2.5 s, CLS < 0.05).
 
-## What you'll find today
+## v0.1 Highlights
 
-- Home hero with `⌘/Ctrl+K` quick search, a subtle focus glow, rotating trending placeholder prompts, a trending grid, and a watchlist shelf for signed-in viewers (persisted via Neon + Drizzle).
-- Anime, Manga, and Characters routes that preload AniList trending data in loaders, hydrate client search from URL params, and reuse cached list data inside detail panels with add-to-watchlist actions.
-- A universal `/search` route with Search Plus Ultra scope + format/season/year controls, category chips, shareable URL state, empty/error handling, and retry/backoff messaging when AniList hiccups.
-- Authentication preview: email/password registration + login with bcrypt hashes stored in Postgres, cookie sessions driven by `SESSION_SECRET`, and a “remember me” path ahead of the Stage 2 OAuth swap.
-- Keyboard and UX polish: skeleton grids, lazy media, spotlight carousels, and hotkeys (`⌘/Ctrl+K` to focus search, `⌘/Ctrl+S` to toggle the sidebar, Shift+? for help).
+- Home hero with `Cmd/Ctrl+K` quick search, rotating trending placeholder prompts, a trending grid, and a signed-in watchlist shelf (Neon + Drizzle).
+- Sidebar-first Anime, Manga, and Characters routes that preload AniList data in loaders, hydrate client search from URL params, and reuse cached list data inside detail panels.
+- A universal `/search` route with Search Plus Ultra scope, format/season/year controls, category chips, shareable URL state, and empty/error handling.
+- Auth preview: email/password registration + login with bcrypt hashes stored in Postgres, cookie sessions driven by `SESSION_SECRET`, and watchlist add/remove actions.
+- UX polish: skeleton grids, lazy media, spotlight carousels, retry/backoff messaging on AniList hiccups, hero placeholder rotation (paused on focus), and hotkeys (`Cmd/Ctrl+K`, `Cmd/Ctrl+S`, Shift+?).
 
-## Hero Search Placeholder Rotation
+## Coming soon
 
-- The home hero search input cycles through trending anime titles when the field is empty and unfocused.
-- Suggestions are seeded with One Piece, Frieren, and Gojo Satoru and then matched against the current trending anime list; the seeds are used as fallbacks if nothing matches.
-- The animation pauses on focus/typing and honors `prefers-reduced-motion`.
+- Infinite scroll with `useInfiniteQuery` + IntersectionObserver sentinels across list routes.
+- Staff route with rich detail panels and shared AniList fragments.
+- Sticky filter/search bar with quick toggles for format, season, and year.
+- Auth.js OAuth (GitHub/Google) plus optional magic links.
+- "My Library" watchlist management with filters, pagination, and profile controls.
+- Collections, ratings/reviews, activity feed, recommendations, and offline/PWA caching.
 
 ## Roadmap
 
-- **Stage 1 — MVP “Beautiful Infinite Scroll” (current)**
-  - RSC loaders fetch AniList GraphQL data for fast first paint; client components hydrate queries and reuse cached data in detail panels and watchlist actions.
-  - Sidebar routes: Anime, Characters, Manga, plus a universal Search surface; Staff is next. Infinite pagination + sentinels are being wired in alongside the current spotlight grids.
-  - URLSearchParams remain the source of truth for search/sort/filter. Cards ship skeletons, lazy art, empty/error states, and rate-limit-aware retries.
-  - Auth + watchlist preview backed by Neon/Drizzle so saved titles show up on the home shelf.
-- **Stage 2 — Auth + Watchlists**
-  - Swap to Auth.js OAuth (GitHub, Google) or magic links on top of hardened cookies/sessions.
-  - Server Actions mutate watchlists with optimistic React Query updates, CSRF protection, and rate-limited mutations.
-  - “My Library” view with filters/pagination, user profile (avatar, display name, theme/content rating prefs).
-- **Stage 3 — Advanced Features**
-  - Collections & shareable slugs, ratings/reviews with moderation, popular searches, activity feed/follow graph, recommendations (“Because you watched …”), offline/PWA caching, advanced faceted search, Vercel image caching, i18n routing, and admin tooling for feature flags + moderation queues.
+- **Stage 1 — MVP “Beautiful Infinite Scroll” (complete)**
+  - [x] RSC loaders fetch AniList GraphQL data for fast first paint; client components hydrate queries and reuse cached data in detail panels and watchlist actions.
+  - [x] Sidebar routes for Anime, Characters, Manga, plus a universal Search surface with URL-driven filters and shareable links.
+  - [x] Cards ship skeletons, lazy art, empty/error states, and rate-limit-aware retries.
+  - [x] Auth + watchlist preview backed by Neon/Drizzle so saved titles show up on the home shelf.
+- **Stage 2 — Coming next**
+  - [ ] Infinite scroll with `useInfiniteQuery` + IntersectionObserver sentinels across list routes.
+  - [ ] Sticky filter/search bar with quick toggles for format, season, and year.
+  - [ ] Swap to Auth.js OAuth (GitHub/Google) or magic links on top of hardened cookies/sessions.
+  - [ ] Server Actions for watchlists with optimistic updates, CSRF protection, and rate-limited mutations.
+  - [ ] "My Library" view with filters/pagination plus profile controls (avatar, display name, theme/content rating prefs).
+  - [ ] Collections and shareable slugs, ratings/reviews with moderation + helpful votes, activity feed, and recommendations.
+  - [ ] Offline/PWA caching and debounced faceted search (year/season/format/studios/tags).
+  - [ ] CDN/blobs for cover art, i18n routing, and admin tooling for feature flags + moderation queues.
 
 ## Stack & structure
 
@@ -88,6 +94,7 @@ Senkou (線光) is an IMDB-style experience for anime, manga, and characters. St
    ```
 
    Neon is the default Postgres target; `drizzle.config.ts` reads `DATABASE_URL`.
+
 3. (Optional) Sync the schema: `pnpm drizzle:generate && pnpm drizzle:push`.
 4. Run the dev server with `pnpm dev` (`http://localhost:3000`). Before shipping, run `pnpm test` and `pnpm build`; preview production output with `pnpm serve`.
 
