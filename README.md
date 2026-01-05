@@ -73,7 +73,7 @@ Senkou (線光) is an IMDB-style experience for anime, manga, and characters. St
 - **Framework & data**: TanStack Start (React 19 + Vite). AniList GraphQL is fetched through `src/lib/anilist-client.ts` with backoff for 429/5xx. URLSearchParams are validated (zod) before queries fire.
 - **Routing & state**: TanStack Router file routes with loaders for first paint, TanStack Query for hydration/caching, Zustand for sidebar/help state.
 - **Styling**: Tailwind CSS v4 + shadcn/ui. Themes and Radix color tokens live in `src/styles.css` and `src/lib/theme`; media uses `@unpic/react` for responsive images.
-- **Database**: Neon Postgres + Drizzle ORM for users and watchlists (see `src/db/`). Server functions manage auth, watchlist mutations, and sessions (`SESSION_SECRET`-backed cookies).
+- **Database**: Neon Postgres + Drizzle ORM for users and watchlists (see `src/db/`), including a user experience level (0-9) and profile bio for future personalization. Server functions manage auth, watchlist mutations, and sessions (`SESSION_SECRET`-backed cookies).
 - **Project layout**: Feature folders inside `src/` (`routes`, `components`, `data`, `hooks`, `lib`, `db`). AniList queries and normalizers live in `src/data/queries`; shared UI in `src/components/ui` and `src/components/media/watchlist`.
 
 ## Performance & resilience

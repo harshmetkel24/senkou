@@ -6,7 +6,10 @@ import {
 
 // user
 export type User = typeof usersTable.$inferSelect;
-export type UserInfo = Pick<User, "email" | "displayName" | "profileImg">;
+export type UserInfo = Pick<
+  User,
+  "email" | "displayName" | "profileImg" | "experienceLevel" | "bio"
+>;
 export type UserWithoutSensitiveInfo = Omit<
   typeof usersTable.$inferInsert,
   "passwordHash" | "id"

@@ -2,12 +2,15 @@ import {
   ProfileAvatar,
   getUserInfoQueryKey,
 } from "@/components/helpers/ProfileAvatar";
+import { ExperienceBadge } from "@/components/helpers/experience-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
+import { getExperienceLevelInfo } from "@/lib/constants/experience-levels";
 import { updateUserFn } from "@/lib/server/user";
 import type { UserInfo } from "@/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -30,6 +33,8 @@ function ProfilePage() {
     displayName: user?.displayName || "",
     email: user?.email || "",
     profileImg: null as string | null,
+    experienceLevel: 0,
+    bio: null as string | null,
   }));
   const [draftData, setDraftData] = useState(profileData);
   const fullUserQueryKey = getUserInfoQueryKey(userId);
@@ -40,6 +45,8 @@ function ProfilePage() {
       displayName: fullUser.displayName || "",
       email: fullUser.email || "",
       profileImg: fullUser.profileImg || null,
+      experienceLevel: fullUser.experienceLevel ?? 0,
+      bio: fullUser.bio ?? null,
     };
     setProfileData(nextProfile);
     setDraftData(nextProfile);
@@ -68,6 +75,8 @@ function ProfilePage() {
       displayName: string;
       email: string;
       profileImg: string | null;
+      experienceLevel: number;
+      bio: string | null;
     }) => {
       return await updateUser({ data: payload });
     },
@@ -83,6 +92,8 @@ function ProfilePage() {
         displayName: response.user.displayName || "",
         email: response.user.email || "",
         profileImg: response.user.profileImg || null,
+        experienceLevel: response.user.experienceLevel ?? 0,
+        bio: response.user.bio ?? null,
       };
 
       if (userId) {
@@ -117,15 +128,29 @@ function ProfilePage() {
     return <div>Please log in to view your profile.</div>;
   }
 
+  const activeExperienceLevel = editMode
+    ? draftData.experienceLevel
+    : profileData.experienceLevel;
+  const experienceInfo = getExperienceLevelInfo(activeExperienceLevel);
+  const draftExperienceInfo = getExperienceLevelInfo(draftData.experienceLevel);
+
   const handleSave = () => {
     if (!userId || updateUserMutation.isPending) return;
 
     const trimmedDisplayName = draftData.displayName.trim();
     const trimmedEmail = draftData.email.trim();
+    const trimmedBio = draftData.bio?.trim() ?? "";
 
     if (!trimmedDisplayName || !trimmedEmail) {
       toast.error("Missing details", {
         description: "Display name and email cannot be empty.",
+      });
+      return;
+    }
+
+    if (trimmedBio.length > 128) {
+      toast.error("Bio too long", {
+        description: "Please keep it within 128 characters.",
       });
       return;
     }
@@ -135,6 +160,11 @@ function ProfilePage() {
       displayName: trimmedDisplayName,
       email: trimmedEmail,
       profileImg: draftData.profileImg,
+      bio: trimmedBio.length ? trimmedBio : null,
+      experienceLevel: Math.min(
+        Math.max(Math.floor(draftData.experienceLevel), 0),
+        9
+      ),
     });
   };
 
@@ -148,15 +178,29 @@ function ProfilePage() {
     <div className="container mx-auto p-6">
       <Card className="max-w-lg mx-auto">
         <CardHeader>
-          <div className="flex flex-col items-center space-y-4 mb-4">
-            <ProfileAvatar
-              userId={userId}
-              draftImage={editMode ? draftData.profileImg : null}
-              fallbackInitial={
-                profileData.displayName || user?.displayName || ""
-              }
-              onUserLoaded={handleUserLoaded}
-            />
+          <div className="flex flex-col items-center space-y-3 mb-4">
+            <div className="relative inline-flex h-28 w-28 items-center justify-center">
+              <ProfileAvatar
+                userId={userId}
+                draftImage={editMode ? draftData.profileImg : null}
+                fallbackInitial={
+                  profileData.displayName || user?.displayName || ""
+                }
+                onUserLoaded={handleUserLoaded}
+              />
+              <ExperienceBadge
+                level={activeExperienceLevel}
+                className="absolute -bottom-1 -right-1"
+              />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-semibold text-foreground">
+                Level {experienceInfo.level + 1}: {experienceInfo.title}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {experienceInfo.subtitle}
+              </p>
+            </div>
           </div>
           <CardTitle className="flex items-center justify-between">
             Profile
@@ -212,6 +256,18 @@ function ProfilePage() {
                   {profileData.email}
                 </p>
               </div>
+              <div>
+                <Label>Bio</Label>
+                {profileData.bio ? (
+                  <p className="text-sm text-foreground/90 leading-relaxed">
+                    {profileData.bio}
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">
+                    No bio yet.
+                  </p>
+                )}
+              </div>
             </>
           ) : (
             <>
@@ -237,6 +293,61 @@ function ProfilePage() {
                     setDraftData({ ...draftData, email: e.target.value })
                   }
                 />
+              </div>
+              <div>
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea
+                  id="bio"
+                  maxLength={128}
+                  value={draftData.bio ?? ""}
+                  onChange={(e) =>
+                    setDraftData({
+                      ...draftData,
+                      bio: e.target.value.slice(0, 128),
+                    })
+                  }
+                  placeholder="A short line about your anime taste."
+                />
+                <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Keep it short and punchy.</span>
+                  <span>{(draftData.bio ?? "").length}/128</span>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="experienceLevel">Experience Level</Label>
+                <div className="mt-2 rounded-lg border border-border/60 bg-muted/30 p-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-sm font-semibold text-foreground">
+                      Level {draftExperienceInfo.level + 1}:{" "}
+                      {draftExperienceInfo.title}
+                    </p>
+                    <span className="text-xs text-muted-foreground">
+                      {draftExperienceInfo.subtitle}
+                    </span>
+                  </div>
+                  <input
+                    id="experienceLevel"
+                    type="range"
+                    min={0}
+                    max={9}
+                    step={1}
+                    value={draftData.experienceLevel}
+                    onChange={(e) =>
+                      setDraftData({
+                        ...draftData,
+                        experienceLevel: Number(e.target.value),
+                      })
+                    }
+                    className="mt-3 w-full accent-primary"
+                  />
+                  <div className="mt-1 flex justify-between text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+                    <span>1</span>
+                    <span>10</span>
+                  </div>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  We will auto-calc this from watch history later.
+                </p>
               </div>
               <div>
                 <Label htmlFor="profileImg">Profile Image</Label>
