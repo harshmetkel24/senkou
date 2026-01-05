@@ -8,7 +8,12 @@ import {
 export type User = typeof usersTable.$inferSelect;
 export type UserInfo = Pick<
   User,
-  "email" | "displayName" | "profileImg" | "experienceLevel" | "bio"
+  | "email"
+  | "displayName"
+  | "profileImg"
+  | "experienceLevel"
+  | "bio"
+  | "createdAt"
 >;
 export type UserWithoutSensitiveInfo = Omit<
   typeof usersTable.$inferInsert,
