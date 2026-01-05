@@ -189,8 +189,8 @@ function ProfilePage() {
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <Card className="max-w-lg mx-auto">
+    <div className="min-h-screen w-full flex items-center justify-center">
+      <Card className="w-full max-w-lg">
         <CardHeader>
           <div className="flex flex-col items-center space-y-3 mb-4">
             <div className="relative inline-flex h-28 w-28 items-center justify-center">
