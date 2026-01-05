@@ -52,7 +52,7 @@ export function SearchResultsPanel<T>({
   suggestions,
 }: SearchResultsPanelProps<T>) {
   return (
-    <section className="space-y-6 rounded-[36px] border border-border/60 bg-card/80 p-6 shadow-[0_45px_120px_rgba(0,0,0,0.55)] md:p-8">
+    <section className="space-y-6 rounded-3xl border border-border/60 bg-card/80 p-6 shadow-[0_45px_120px_rgba(0,0,0,0.55)] md:p-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
@@ -91,7 +91,9 @@ export function SearchResultsPanel<T>({
                 <h3 className="text-lg font-semibold text-foreground">
                   {errorTitle}
                 </h3>
-                <p className="text-sm text-muted-foreground">{errorDescription}</p>
+                <p className="text-sm text-muted-foreground">
+                  {errorDescription}
+                </p>
               </div>
             </div>
             <div className="flex gap-3">
@@ -112,7 +114,9 @@ export function SearchResultsPanel<T>({
             <SearchIcon className="h-6 w-6 text-muted-foreground" />
           </div>
           <h3 className="mt-4 text-2xl font-semibold">{emptyTitle}</h3>
-          <p className="mt-2 text-sm text-muted-foreground">{emptyDescription}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {emptyDescription}
+          </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Button type="button" onClick={onRetry}>
               Try again
