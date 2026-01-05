@@ -2,7 +2,10 @@ import { useAppSession } from "@/lib/auth/session";
 import type { User } from "@/types";
 import { createServerFn } from "@tanstack/react-start";
 
-type UpdateUserType = Pick<User, "id" | "displayName" | "email" | "profileImg"> &
+type UpdateUserType = Pick<
+  User,
+  "id" | "displayName" | "email" | "profileImg"
+> &
   Partial<Pick<User, "experienceLevel" | "bio">>;
 
 export const updateUserFn = createServerFn({ method: "POST" })
@@ -72,6 +75,8 @@ export const updateUserFn = createServerFn({ method: "POST" })
           profileImg: updatedUser.profileImg,
           experienceLevel: updatedUser.experienceLevel,
           bio: updatedUser.bio,
+          createdAt: updatedUser.createdAt,
+          updatedAt: new Date(),
         },
       };
     } catch (error) {
@@ -94,6 +99,8 @@ export const getUserInfo = createServerFn({ method: "GET" })
         profileImg: user.profileImg,
         experienceLevel: user.experienceLevel,
         bio: user.bio,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       };
       return {
         success: true,

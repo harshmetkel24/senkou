@@ -35,9 +35,21 @@ function ProfilePage() {
     profileImg: null as string | null,
     experienceLevel: 0,
     bio: null as string | null,
+    createdAt: null as Date | null,
   }));
   const [draftData, setDraftData] = useState(profileData);
   const fullUserQueryKey = getUserInfoQueryKey(userId);
+
+  const formatJoinedSince = (value?: Date | string | null) => {
+    if (!value) return "—";
+    const parsed = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(parsed.getTime())) return "N/A";
+    return new Intl.DateTimeFormat(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(parsed);
+  };
 
   const handleUserLoaded = (fullUser: UserInfo) => {
     if (editMode) return;
@@ -47,6 +59,7 @@ function ProfilePage() {
       profileImg: fullUser.profileImg || null,
       experienceLevel: fullUser.experienceLevel ?? 0,
       bio: fullUser.bio ?? null,
+      createdAt: fullUser.createdAt ?? null,
     };
     setProfileData(nextProfile);
     setDraftData(nextProfile);
@@ -94,6 +107,7 @@ function ProfilePage() {
         profileImg: response.user.profileImg || null,
         experienceLevel: response.user.experienceLevel ?? 0,
         bio: response.user.bio ?? null,
+        createdAt: response.user.createdAt ?? null,
       };
 
       if (userId) {
@@ -257,6 +271,12 @@ function ProfilePage() {
                 </p>
               </div>
               <div>
+                <Label>Joined Since</Label>
+                <p className="text-sm text-muted-foreground">
+                  {formatJoinedSince(profileData.createdAt)}
+                </p>
+              </div>
+              <div>
                 <Label>Bio</Label>
                 {profileData.bio ? (
                   <p className="text-sm text-foreground/90 leading-relaxed">
@@ -293,6 +313,15 @@ function ProfilePage() {
                     setDraftData({ ...draftData, email: e.target.value })
                   }
                 />
+              </div>
+              <div>
+                <Label>Joined Since</Label>
+                <p className="text-sm text-muted-foreground">
+                  {formatJoinedSince(profileData.createdAt)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  System generated.
+                </p>
               </div>
               <div>
                 <Label htmlFor="bio">Bio</Label>

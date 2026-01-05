@@ -40,6 +40,7 @@ Senkou (線光) is an IMDB-style experience for anime, manga, and characters. St
 - Sidebar-first Anime, Manga, and Characters routes that preload AniList data in loaders, hydrate client search from URL params, and reuse cached list data inside detail panels.
 - A universal `/search` route with Search Plus Ultra scope, format/season/year controls, category chips, shareable URL state, and empty/error handling.
 - Auth preview: email/password registration + login with bcrypt hashes stored in Postgres, cookie sessions driven by `SESSION_SECRET`, and watchlist add/remove actions.
+- Profile polish: system-generated "Joined Since" metadata alongside editable profile fields.
 - UX polish: skeleton grids, lazy media, spotlight carousels, retry/backoff messaging on AniList hiccups, hero placeholder rotation (paused on focus), and hotkeys (`Cmd/Ctrl+K`, `Cmd/Ctrl+S`, Shift+?).
 
 ## Coming soon
