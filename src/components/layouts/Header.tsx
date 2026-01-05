@@ -1,11 +1,14 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
+import _includes from "lodash/includes";
 import { Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/ui/search-bar";
 import { useSidebarStore } from "@/lib/stores";
 import { cn } from "@/lib/utils";
+
+const PATHS_TO_HIDE_SEARCH_BAR = ["/", "/profile"];
 
 export default function Header() {
   const collapsed = useSidebarStore((state) => state.collapsed);
@@ -15,7 +18,10 @@ export default function Header() {
 
   const toggleMobileSidebar = () => setMobileOpen(!mobileOpen);
 
-  const isIndexRoute = location.pathname === "/";
+  const searchBarHidden = _includes(
+    PATHS_TO_HIDE_SEARCH_BAR,
+    location.pathname
+  );
 
   return (
     <header
@@ -23,7 +29,7 @@ export default function Header() {
         "border-b border-border bg-background/90 px-4 backdrop-blur md:px-6 transition-all duration-300 flex items-center",
         collapsed ? "md-[5rem]" : "md:ml-64",
         {
-          "h-[5rem]": !isIndexRoute,
+          "h-[5rem]": !searchBarHidden,
         }
       )}
     >
@@ -52,7 +58,7 @@ export default function Header() {
               height={1024}
               className="h-10 w-10"
             />
-            {isIndexRoute ? (
+            {searchBarHidden ? (
               <span className="text-xl font-bold uppercase tracking-tighter">
                 senkō!
               </span>
@@ -60,7 +66,7 @@ export default function Header() {
           </Link>
         </div>
         <div className="flex-1 flex justify-center px-4">
-          {!isIndexRoute && <SearchBar />}
+          {!searchBarHidden && <SearchBar />}
         </div>
       </div>
     </header>
