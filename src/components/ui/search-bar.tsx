@@ -367,7 +367,7 @@ export function SearchBar({
         ) : null}
       </div>
       {isHero && showCategoryChips ? (
-        <div className="mt-4 flex justify-center">
+        <div className="mt-6 flex justify-center">
           <CategoryChipGroup
             selected={selectedCategories}
             onChange={setSelectedCategories}
