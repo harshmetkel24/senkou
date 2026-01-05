@@ -81,9 +81,9 @@ function ProfileAvatarContent({
     <Image
       src={profileImg}
       alt="Profile"
-      className="w-24 h-24 rounded-full object-cover shadow-lg"
-      width={96}
-      height={96}
+      className="size-28 rounded-full object-cover shadow-lg"
+      width={116}
+      height={112}
       loading="lazy"
     />
   );
@@ -114,7 +114,7 @@ class AvatarErrorBoundary extends Component<
 export function ProfileAvatarFallback({ initial }: { initial?: string }) {
   const letter = initial?.charAt(0).toUpperCase() || "U";
   return (
-    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-3xl font-bold shadow-lg">
+    <div className="w-28 h-28 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-4xl font-bold shadow-lg">
       {letter}
     </div>
   );

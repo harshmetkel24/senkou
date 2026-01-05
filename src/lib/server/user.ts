@@ -2,7 +2,8 @@ import { useAppSession } from "@/lib/auth/session";
 import type { User } from "@/types";
 import { createServerFn } from "@tanstack/react-start";
 
-type UpdateUserType = Pick<User, "id" | "displayName" | "email" | "profileImg">;
+type UpdateUserType = Pick<User, "id" | "displayName" | "email" | "profileImg"> &
+  Partial<Pick<User, "experienceLevel" | "bio">>;
 
 export const updateUserFn = createServerFn({ method: "POST" })
   .inputValidator((data: UpdateUserType) => data)
@@ -30,12 +31,28 @@ export const updateUserFn = createServerFn({ method: "POST" })
         import("drizzle-orm"),
       ]);
 
+      let nextBio = userQueried.bio;
+
+      if (data.bio !== undefined) {
+        if (data.bio === null) {
+          nextBio = null;
+        } else {
+          const trimmedBio = data.bio.trim();
+          if (trimmedBio.length > 128) {
+            throw new Error("Bio must be 128 characters or less");
+          }
+          nextBio = trimmedBio.length ? trimmedBio : null;
+        }
+      }
+
       const [updatedUser] = await db
         .update(usersTable)
         .set({
           email: data.email,
           displayName: data.displayName,
           profileImg: data.profileImg,
+          experienceLevel: data.experienceLevel ?? userQueried.experienceLevel,
+          bio: nextBio,
           updatedAt: sql`NOW()`,
         })
         .where(eq(usersTable.id, data.id))
@@ -53,6 +70,8 @@ export const updateUserFn = createServerFn({ method: "POST" })
           email: updatedUser.email,
           displayName: updatedUser.displayName,
           profileImg: updatedUser.profileImg,
+          experienceLevel: updatedUser.experienceLevel,
+          bio: updatedUser.bio,
         },
       };
     } catch (error) {
@@ -73,6 +92,8 @@ export const getUserInfo = createServerFn({ method: "GET" })
         email: user.email,
         displayName: user.displayName,
         profileImg: user.profileImg,
+        experienceLevel: user.experienceLevel,
+        bio: user.bio,
       };
       return {
         success: true,

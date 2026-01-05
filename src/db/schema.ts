@@ -14,6 +14,8 @@ export const usersTable = pgTable("users", {
   email: varchar("email", { length: 255 }).unique().notNull(),
   passwordHash: varchar("password_hash", { length: 255 }).notNull(),
   displayName: varchar("display_name", { length: 120 }).notNull(),
+  experienceLevel: integer("experience_level").notNull().default(0),
+  bio: text("bio"),
   // HACK: using base64 encoded strings for profile images for simplicity.
   // In future, consider migrating to dedicated file storage (e.g., S3)
   // and change it to profileImageUrl
