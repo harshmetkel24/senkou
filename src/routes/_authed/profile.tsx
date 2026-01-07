@@ -147,6 +147,7 @@ function ProfilePage() {
     : profileData.experienceLevel;
   const experienceInfo = getExperienceLevelInfo(activeExperienceLevel);
   const draftExperienceInfo = getExperienceLevelInfo(draftData.experienceLevel);
+  const showExperienceLoading = !editMode && profileData.createdAt === null;
 
   const handleSave = () => {
     if (!userId || updateUserMutation.isPending) return;
@@ -202,19 +203,36 @@ function ProfilePage() {
                 }
                 onUserLoaded={handleUserLoaded}
               />
-              <ExperienceBadge
-                level={activeExperienceLevel}
-                className="absolute -bottom-1 -right-1"
-              />
+              {showExperienceLoading ? (
+                <div
+                  className="absolute -bottom-1 -right-1 h-9 w-9 rounded-full bg-muted/40 animate-pulse ring-2 ring-background"
+                  aria-hidden="true"
+                />
+              ) : (
+                <ExperienceBadge
+                  level={activeExperienceLevel}
+                  className="absolute -bottom-1 -right-1"
+                />
+              )}
             </div>
-            <div className="text-center">
-              <p className="text-sm font-semibold text-foreground">
-                Level {experienceInfo.level + 1}: {experienceInfo.title}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {experienceInfo.subtitle}
-              </p>
-            </div>
+            {showExperienceLoading ? (
+              <div className="text-center" aria-live="polite" aria-busy="true">
+                <div className="mx-auto h-4 w-40 rounded-full bg-muted/50 animate-pulse" />
+                <div className="mx-auto mt-2 h-3 w-28 rounded-full bg-muted/40 animate-pulse" />
+                <p className="mt-2 text-[11px] text-muted-foreground italic">
+                  Fetching your level... stay in the opening sequence.
+                </p>
+              </div>
+            ) : (
+              <div className="text-center">
+                <p className="text-sm font-semibold text-foreground">
+                  Level {experienceInfo.level + 1}: {experienceInfo.title}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {experienceInfo.subtitle}
+                </p>
+              </div>
+            )}
           </div>
           <CardTitle className="flex items-center justify-between">
             Profile
