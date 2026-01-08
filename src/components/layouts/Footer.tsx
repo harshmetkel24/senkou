@@ -1,37 +1,160 @@
-import { Github } from "lucide-react";
+import { Github, Heart, Zap } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 import { useSidebarStore } from "@/lib/stores";
 
 export default function Footer() {
   const collapsed = useSidebarStore((state) => state.collapsed);
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer
-      className={`border-t border-border bg-muted/50 text-muted-foreground transition-all duration-300 ${
+      className={`border-t border-border/50 bg-gradient-to-t from-muted/30 to-background/50 backdrop-blur transition-all duration-300 ${
         collapsed ? "md:ml-[5rem]" : "md:ml-64"
       }`}
     >
-      <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <p className="text-lg font-semibold text-foreground">Senkou • AniList seeker</p>
-          <p className="text-sm text-muted-foreground">
-            Crafted for buttery scrolls, thoughtful filters, and calm night browsing.
-          </p>
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        {/* Main Footer Content */}
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
+          {/* Brand Section */}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-primary"></div>
+              <h3 className="text-sm font-bold uppercase tracking-[0.15em] text-foreground">
+                Senkō
+              </h3>
+            </div>
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              A beautiful, performant AniList browser crafted for cinematic browsing.
+            </p>
+            <div className="flex items-center gap-1 pt-2 text-xs text-muted-foreground">
+              <Zap className="h-3 w-3 text-accent" />
+              <span>Built with passion and care</span>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div className="flex flex-col gap-3">
+            <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-foreground">
+              Browse
+            </h4>
+            <nav className="flex flex-col gap-2">
+              <Link
+                to="/anime"
+                className="text-xs text-muted-foreground transition hover:text-primary hover:translate-x-0.5"
+              >
+                Anime
+              </Link>
+              <Link
+                to="/manga"
+                className="text-xs text-muted-foreground transition hover:text-primary hover:translate-x-0.5"
+              >
+                Manga
+              </Link>
+              <Link
+                to="/characters"
+                className="text-xs text-muted-foreground transition hover:text-primary hover:translate-x-0.5"
+              >
+                Characters
+              </Link>
+              <Link
+                to="/staff"
+                className="text-xs text-muted-foreground transition hover:text-primary hover:translate-x-0.5"
+              >
+                Staff
+              </Link>
+            </nav>
+          </div>
+
+          {/* Resources */}
+          <div className="flex flex-col gap-3">
+            <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-foreground">
+              Resources
+            </h4>
+            <nav className="flex flex-col gap-2">
+              <a
+                href="https://anilist.co"
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-muted-foreground transition hover:text-primary hover:translate-x-0.5"
+              >
+                AniList API
+              </a>
+              <a
+                href="https://github.com/harshmetkel24/senkou"
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-muted-foreground transition hover:text-primary hover:translate-x-0.5"
+              >
+                Source Code
+              </a>
+              <a
+                href="https://github.com/harshmetkel24/senkou/issues"
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-muted-foreground transition hover:text-primary hover:translate-x-0.5"
+              >
+                Report Issues
+              </a>
+            </nav>
+          </div>
+
+          {/* Social & Actions */}
+          <div className="flex flex-col gap-3">
+            <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-foreground">
+              Connect
+            </h4>
+            <div className="flex gap-2">
+              <a
+                href="https://github.com/harshmetkel24/senkou"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="GitHub repository"
+                className="group flex h-8 w-8 items-center justify-center rounded-lg border border-border/50 bg-muted/30 transition hover:border-accent/50 hover:bg-accent/10"
+              >
+                <Github className="h-3.5 w-3.5 text-muted-foreground transition group-hover:text-accent" />
+              </a>
+              <a
+                href="https://github.com/harshmetkel24/senkou"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Star on GitHub"
+                className="group flex h-8 w-8 items-center justify-center rounded-lg border border-border/50 bg-muted/30 transition hover:border-primary/50 hover:bg-primary/10"
+              >
+                <Heart className="h-3.5 w-3.5 text-muted-foreground transition group-hover:text-primary" />
+              </a>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Love the project?{" "}
+              <span className="block text-[0.7rem] pt-1">Consider starring on GitHub</span>
+            </p>
+          </div>
         </div>
-        <div className="flex flex-col items-start gap-2 sm:items-end">
-          <p className="text-xs font-semibold tracking-[0.3em] text-muted-foreground">stay in orbit</p>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-foreground">
-            <span className="rounded-full border border-border px-3 py-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              like my work, please hit a ⭐
+
+        {/* Divider */}
+        <div className="my-8 h-px bg-gradient-to-r from-border/0 via-border/30 to-border/0"></div>
+
+        {/* Bottom Section */}
+        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+          <div className="text-center text-xs text-muted-foreground sm:text-left">
+            <p>
+              © {currentYear} Senkō • Made by{" "}
+              <a
+                href="https://github.com/harshmetkel24"
+                target="_blank"
+                rel="noreferrer"
+                className="text-primary transition hover:text-primary/80"
+              >
+                Harsh Metkel
+              </a>
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1 rounded-full border border-border/30 bg-muted/20 px-3 py-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary/60 animate-pulse"></span>
+              Built with TanStack, Tailwind & ❤️
             </span>
-            <a
-              href="https://github.com/harshmetkel24/senkou"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 rounded-full border border-border bg-accent/5 px-4 py-2 text-[0.85rem] font-medium text-foreground transition hover:border-accent hover:bg-accent/10"
-            >
-              <Github className="h-4 w-4" aria-hidden />
-              <span>github.com/harshmetkel24/senkou</span>
-            </a>
           </div>
         </div>
       </div>
