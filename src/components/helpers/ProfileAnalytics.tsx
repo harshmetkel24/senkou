@@ -134,22 +134,22 @@ export function ProfileAnalytics() {
 
   return (
     <Card className="w-full">
-      <CardHeader className="pb-4">
+      <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <BookMarked className="h-5 w-5 text-primary" />
+          <BookMarked className="size-4 text-primary" />
           Anime Stats
         </CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
             {Array.from({ length: 5 }).map((_, i) => (
               <StatCardSkeleton key={i} />
             ))}
           </div>
         ) : !stats || stats.total === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <BookMarked className="h-12 w-12 text-muted-foreground/40" />
+            <BookMarked className="size-12 text-muted-foreground/40" />
             <p className="mt-3 text-sm text-muted-foreground">
               No anime in your library yet.
             </p>
@@ -160,12 +160,12 @@ export function ProfileAnalytics() {
         ) : (
           <>
             <div className="mb-4 flex items-baseline gap-2">
-              <span className="text-3xl font-bold">{stats.total}</span>
-              <span className="text-sm text-muted-foreground">
-                anime in library
+              <span className="text-2xl font-bold">{stats.total}</span>
+              <span className="text-xl text-muted-foreground">
+                Anime in Library
               </span>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
               {STATUS_ORDER.map((status) => (
                 <StatCard
                   key={status}

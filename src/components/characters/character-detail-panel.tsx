@@ -26,7 +26,7 @@ export function CharacterDetailPanel({
       aria-label={`${character.name} details`}
     >
       <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
-      <article className="relative z-10 grid max-h-[92vh] w-full max-w-5xl grid-cols-1 overflow-hidden rounded-3xl border border-border/70 bg-gradient-to-b from-card/90 via-background/95 to-background shadow-[0_40px_90px_rgba(0,0,0,0.65)] md:grid-cols-[320px_minmax(0,1fr)]">
+      <article className="relative z-10 grid max-h-[92vh] w-full max-w-5xl grid-cols-1 overflow-hidden rounded-3xl border border-border/70 bg-gradient-to-b from-card/90 via-background/95 to-background shadow-(--shadow-immersive) md:grid-cols-[320px_minmax(0,1fr)]">
         <div className="relative h-full bg-black/30">
           <Image
             src={character.image}

@@ -410,7 +410,7 @@ function SearchAutocompletePanel({
       className="absolute left-0 right-0 top-full z-30 mt-3"
       onMouseDown={(event) => event.preventDefault()}
     >
-      <div className="space-y-4 rounded-3xl max-h-[450px] overflow-auto border border-border/60 bg-card/95 p-4 shadow-[0_35px_100px_rgba(0,0,0,0.55)] backdrop-blur">
+      <div className="space-y-4 rounded-3xl max-h-[450px] overflow-auto border border-border/60 bg-card/95 p-4 shadow-(--shadow-immersive) backdrop-blur">
         {isLoading ? (
           <div className="flex items-center gap-2 rounded-2xl border border-border/60 bg-background/70 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
             <RefreshCw className="h-4 w-4 animate-spin" />

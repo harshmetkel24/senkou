@@ -103,7 +103,7 @@ export function MediaDetailPanel({
       aria-label={`${media.title} details`}
     >
       <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
-      <article className="relative z-10 flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-b from-card/90 via-background/95 to-background shadow-[0_40px_90px_rgba(0,0,0,0.65)]">
+      <article className="relative z-10 flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-b from-card/90 via-background/95 to-background shadow-(--shadow-immersive)">
         <header className="relative h-64 overflow-hidden">
           <Image
             src={media.bannerImage ?? media.coverImage}

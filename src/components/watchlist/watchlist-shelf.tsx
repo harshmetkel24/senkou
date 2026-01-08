@@ -249,7 +249,7 @@ export function WatchlistShelfSkeleton({
               key={index}
               className="basis-60 md:basis-64 lg:basis-72"
             >
-              <article className="flex h-full flex-col gap-3 rounded-3xl border border-border/60 bg-card/40 p-4 shadow-[0_25px_60px_rgba(0,0,0,0.35)]">
+              <article className="flex h-full flex-col gap-3 rounded-3xl border border-border/60 bg-card/40 p-4 shadow-(--shadow-soft)">
                 <div className="aspect-[3/4] rounded-2xl bg-muted/30 animate-pulse" />
                 <div className="space-y-2">
                   <div className="h-3 w-24 rounded-full bg-muted/40 animate-pulse" />

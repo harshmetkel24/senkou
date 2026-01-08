@@ -447,7 +447,7 @@ function SearchRoute() {
             onYearChange={handleYearChange}
             onClearFilters={handleClearFilters}
           />
-          <header className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-[0_45px_120px_rgba(0,0,0,0.55)]">
+          <header className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-(--shadow-immersive)">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
               Cinematic discovery
             </p>
@@ -604,7 +604,7 @@ function CategorySection({
       : "AniList couldn't respond fast enough. Retry in a moment.";
 
   return (
-    <section className="space-y-6 rounded-2xl border border-border/60 bg-card/70 p-6 shadow-[0_35px_90px_rgba(0,0,0,0.5)]">
+    <section className="space-y-6 rounded-2xl border border-border/60 bg-card/70 p-6 shadow-(--shadow-elevated)">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">

@@ -1,5 +1,5 @@
-import { Flame, Heart, Sparkles } from "lucide-react";
 import { Image } from "@unpic/react";
+import { Flame, Heart, Sparkles } from "lucide-react";
 
 import type { CharacterListItem } from "@/data/queries/characters";
 import { cn } from "@/lib/utils";
@@ -17,7 +17,7 @@ export function CharacterCard({ character, onSelect }: CharacterCardProps) {
       type="button"
       onClick={() => onSelect?.(character)}
       className={cn(
-        "group flex flex-col rounded-3xl border border-border/80 bg-gradient-to-b from-card/80 to-background/30 p-5 text-left shadow-[0_20px_50px_rgba(0,0,0,0.45)] transition hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70",
+        "group flex flex-col rounded-3xl border border-border/80 bg-gradient-to-b from-card/80 to-background/30 p-5 text-left shadow-(--shadow-soft) transition hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
       )}
       aria-label={`Open profile for ${character.name}`}
     >
