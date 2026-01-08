@@ -23,9 +23,10 @@ import appCss from "../styles.css?url";
 import { NotFound } from "@/components/helpers/NotFound";
 
 import { getCurrentUserFn } from "@/lib/auth";
+import { registerServiceWorker } from "@/lib/pwa";
 import type { AuthContextType } from "@/types";
 import type { QueryClient } from "@tanstack/react-query";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -56,11 +57,44 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         title: "Senkou",
       },
+      {
+        name: "theme-color",
+        content: "#0f0f23",
+      },
+      {
+        name: "description",
+        content:
+          "A cinematic, IMDB-style AniList browser with infinite scroll and rich micro-interactions",
+      },
+      {
+        name: "mobile-web-app-capable",
+        content: "yes",
+      },
+      {
+        name: "apple-mobile-web-app-capable",
+        content: "yes",
+      },
+      {
+        name: "apple-mobile-web-app-status-bar-style",
+        content: "black-translucent",
+      },
+      {
+        name: "apple-mobile-web-app-title",
+        content: "Senkou",
+      },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      {
+        rel: "manifest",
+        href: "/manifest.json",
+      },
+      {
+        rel: "apple-touch-icon",
+        href: "/logo192.png",
       },
     ],
   }),
@@ -89,6 +123,10 @@ function RootComponent() {
     select: (state) => state.location.pathname,
   });
   const sidebarVisible = pathsToExcludeSidebar.includes(pathname);
+
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
 
   return (
     <RootDocument>
