@@ -236,7 +236,7 @@ function AnimeRoute() {
         ) : spotlightItems.length ? (
           <section className="space-y-4">
             <Carousel
-              className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-[0_45px_120px_rgba(0,0,0,0.55)] md:h-[520px]"
+              className="overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-(--shadow-immersive) md:h-[520px]"
               opts={{ loop: true }}
               plugins={[autoplayPlugin]}
             >

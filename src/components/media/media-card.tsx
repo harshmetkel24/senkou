@@ -1,5 +1,5 @@
-import { Calendar, Flame, Star } from "lucide-react";
 import { Image } from "@unpic/react";
+import { Calendar, Flame, Star } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -38,7 +38,7 @@ export function MediaCard({ media, onSelect }: MediaCardProps) {
       type="button"
       onClick={() => onSelect?.(media)}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-b from-background/40 to-background/5 text-left shadow-[0_20px_45px_rgba(0,0,0,0.45)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70",
+        "group relative flex flex-col overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-b from-background/40 to-background/5 text-left shadow-(--shadow-soft) transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
       )}
       aria-label={`Open details for ${media.title}`}
     >
