@@ -1,11 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import { Github, Twitter, Zap } from "lucide-react";
+import { Download, Github, Twitter, Zap } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { usePWAInstall } from "@/lib/hooks/use-pwa-install";
 import { useSidebarStore } from "@/lib/stores";
 
 export default function Footer() {
   const collapsed = useSidebarStore((state) => state.collapsed);
   const currentYear = new Date().getFullYear();
+  const { isInstallable, isInstalled, install } = usePWAInstall();
 
   return (
     <footer
@@ -131,6 +134,16 @@ export default function Footer() {
                 Consider starring on GitHub
               </span>
             </p>
+            {isInstallable && !isInstalled && (
+              <Button
+                onClick={install}
+                size="sm"
+                className="mt-2 w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-500 hover:to-emerald-500 shadow-md shadow-green-500/20"
+              >
+                <Download className="h-4 w-4" />
+                Install App
+              </Button>
+            )}
           </div>
         </div>
 
