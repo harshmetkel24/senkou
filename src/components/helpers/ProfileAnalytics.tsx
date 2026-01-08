@@ -162,7 +162,7 @@ export function ProfileAnalytics() {
             <div className="mb-4 flex items-baseline gap-2">
               <span className="text-2xl font-bold">{stats.total}</span>
               <span className="text-xl text-muted-foreground">
-                anime in library
+                Anime in Library
               </span>
             </div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
