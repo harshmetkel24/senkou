@@ -1,3 +1,4 @@
+import { ProfileAnalytics } from "@/components/helpers/ProfileAnalytics";
 import {
   ProfileAvatar,
   getUserInfoQueryKey,
@@ -190,7 +191,7 @@ function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center">
+    <div className="w-full flex flex-col items-center justify-center gap-6 py-8 px-4">
       <Card className="w-full max-w-lg">
         <CardHeader>
           <div className="flex flex-col items-center space-y-3 mb-4">
@@ -417,6 +418,11 @@ function ProfilePage() {
           ) : null}
         </CardContent>
       </Card>
+      {!editMode ? (
+        <div className="w-full max-w-4xl">
+          <ProfileAnalytics />
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -220,6 +220,51 @@ export const updateWatchlistStatusFn = createServerFn({ method: "POST" })
     }
   });
 
+export const getWatchlistStatsFn = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const session = await useAppSession();
+    const userId = session.data.userId;
+
+    if (!userId) {
+      return null;
+    }
+
+    const [{ db }, { watchlistEntriesTable }, { eq, sql, count }] =
+      await Promise.all([
+        import("@/db"),
+        import("@/db/schema"),
+        import("drizzle-orm"),
+      ]);
+
+    const statusCounts = await db
+      .select({
+        status: watchlistEntriesTable.status,
+        count: count(),
+      })
+      .from(watchlistEntriesTable)
+      .where(eq(watchlistEntriesTable.userId, userId))
+      .groupBy(watchlistEntriesTable.status);
+
+    const stats = {
+      PLANNING: 0,
+      WATCHING: 0,
+      COMPLETED: 0,
+      PAUSED: 0,
+      DROPPED: 0,
+      total: 0,
+    };
+
+    for (const row of statusCounts) {
+      if (row.status in stats) {
+        stats[row.status as keyof typeof stats] = row.count;
+      }
+      stats.total += row.count;
+    }
+
+    return stats;
+  }
+);
+
 export const removeFromWatchlistFn = createServerFn({ method: "POST" })
   .inputValidator((data: RemoveWatchlistEntryInput) =>
     removeWatchlistEntrySchema.parse(data)
