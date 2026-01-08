@@ -1,5 +1,5 @@
-import { Github, Heart, Zap } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { Github, Twitter, Zap } from "lucide-react";
 
 import { useSidebarStore } from "@/lib/stores";
 
@@ -13,7 +13,7 @@ export default function Footer() {
         collapsed ? "md:ml-[5rem]" : "md:ml-64"
       }`}
     >
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-8">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
           {/* Brand Section */}
@@ -25,7 +25,8 @@ export default function Footer() {
               </h3>
             </div>
             <p className="text-xs leading-relaxed text-muted-foreground">
-              A beautiful, performant AniList browser crafted for cinematic browsing.
+              A beautiful, performant AniList browser crafted for cinematic
+              browsing.
             </p>
             <div className="flex items-center gap-1 pt-2 text-xs text-muted-foreground">
               <Zap className="h-3 w-3 text-accent" />
@@ -115,24 +116,26 @@ export default function Footer() {
                 <Github className="h-3.5 w-3.5 text-muted-foreground transition group-hover:text-accent" />
               </a>
               <a
-                href="https://github.com/harshmetkel24/senkou"
+                href="https://x.com/harshmetkel24"
                 target="_blank"
                 rel="noreferrer"
-                aria-label="Star on GitHub"
+                aria-label="Twitter / X"
                 className="group flex h-8 w-8 items-center justify-center rounded-lg border border-border/50 bg-muted/30 transition hover:border-primary/50 hover:bg-primary/10"
               >
-                <Heart className="h-3.5 w-3.5 text-muted-foreground transition group-hover:text-primary" />
+                <Twitter className="h-3.5 w-3.5 text-muted-foreground transition group-hover:text-primary" />
               </a>
             </div>
             <p className="text-xs text-muted-foreground">
               Love the project?{" "}
-              <span className="block text-[0.7rem] pt-1">Consider starring on GitHub</span>
+              <span className="block text-[0.7rem] pt-1">
+                Consider starring on GitHub
+              </span>
             </p>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="my-8 h-px bg-gradient-to-r from-border/0 via-border/30 to-border/0"></div>
+        <div className="my-4 h-px bg-gradient-to-r from-border/0 via-border/30 to-border/0"></div>
 
         {/* Bottom Section */}
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
@@ -140,7 +143,7 @@ export default function Footer() {
             <p>
               © {currentYear} Senkō • Made by{" "}
               <a
-                href="https://github.com/harshmetkel24"
+                href="https://isharsh.vercel.app/"
                 target="_blank"
                 rel="noreferrer"
                 className="text-primary transition hover:text-primary/80"
