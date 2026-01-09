@@ -2,6 +2,7 @@ import { keepPreviousData, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
 import { Suspense, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { PendingComponent } from "@/components/helpers/PendingComponent";
 import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
@@ -41,6 +42,7 @@ export const Route = createFileRoute("/")({
 });
 
 function App() {
+  const { t } = useTranslation("home");
   const { user } = useAuth();
   const { data: trendingAnime } = useSuspenseQuery(trendingAnimeQueryOptions());
   const [activeMedia, setActiveMedia] = useState<MediaDetailData | undefined>();
@@ -69,11 +71,10 @@ function App() {
             className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6"
           />
           <h1 className="text-4xl md:text-6xl font-black mb-4 uppercase [letter-spacing:-0.08em]">
-            senkō!
+            {t("welcome")}
           </h1>
           <p className="mx-auto max-w-2xl text-lg md:text-xl text-muted-foreground font-light">
-            Endless light. Endless stories. Built with the same sleek, data-rich
-            spirit you love on IMDb—now curated for anime-first adventures.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -92,7 +93,9 @@ function App() {
 
         {/* Trending Anime */}
         <section className="w-full max-w-6xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-6">Trending Now</h2>
+          <h2 className="text-2xl font-bold text-center mb-6">
+            {t("trending")}
+          </h2>
           <MediaGrid
             items={trendingAnime.items.slice(1)}
             onSelect={handleSelect}
@@ -112,11 +115,7 @@ function App() {
   );
 }
 
-const HERO_PLACEHOLDER_SEEDS = [
-  "One Piece",
-  "Frieren",
-  "Gojo Satoru",
-] as const;
+const HERO_PLACEHOLDER_SEEDS = ["One Piece", "Frieren", "Gojo Satoru"] as const;
 
 function buildHeroSearchPlaceholders(animeItems: AnimeListItem[]): string[] {
   const animeTitles = animeItems.map((item) => item.title).filter(Boolean);

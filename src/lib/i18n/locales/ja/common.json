@@ -1,0 +1,11 @@
+{
+  "appName": "閃光",
+  "loading": "読み込み中...",
+  "error": "エラーが発生しました",
+  "retry": "再試行",
+  "cancel": "キャンセル",
+  "save": "保存",
+  "search": "検索",
+  "noResults": "結果が見つかりません",
+  "viewAll": "すべて表示"
+}

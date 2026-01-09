@@ -23,10 +23,12 @@ import appCss from "../styles.css?url";
 import { NotFound } from "@/components/helpers/NotFound";
 
 import { getCurrentUserFn } from "@/lib/auth";
+import "@/lib/i18n";
 import { registerServiceWorker } from "@/lib/pwa";
 import type { AuthContextType } from "@/types";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactNode, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -105,8 +107,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 const pathsToExcludeSidebar = ["/login", "/register"];
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+  const { i18n } = useTranslation();
+  
   return (
-    <html lang="en" data-theme="senkou-dark" className="dark">
+    <html lang={i18n.language} data-theme="senkou-dark" className="dark">
       <head>
         <HeadContent />
       </head>

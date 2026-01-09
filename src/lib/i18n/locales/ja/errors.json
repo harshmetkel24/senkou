@@ -1,0 +1,7 @@
+{
+  "notFound": "ページが見つかりません",
+  "notFoundDescription": "お探しのページは存在しないか、移動されました。",
+  "goHome": "家に帰れ",
+  "rateLimit": "レート制限を超えました。{{seconds}}秒後に再試行してください。",
+  "networkError": "ネットワークエラー。接続を確認してください。"
+}

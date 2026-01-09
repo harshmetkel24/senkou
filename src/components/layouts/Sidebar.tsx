@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import {
   Sheet,
   SheetContent,
@@ -25,21 +26,23 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 
 const navItems = [
-  { to: "/", label: "Home", icon: Home },
-  { to: "/anime", label: "Anime", icon: Film },
-  { to: "/manga", label: "Manga", icon: BookOpen },
-  { to: "/characters", label: "Characters", icon: Users },
+  { to: "/", labelKey: "home", icon: Home },
+  { to: "/anime", labelKey: "anime", icon: Film },
+  { to: "/manga", labelKey: "manga", icon: BookOpen },
+  { to: "/characters", labelKey: "characters", icon: Users },
 ];
 const authItems = [
-  { to: "/login", label: "Log in", icon: LogIn },
-  { to: "/register", label: "Register", icon: UserPlus },
+  { to: "/login", labelKey: "login", icon: LogIn },
+  { to: "/register", labelKey: "register", icon: UserPlus },
 ];
-const profileItem = { to: "/profile", label: "Profile", icon: User };
+const profileItem = { to: "/profile", labelKey: "profile", icon: User };
 
 export default function Sidebar() {
+  const { t } = useTranslation("nav");
   const { user } = useAuth();
 
   const collapsed = useSidebarStore((state) => state.collapsed);
@@ -90,11 +93,14 @@ export default function Sidebar() {
         >
           <div className="flex h-full flex-col">
             <SheetHeader className="px-4">
-              <SheetTitle className="text-left">Navigation</SheetTitle>
+              <SheetTitle className="text-left">
+                {t("navigation")}
+              </SheetTitle>
             </SheetHeader>
             <nav className="mt-6 flex flex-1 flex-col space-y-2 px-4">
               <div className="space-y-2">
-                {navItems.map(({ to, label, icon: Icon }) => {
+                {navItems.map(({ to, labelKey, icon: Icon }) => {
+                  const label = t(labelKey);
                   // FIXME: should use route matching here to find active route
                   const isActive =
                     pathname === to ||
@@ -121,6 +127,7 @@ export default function Sidebar() {
                 })}
               </div>
               <div className="mt-auto flex flex-col gap-2 border-t border-border/60 pb-6 pt-4">
+                <LanguageSwitcher collapsed={false} />
                 {user ? (
                   <>
                     <Link to={profileItem.to}>
@@ -131,7 +138,7 @@ export default function Sidebar() {
                           onClick={() => setMobileOpen(false)}
                         >
                           <profileItem.icon className="mr-2 h-4 w-4" />
-                          {profileItem.label}
+                          {t(profileItem.labelKey)}
                         </Button>
                       )}
                     </Link>
@@ -142,12 +149,12 @@ export default function Sidebar() {
                       onClick={() => logoutMutation.mutate(undefined)}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      Logout
+                      {t("logout")}
                     </Button>
                   </>
                 ) : (
-                  authItems.map(({ to, label, icon: Icon }) => {
-                    // FIXME: should use route matching here to find active route
+                  authItems.map(({ to, labelKey, icon: Icon }) => {
+                    const label = t(labelKey);
                     const isActive = pathname === to;
                     return (
                       <Button
@@ -155,7 +162,7 @@ export default function Sidebar() {
                         asChild
                         variant={isActive ? "secondary" : "ghost"}
                         className={`w-full justify-start ${
-                          label === "Register"
+                          labelKey === "register"
                             ? "text-xs uppercase tracking-[0.3em]"
                             : ""
                         }`}
@@ -222,8 +229,8 @@ export default function Sidebar() {
 
         <nav className="flex flex-1 flex-col p-4">
           <div className="space-y-2">
-            {navItems.map(({ to, label, icon: Icon }) => {
-              // FIXME: should use route matching here to find active route
+            {navItems.map(({ to, labelKey, icon: Icon }) => {
+              const label = t(labelKey);
               const isActive =
                 pathname === to ||
                 (to !== "/" && pathname.startsWith(`${to}/`));
@@ -252,6 +259,7 @@ export default function Sidebar() {
               collapsed ? "items-center" : ""
             )}
           >
+            <LanguageSwitcher collapsed={collapsed} />
             {user ? (
               <>
                 <Button
@@ -261,13 +269,13 @@ export default function Sidebar() {
                     "w-full",
                     collapsed ? "justify-center px-2" : "justify-start"
                   )}
-                  title={collapsed ? profileItem.label : undefined}
+                  title={collapsed ? t(profileItem.labelKey) : undefined}
                 >
                   <Link to={profileItem.to}>
                     <profileItem.icon
                       className={`${collapsed ? "" : "mr-2"} h-4 w-4`}
                     />
-                    {!collapsed && profileItem.label}
+                    {!collapsed && t(profileItem.labelKey)}
                   </Link>
                 </Button>
                 <Button
@@ -276,15 +284,16 @@ export default function Sidebar() {
                     "w-full",
                     collapsed ? "justify-center px-2" : "justify-start"
                   )}
-                  title={collapsed ? "Logout" : undefined}
+                  title={collapsed ? t("logout") : undefined}
                   onClick={() => logoutFn()}
                 >
                   <LogOut className={cn("h-4 w-4", { "mr-2": !collapsed })} />
-                  {!collapsed && "Logout"}
+                  {!collapsed && t("logout")}
                 </Button>
               </>
             ) : (
-              authItems.map(({ to, label, icon: Icon }) => {
+              authItems.map(({ to, labelKey, icon: Icon }) => {
+                const label = t(labelKey);
                 const isActive = pathname === to;
                 return (
                   <Button
@@ -294,7 +303,7 @@ export default function Sidebar() {
                     className={cn(
                       "w-full",
                       collapsed ? "justify-center px-2" : "justify-start",
-                      label === "Register"
+                      labelKey === "register"
                         ? "text-xs uppercase tracking-[0.3em]"
                         : ""
                     )}

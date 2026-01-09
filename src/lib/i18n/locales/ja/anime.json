@@ -1,0 +1,12 @@
+{
+  "title": "アニメ",
+  "episodes": "話数",
+  "status": "状態",
+  "score": "スコア",
+  "popularity": "人気度",
+  "format": "フォーマット",
+  "season": "シーズン",
+  "studio": "スタジオ",
+  "genres": "ジャンル",
+  "synopsis": "あらすじ"
+}
