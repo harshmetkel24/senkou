@@ -34,7 +34,7 @@
 
 Senkou (線光) is an IMDB-style experience for anime, manga, and characters. Stage 1 centers on a cinematic, URL-driven browsing surface powered by TanStack Start RSC loaders + React Query hydration, spotlight carousels, and infinite-scroll-ready grids. Later stages layer in auth, watchlists, recommendations, and social features while holding the performance budgets (TTFB < 200 ms cached, LCP < 2.5 s, CLS < 0.05).
 
-## v0.1 Highlights
+## Features
 
 - Home hero with `Cmd/Ctrl+K` quick search, rotating trending placeholder prompts, a trending grid, and a signed-in watchlist shelf (Neon + Drizzle).
 - Sidebar-first Anime, Manga, and Characters routes that preload AniList data in loaders, hydrate client search from URL params, and reuse cached list data inside detail panels.
@@ -42,6 +42,9 @@ Senkou (線光) is an IMDB-style experience for anime, manga, and characters. St
 - Auth preview: email/password registration + login with bcrypt hashes stored in Postgres, cookie sessions driven by `SESSION_SECRET`, and watchlist add/remove actions.
 - Profile polish: system-generated "Joined Since" metadata alongside editable profile fields.
 - UX polish: skeleton grids, lazy media, spotlight carousels, retry/backoff messaging on AniList hiccups, hero placeholder rotation (paused on focus), and hotkeys (`Cmd/Ctrl+K`, `Cmd/Ctrl+S`, Shift+?).
+- i18n: Full internationalization with English and Japanese translations using `i18next` + `react-i18next`, browser language detection, and localStorage persistence.
+- PWA-ready: Web app manifest, service worker with network-first API caching and cache-first image strategy, and offline fallback for AniList data.
+- Theme toggle: Dark/light mode switching with localStorage persistence and Radix color tokens.
 
 ## Coming soon
 
@@ -66,8 +69,10 @@ Senkou (線光) is an IMDB-style experience for anime, manga, and characters. St
   - [ ] Server Actions for watchlists with optimistic updates, CSRF protection, and rate-limited mutations.
   - [ ] "My Library" view with filters/pagination plus profile controls (avatar, display name, theme/content rating prefs).
   - [ ] Collections and shareable slugs, ratings/reviews with moderation + helpful votes, activity feed, and recommendations.
-  - [ ] Offline/PWA caching and debounced faceted search (year/season/format/studios/tags).
-  - [ ] CDN/blobs for cover art, i18n routing, and admin tooling for feature flags + moderation queues.
+  - [ ] Debounced faceted search (year/season/format/studios/tags).
+  - [x] PWA support with service worker, offline caching, and installable manifest.
+  - [ ] CDN/blobs for cover art and admin tooling for feature flags + moderation queues.
+  - [x] i18n with English/Japanese translations, browser detection, and language switcher.
 
 ## Stack & structure
 
