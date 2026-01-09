@@ -1,0 +1,11 @@
+{
+  "appName": "Senkou",
+  "loading": "Loading...",
+  "error": "Something went wrong",
+  "retry": "Retry",
+  "cancel": "Cancel",
+  "save": "Save",
+  "search": "Search",
+  "noResults": "No results found",
+  "viewAll": "View All"
+}

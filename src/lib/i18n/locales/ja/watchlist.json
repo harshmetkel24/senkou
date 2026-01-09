@@ -1,0 +1,10 @@
+{
+  "title": "マイリスト",
+  "add": "リストに追加",
+  "remove": "リストから削除",
+  "watching": "視聴中",
+  "completed": "完了",
+  "planToWatch": "視聴予定",
+  "dropped": "中断",
+  "onHold": "保留中"
+}

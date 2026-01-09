@@ -62,7 +62,7 @@ code {
   --card: var(--slate-2);
   --card-foreground: var(--yellow-10);
   --popover: var(--slate-3);
-  --popover-foreground: var(--yellow-3);
+  --popover-foreground: var(--yellow-9);
   --primary: var(--yellow-9);
   --primary-foreground: var(--slate-1);
   --primary-hover: var(--yellow-1);

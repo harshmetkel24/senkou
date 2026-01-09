@@ -1,0 +1,7 @@
+{
+  "notFound": "Page not found",
+  "notFoundDescription": "The page you're looking for doesn't exist or has been moved.",
+  "goHome": "Go Home",
+  "rateLimit": "Rate limit exceeded. Please try again in {{seconds}} seconds.",
+  "networkError": "Network error. Please check your connection."
+}
