@@ -1,4 +1,6 @@
 import { useAppSession } from "@/lib/auth/session";
+import { resolveProfileImageUrl } from "@/lib/storage/avatar";
+import { uploadProfileImageFromDataUrl } from "@/lib/storage/minio";
 import type { User } from "@/types";
 import { createServerFn } from "@tanstack/react-start";
 
@@ -35,6 +37,7 @@ export const updateUserFn = createServerFn({ method: "POST" })
       ]);
 
       let nextBio = userQueried.bio;
+      let nextProfileImg = userQueried.profileImg ?? null;
 
       if (data.bio !== undefined) {
         if (data.bio === null) {
@@ -48,12 +51,29 @@ export const updateUserFn = createServerFn({ method: "POST" })
         }
       }
 
+      if (typeof data.profileImg === "string") {
+        const trimmedImage = data.profileImg.trim();
+        if (!trimmedImage.length) {
+          nextProfileImg = null;
+        } else if (trimmedImage.startsWith("data:")) {
+          const uploadResult = await uploadProfileImageFromDataUrl({
+            dataUrl: trimmedImage,
+            userId: data.id,
+          });
+          nextProfileImg = uploadResult.url;
+        } else {
+          nextProfileImg = trimmedImage;
+        }
+      } else if (data.profileImg === null) {
+        nextProfileImg = null;
+      }
+
       const [updatedUser] = await db
         .update(usersTable)
         .set({
           email: data.email,
           displayName: data.displayName,
-          profileImg: data.profileImg,
+          profileImg: nextProfileImg,
           experienceLevel: data.experienceLevel ?? userQueried.experienceLevel,
           bio: nextBio,
           updatedAt: sql`NOW()`,
@@ -72,7 +92,7 @@ export const updateUserFn = createServerFn({ method: "POST" })
           id: updatedUser.id,
           email: updatedUser.email,
           displayName: updatedUser.displayName,
-          profileImg: updatedUser.profileImg,
+          profileImg: resolveProfileImageUrl(updatedUser.profileImg),
           experienceLevel: updatedUser.experienceLevel,
           bio: updatedUser.bio,
           createdAt: updatedUser.createdAt,
@@ -81,7 +101,11 @@ export const updateUserFn = createServerFn({ method: "POST" })
       };
     } catch (error) {
       console.error("Error updating user:", error);
-      throw error;
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to update profile. Please try again.";
+      throw new Error(message);
     }
   });
 
@@ -96,7 +120,7 @@ export const getUserInfo = createServerFn({ method: "GET" })
       const fullUser = {
         email: user.email,
         displayName: user.displayName,
-        profileImg: user.profileImg,
+        profileImg: resolveProfileImageUrl(user.profileImg),
         experienceLevel: user.experienceLevel,
         bio: user.bio,
         createdAt: user.createdAt,

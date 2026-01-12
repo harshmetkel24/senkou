@@ -97,14 +97,31 @@ Senkou (線光) is an IMDB-style experience for anime, manga, and characters. St
    ```
    DATABASE_URL="postgres://user:password@host:port/db"
    SESSION_SECRET="at-least-32-characters"
+   # MinIO (profile avatars)
+   MINIO_ENDPOINT="http://127.0.0.1:9000"
+   MINIO_PUBLIC_URL="http://127.0.0.1:9000"
+   MINIO_REGION="us-east-1"
+   MINIO_BUCKET="senkou"
+   MINIO_ACCESS_KEY="minioadmin"
+   MINIO_SECRET_KEY="minioadmin"
    ```
 
    Neon is the default Postgres target; `drizzle.config.ts` reads `DATABASE_URL`.
+   The app will auto-create `MINIO_BUCKET` on first upload; set a public-read
+   policy (or your preferred equivalent) via `mc` so avatar URLs are viewable.
 
 3. (Optional) Sync the schema: `pnpm drizzle:generate && pnpm drizzle:push`.
 4. Run the dev server with `pnpm dev` (`http://localhost:3000`). Before shipping, run `pnpm test` and `pnpm build`; preview production output with `pnpm serve`.
 
 Common scripts: `pnpm dev`, `pnpm build`, `pnpm serve`, `pnpm test`, `pnpm drizzle:studio` (inspect data), `pnpm drizzle:generate`, `pnpm drizzle:push`.
+
+## Local MinIO/AIStor (profile uploads)
+
+1. Place your AIStor license anywhere on disk and set `MINIO_LICENSE_PATH` to that file (e.g., in your `.env`), or drop it at `docker/minio/minio.license` (ignored by git). Optionally add TLS certs to `docker/minio/certs`.
+2. Ensure your `.env` matches the values above (`MINIO_ENDPOINT=http://127.0.0.1:9000`, `MINIO_PUBLIC_URL` the same, bucket/keys as desired).
+3. Start the container with `pnpm docker:up` (stops with `pnpm docker:down`). Data persists in `docker/minio/data`.
+4. Visit `http://localhost:9001` to confirm the console is up (default creds: `minioadmin:minioadmin` unless you override envs).
+5. The app auto-creates the avatar bucket on first upload; use `mc` to set a public-read policy or equivalent before sharing URLs.
 
 ## Contributing
 

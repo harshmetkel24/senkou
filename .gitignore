@@ -11,3 +11,6 @@ count.txt
 .output
 .vinxi
 todos.json
+docker/minio/data
+docker/minio/certs
+docker/minio/minio.license
