@@ -43,6 +43,7 @@ const profileItem = { to: "/profile", labelKey: "profile", icon: User };
 
 export default function Sidebar() {
   const { t } = useTranslation("nav");
+  const { t: tAuth } = useTranslation("auth");
   const { user } = useAuth();
 
   const collapsed = useSidebarStore((state) => state.collapsed);
@@ -59,21 +60,21 @@ export default function Sidebar() {
     mutationFn: logoutFn,
     onSuccess: (response) => {
       if (!response?.success) {
-        toast.error("User logged out failed", {
-          description: "Please try again in a moment.",
+        toast.error(tAuth("logoutFailed"), {
+          description: tAuth("pleaseTryAgainInMoment"),
         });
         return;
       }
 
-      toast.success("Signed in", {
-        description: "Redirecting you to your dashboard.",
+      toast.success(tAuth("logoutSuccess"), {
+        description: tAuth("redirecting"),
       });
       navigate({ to: "/" });
     },
     onError: (error) => {
       const description =
         error instanceof Error ? error.message : "Please try again.";
-      toast.error("Logout failed", { description });
+      toast.error(tAuth("logoutFailed"), { description });
     },
   });
 

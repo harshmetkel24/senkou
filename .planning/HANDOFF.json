@@ -1,0 +1,52 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-04-16T19:33:55.793Z",
+  "phase": null,
+  "phase_name": "quick-task: migrate-avatar-storage-minio-to-supabase",
+  "phase_dir": ".planning/",
+  "plan": null,
+  "task": null,
+  "total_tasks": null,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": 1, "name": "Rename minio.ts → supabase.ts, update S3 client to use SUPABASE_S3_* credentials", "status": "done"},
+    {"id": 2, "name": "Update avatar.ts: R2 env vars → SUPABASE_* env vars, fix public URL to include bucket name", "status": "done"},
+    {"id": 3, "name": "Update user.ts import: storage/r2 → storage/supabase", "status": "done"},
+    {"id": 4, "name": "Update .env.example with SUPABASE_* vars", "status": "done"},
+    {"id": 5, "name": "Update README.md: remove MinIO section, add Supabase Storage setup", "status": "done"},
+    {"id": 6, "name": "Remove docker/minio/ directory", "status": "done"},
+    {"id": 7, "name": "Remove docker:up/docker:down scripts from package.json", "status": "done"},
+    {"id": 8, "name": "User created Supabase project, avatars bucket (public), and S3 access keys", "status": "done"},
+    {"id": 9, "name": "User populated .env with correct endpoint/region/public URL/credentials", "status": "in_progress", "progress": "Env vars set but secret key was truncated in screenshot; user regenerated keys"}
+  ],
+  "remaining_tasks": [
+    {"id": 10, "name": "Verify avatar upload works end-to-end in dev", "status": "not_started"}
+  ],
+  "blockers": [
+    {
+      "description": "Previous S3 secret key was truncated when copying from screenshot — user generated a new key pair",
+      "type": "human_action",
+      "workaround": "New keys generated: Access Key ID = 32f5704d7a295c94bfaab7b0cf25b63b. User must ensure full secret key is pasted into .env."
+    }
+  ],
+  "human_actions_pending": [
+    {
+      "action": "Confirm full SUPABASE_S3_SECRET_ACCESS_KEY is in .env (not truncated) then restart pnpm dev and test avatar upload",
+      "context": "Previous attempt failed with signature mismatch due to truncated secret key",
+      "blocking": true
+    }
+  ],
+  "decisions": [
+    {"decision": "Use Supabase Storage instead of Cloudflare R2", "rationale": "R2 requires credit card; Supabase free tier has no credit card requirement", "phase": "quick"},
+    {"decision": "Keep @aws-sdk/client-s3 with forcePathStyle: true", "rationale": "Supabase Storage is S3-compatible so no SDK change needed, just env var swap", "phase": "quick"},
+    {"decision": "Public URL format: <base>/<bucket>/<key>", "rationale": "Supabase public URLs include bucket name in path, unlike R2 which did not", "phase": "quick"},
+    {"decision": "Start fresh — no migration of existing avatars", "rationale": "User confirmed no existing avatar data worth migrating", "phase": "quick"}
+  ],
+  "uncommitted_files": [
+    ".env.example", "README.md", "package.json", "src/db/schema.ts",
+    "src/lib/server/user.ts", "src/lib/storage/avatar.ts",
+    "src/lib/storage/supabase.ts", "docker/minio/docker-compose.yml (deleted)"
+  ],
+  "next_action": "Confirm .env has full (non-truncated) SUPABASE_S3_SECRET_ACCESS_KEY, restart pnpm dev, test avatar upload on /profile page",
+  "context_notes": "All code changes are complete and correct. The only remaining work is verifying the .env credentials are complete and that an end-to-end avatar upload succeeds. Supabase project ref is uyplkgcwahwoofxlpaur, region ap-south-1, bucket name avatars."
+}

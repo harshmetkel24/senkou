@@ -198,7 +198,7 @@ function ProfilePage() {
             <div className="relative inline-flex h-28 w-28 items-center justify-center">
               <ProfileAvatar
                 userId={userId}
-                draftImage={editMode ? draftData.profileImg : null}
+                draftImage={editMode ? draftData.profileImg : profileData.profileImg}
                 fallbackInitial={
                   profileData.displayName || user?.displayName || ""
                 }

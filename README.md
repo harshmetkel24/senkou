@@ -97,9 +97,18 @@ Senkou (線光) is an IMDB-style experience for anime, manga, and characters. St
    ```
    DATABASE_URL="postgres://user:password@host:port/db"
    SESSION_SECRET="at-least-32-characters"
+   # Supabase Storage (profile avatars)
+   SUPABASE_S3_ENDPOINT="https://your-project-ref.supabase.co/storage/v1/s3"
+   SUPABASE_S3_REGION="us-east-1"
+   SUPABASE_S3_ACCESS_KEY_ID="your-access-key-id"
+   SUPABASE_S3_SECRET_ACCESS_KEY="your-secret-access-key"
+   SUPABASE_STORAGE_BUCKET="avatars"
+   SUPABASE_STORAGE_PUBLIC_URL="https://your-project-ref.supabase.co/storage/v1/object/public"
    ```
 
    Neon is the default Postgres target; `drizzle.config.ts` reads `DATABASE_URL`.
+   Create a public bucket in the Supabase dashboard, then find your S3 credentials
+   under **Settings → Storage → S3 Access**.
 
 3. (Optional) Sync the schema: `pnpm drizzle:generate && pnpm drizzle:push`.
 4. Run the dev server with `pnpm dev` (`http://localhost:3000`). Before shipping, run `pnpm test` and `pnpm build`; preview production output with `pnpm serve`.
