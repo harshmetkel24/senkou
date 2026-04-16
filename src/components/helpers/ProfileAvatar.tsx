@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Image } from "@unpic/react";
 import { Component, ReactNode, Suspense, useEffect, useMemo } from "react";
 
 import { getUserInfo } from "@/lib/server/user";
@@ -78,7 +77,7 @@ function ProfileAvatarContent({
   }
 
   return (
-    <Image
+    <img
       src={profileImg}
       alt="Profile"
       className="size-28 rounded-full object-cover shadow-lg"
