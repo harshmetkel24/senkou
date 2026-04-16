@@ -1,16 +1,20 @@
-// Supabase S3-compatible API endpoint: https://<project-ref>.supabase.co/storage/v1/s3
 const STORAGE_ENDPOINT = (
-  process.env.SUPABASE_S3_ENDPOINT ?? "https://your-project-ref.supabase.co/storage/v1/s3"
+  process.env.SUPABASE_S3_ENDPOINT ?? ""
 ).replace(/\/$/, "");
 const STORAGE_REGION = process.env.SUPABASE_S3_REGION ?? "us-east-1";
 const AVATAR_BUCKET = process.env.SUPABASE_STORAGE_BUCKET ?? "avatars";
-// Public base: https://<project-ref>.supabase.co/storage/v1/object/public
 const AVATAR_PUBLIC_BASE = (
   process.env.SUPABASE_STORAGE_PUBLIC_URL ?? ""
 ).replace(/\/$/, "");
 const AVATAR_PREFIX = sanitizePrefix(
   process.env.SUPABASE_STORAGE_AVATAR_PREFIX ?? ""
 );
+
+if (!AVATAR_PUBLIC_BASE) {
+  throw new Error(
+    "Missing SUPABASE_STORAGE_PUBLIC_URL. Set it to your Supabase public storage base URL."
+  );
+}
 
 export {
   AVATAR_BUCKET,
@@ -30,8 +34,6 @@ export function buildAvatarPublicUrl(key: string) {
     .map((segment) => encodeURIComponent(segment))
     .join("/");
 
-  // Supabase public URL format: <public-base>/<bucket>/<key>
-  // e.g. https://<ref>.supabase.co/storage/v1/object/public/avatars/public/1/avatar.png
   return `${AVATAR_PUBLIC_BASE}/${AVATAR_BUCKET}/${encodedKey}`;
 }
 

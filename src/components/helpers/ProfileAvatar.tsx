@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Component, ReactNode, Suspense, useEffect, useMemo } from "react";
+import { Component, ReactNode, Suspense, useEffect } from "react";
 
 import { getUserInfo } from "@/lib/server/user";
 import type { UserInfo } from "@/types";
@@ -49,7 +49,7 @@ function ProfileAvatarContent({
 }: Required<Pick<ProfileAvatarProps, "userId">> &
   Omit<ProfileAvatarProps, "userId">) {
   const fetchUserInfo = useServerFn(getUserInfo);
-  const queryKey = useMemo(() => getUserInfoQueryKey(userId), [userId]);
+  const queryKey = getUserInfoQueryKey(userId);
 
   const { data } = useSuspenseQuery({
     queryKey,
@@ -81,7 +81,7 @@ function ProfileAvatarContent({
       src={profileImg}
       alt="Profile"
       className="size-28 rounded-full object-cover shadow-lg"
-      width={116}
+      width={112}
       height={112}
       loading="lazy"
     />

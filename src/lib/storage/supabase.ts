@@ -1,5 +1,4 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { extname } from "node:path";
 
 import {
   AVATAR_BUCKET,
@@ -9,9 +8,6 @@ import {
   buildAvatarPublicUrl,
 } from "./avatar";
 
-const DEFAULT_ENDPOINT = STORAGE_ENDPOINT;
-const DEFAULT_REGION = STORAGE_REGION;
-const BUCKET_NAME = AVATAR_BUCKET;
 const MAX_PROFILE_IMAGE_BYTES = 256 * 1024; // Keep avatars lightweight for quicker loads
 
 let cachedClient: S3Client | null = null;
@@ -29,8 +25,8 @@ function getStorageClient() {
   }
 
   cachedClient = new S3Client({
-    endpoint: DEFAULT_ENDPOINT,
-    region: DEFAULT_REGION,
+    endpoint: STORAGE_ENDPOINT,
+    region: STORAGE_REGION,
     credentials: {
       accessKeyId,
       secretAccessKey,
@@ -44,19 +40,15 @@ function getStorageClient() {
 type UploadProfileImageArgs = {
   dataUrl: string;
   userId: number;
-  originalFileName?: string;
 };
 
 export async function uploadProfileImageFromDataUrl({
   dataUrl,
   userId,
-  originalFileName,
 }: UploadProfileImageArgs) {
   const client = getStorageClient();
   const { buffer, mimeType, extension } = decodeImageDataUrl(dataUrl);
-  const normalizedExt = sanitizeExtension(
-    extension || (originalFileName ? extname(originalFileName) : "") || "png"
-  );
+  const normalizedExt = sanitizeExtension(extension || "png");
   const key = buildAvatarObjectKey(
     userId,
     `avatar-${Date.now()}.${normalizedExt}`
@@ -64,7 +56,7 @@ export async function uploadProfileImageFromDataUrl({
 
   await client.send(
     new PutObjectCommand({
-      Bucket: BUCKET_NAME,
+      Bucket: AVATAR_BUCKET,
       Key: key,
       Body: buffer,
       ContentType: mimeType,
