@@ -61,7 +61,7 @@
 - @tanstack/react-start - Server-side rendering and RPC server functions
 - drizzle-orm 0.44.7 - TypeScript ORM for database access
 - @neondatabase/serverless 1.0.2 - Neon PostgreSQL serverless driver
-- @aws-sdk/client-s3 3.966.0 - AWS S3 and MinIO-compatible file storage client
+- @aws-sdk/client-s3 3.966.0 - AWS S3-compatible client used to connect to Supabase Storage
 
 **Authentication & Validation:**
 - bcryptjs 3.0.3 - Password hashing
@@ -100,7 +100,7 @@
 
 **Environment:**
 - Configuration via `.env` file (see `.env.example`)
-- Critical env vars: `DATABASE_URL`, `SESSION_SECRET`, MinIO credentials
+- Critical env vars: `DATABASE_URL`, `SESSION_SECRET`, Supabase Storage credentials
 - Environment detection via `process.env.NODE_ENV`
 
 **Build:**
@@ -120,11 +120,11 @@
 - TypeScript 5.7.2+
 - pnpm package manager
 - Node.js (compatible with latest ESM modules)
-- Optional: Docker for local MinIO container (`docker/minio/docker-compose.yml`)
+- Supabase project with Storage enabled (for avatar uploads)
 
 **Production:**
 - Node.js runtime (ESM module support required)
-- Environment variables: `DATABASE_URL`, `SESSION_SECRET`, MinIO credentials
+- Environment variables: `DATABASE_URL`, `SESSION_SECRET`, Supabase Storage credentials (`SUPABASE_S3_*`, `SUPABASE_STORAGE_*`)
 - Can be deployed as a full-stack application via TanStack Start
 
 **Browser Requirements:**

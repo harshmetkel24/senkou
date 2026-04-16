@@ -16,11 +16,11 @@
 - Impact: Fragile to route structure changes; doesn't handle route parameters or nested routes correctly; duplicates router logic
 - Fix approach: Use TanStack Router's `useRouterState` with proper route matching utilities or link context from `<Link>` component which already has `isActive` state
 
-**MinIO Client Caching with Global State:**
-- Issue: S3Client and bucket readiness stored in module-level variables with potential race conditions
-- Files: `src/lib/storage/minio.ts:22-23, 50-84`
-- Impact: In concurrent requests, `bucketReady` promise could be created multiple times; potential for unhandled rejections if promise errors
-- Fix approach: Use Singleton pattern with proper error handling or implement connection pooling with timeout/retry logic
+**Supabase S3 Client Caching with Global State:**
+- Issue: S3Client stored in module-level `cachedClient` variable — no thread-safety guarantees if the module is ever re-evaluated
+- Files: `src/lib/storage/supabase.ts:13-38`
+- Impact: Benign in practice under Node.js single-thread model, but a missing credential error after first successful init would be silently swallowed
+- Fix approach: Validate credentials eagerly at startup rather than lazily on first upload; throw on missing env vars at module load time
 
 **Unvalidated Password Requirements:**
 - Issue: Password validation schema only checks length (min 1, max 255) with no complexity requirements (uppercase, numbers, symbols)
@@ -50,11 +50,11 @@
 
 ## Security Considerations
 
-**MINIO_SECRET_KEY Default Fallback:**
-- Risk: If environment variables missing, defaults to "minioadmin" instead of failing loud
-- Files: `src/lib/storage/minio.ts:28-29`
-- Current mitigation: Error thrown if both credentials undefined, but allows insecure defaults in partial config
-- Recommendations: Remove default values and require explicit env vars; fail on startup if missing in production
+**Missing Supabase Storage Credentials Fail at Request Time:**
+- Risk: `SUPABASE_S3_ACCESS_KEY_ID` / `SUPABASE_S3_SECRET_ACCESS_KEY` are only validated on the first upload attempt, not at startup
+- Files: `src/lib/storage/supabase.ts:18-25`
+- Current mitigation: Error is thrown and surfaces to the user on first avatar upload attempt
+- Recommendations: Check for required storage env vars at server startup so misconfiguration is caught immediately on deploy
 
 **Password Hash Algorithm Strength:**
 - Risk: Using bcryptjs with default salt rounds (10 by default) - acceptable but could be configured higher
@@ -138,9 +138,9 @@
 
 **AWS SDK V3 with Breaking Minor Updates:**
 - Risk: @aws-sdk/client-s3 ^3.966.0 uses caret versioning allowing 3.x updates; SDK v4 incompatible
-- Impact: Future npm updates could break MinIO uploads if breaking changes in HTTP client layer
-- Files: `package.json:17`, `src/lib/storage/minio.ts`
-- Migration plan: Lock to v3 with tilde (~3.966.0) until v4 migration tested; implement feature flags for SDK version
+- Impact: Future npm updates could break Supabase Storage uploads if breaking changes in HTTP client layer
+- Files: `package.json:17`, `src/lib/storage/supabase.ts`
+- Migration plan: Lock to v3 with tilde (~3.966.0) until v4 migration tested; verify Supabase S3 compatibility before upgrading
 
 **Babel Plugin React Compiler Pre-release:**
 - Risk: babel-plugin-react-compiler ^1.0.0 is pre-release (not 1.0.0+); could have breaking changes

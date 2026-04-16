@@ -29,22 +29,22 @@
     - `watchlist_entries` - User watchlist items with status, progress, notes, visibility settings
 
 **File Storage:**
-- MinIO (S3-compatible object storage)
-  - Provider: Can be local MinIO container or AWS S3
+- Supabase Storage (S3-compatible object storage)
+  - Provider: Supabase Storage via S3-compatible API
   - Use case: User profile avatar storage
-  - Client: `@aws-sdk/client-s3` (works with MinIO via forcePathStyle option)
+  - Client: `@aws-sdk/client-s3` (connects to Supabase Storage S3 endpoint with forcePathStyle option)
   - Configuration:
-    - Endpoint: `MINIO_ENDPOINT` (default: http://127.0.0.1:9000)
-    - Public URL: `MINIO_PUBLIC_URL` (for serving files)
-    - Region: `MINIO_REGION` (default: us-east-1)
-    - Bucket: `MINIO_BUCKET` (default: senkou)
-    - Credentials: `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY`
+    - Endpoint: `SUPABASE_S3_ENDPOINT` (e.g. https://your-project-ref.supabase.co/storage/v1/s3)
+    - Public URL: `SUPABASE_STORAGE_PUBLIC_URL` (e.g. https://your-project-ref.supabase.co/storage/v1/object/public)
+    - Region: `SUPABASE_S3_REGION` (default: us-east-1)
+    - Bucket: `SUPABASE_STORAGE_BUCKET` (default: avatars)
+    - Credentials: `SUPABASE_S3_ACCESS_KEY_ID` and `SUPABASE_S3_SECRET_ACCESS_KEY` (from Supabase dashboard → Settings → Storage → S3 Access)
+    - Avatar prefix: `SUPABASE_STORAGE_AVATAR_PREFIX` (optional, leave empty to store at bucket root)
   - Implementation:
-    - Avatar upload in `src/lib/storage/minio.ts`
-    - Automatic bucket creation on first use
+    - Avatar upload in `src/lib/storage/supabase.ts`
     - Image validation: max 256KB, image/* MIME types only
-    - Cloud path builder: `src/lib/storage/avatar.ts`
-  - Local Development: Docker container via `docker/minio/docker-compose.yml`
+    - URL/path builder: `src/lib/storage/avatar.ts`
+  - No local container needed — uses Supabase hosted storage directly
 
 **Caching:**
 - TanStack React Query 5.66.5 - Client-side server state caching
@@ -94,17 +94,16 @@
 **Required env vars:**
 - `DATABASE_URL` - PostgreSQL connection string (Neon serverless)
 - `SESSION_SECRET` - At least 32 characters for session cookie encryption
-- `MINIO_ENDPOINT` - MinIO/S3 endpoint (default: http://127.0.0.1:9000)
-- `MINIO_PUBLIC_URL` - Public URL for serving MinIO files (default: same as endpoint)
-- `MINIO_REGION` - AWS region or MinIO region (default: us-east-1)
-- `MINIO_BUCKET` - S3 bucket name (default: senkou)
-- `MINIO_AVATAR_PREFIX` - Path prefix for avatar storage (default: public)
-- `MINIO_ACCESS_KEY` - MinIO access key (default: minioadmin)
-- `MINIO_SECRET_KEY` - MinIO secret key (default: minioadmin)
+- `SUPABASE_S3_ENDPOINT` - Supabase Storage S3 endpoint URL
+- `SUPABASE_S3_REGION` - Region (default: us-east-1)
+- `SUPABASE_S3_ACCESS_KEY_ID` - Supabase S3 access key ID (from Supabase dashboard → Settings → Storage → S3 Access)
+- `SUPABASE_S3_SECRET_ACCESS_KEY` - Supabase S3 secret access key
+- `SUPABASE_STORAGE_BUCKET` - Storage bucket name (default: avatars)
+- `SUPABASE_STORAGE_PUBLIC_URL` - Public base URL for serving files (no trailing slash, no bucket name)
 
 **Optional env vars:**
 - `NODE_ENV` - Environment mode (development/production)
-- `MINIO_LICENSE_PATH` - Path to AIStor license file for local container
+- `SUPABASE_STORAGE_AVATAR_PREFIX` - Key prefix inside bucket for avatars (default: empty, stores at bucket root)
 
 **Secrets location:**
 - `.env` file (root directory, not committed to git)

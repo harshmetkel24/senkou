@@ -13,7 +13,7 @@
 - GraphQL proxying to AniList API
 - Multi-user authentication with session management
 - Watchlist/catalog entity management with PostgreSQL persistence
-- File storage via MinIO S3-compatible API
+- File storage via Supabase Storage (S3-compatible API)
 - i18n support (English/Japanese)
 
 ## Layers
@@ -77,12 +77,12 @@
 - Used by: Server functions for CRUD operations
 
 **Storage Layer:**
-- Purpose: File uploads and avatar management via MinIO
+- Purpose: File uploads and avatar management via Supabase Storage
 - Location: `src/lib/storage/`
 - Contains:
-  - `minio.ts` - S3 client setup, image validation, bucket management
-  - `avatar.ts` - Avatar URL resolution and public URL construction
-- Depends on: AWS SDK S3 client, Node.js path utilities
+  - `supabase.ts` - S3 client setup (pointing to Supabase Storage S3 endpoint), image validation, upload logic
+  - `avatar.ts` - Avatar URL resolution, public URL construction, and env-based config exports
+- Depends on: AWS SDK S3 client (S3-compatible interface), Node.js Buffer
 - Used by: User profile update handlers
 
 **State Management:**
@@ -164,7 +164,7 @@
 2. File converted to base64 data URL
 3. Component passes data URL to `updateUserFn` server function
 4. Server validates file size (<256KB) and format (image/*)
-5. MinIO client ensures bucket exists, uploads file
+5. Supabase Storage S3 client uploads file to configured bucket
 6. Avatar URL stored in users table as absolute URL
 7. `resolveProfileImageUrl` builds public URL if needed on retrieval
 
