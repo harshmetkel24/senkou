@@ -16,7 +16,7 @@ export const usersTable = pgTable("users", {
   displayName: varchar("display_name", { length: 120 }).notNull(),
   experienceLevel: integer("experience_level").notNull().default(0),
   bio: text("bio"),
-  // Stores absolute URLs to avatars (MinIO-backed).
+  // Stores absolute URLs to avatars (Supabase Storage-backed).
   profileImg: text("profile_img"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()

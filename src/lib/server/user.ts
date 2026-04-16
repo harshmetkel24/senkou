@@ -1,6 +1,6 @@
 import { useAppSession } from "@/lib/auth/session";
 import { resolveProfileImageUrl } from "@/lib/storage/avatar";
-import { uploadProfileImageFromDataUrl } from "@/lib/storage/minio";
+import { uploadProfileImageFromDataUrl } from "@/lib/storage/supabase";
 import type { User } from "@/types";
 import { createServerFn } from "@tanstack/react-start";
 

@@ -1,14 +1,15 @@
+// Supabase S3-compatible API endpoint: https://<project-ref>.supabase.co/storage/v1/s3
 const STORAGE_ENDPOINT = (
-  process.env.MINIO_ENDPOINT ?? "http://127.0.0.1:9000"
+  process.env.SUPABASE_S3_ENDPOINT ?? "https://your-project-ref.supabase.co/storage/v1/s3"
 ).replace(/\/$/, "");
-const STORAGE_REGION = process.env.MINIO_REGION ?? "us-east-1";
-const AVATAR_BUCKET =
-  process.env.MINIO_BUCKET ?? process.env.MINIO_BUCKET_NAME ?? "senkou";
+const STORAGE_REGION = process.env.SUPABASE_S3_REGION ?? "us-east-1";
+const AVATAR_BUCKET = process.env.SUPABASE_STORAGE_BUCKET ?? "avatars";
+// Public base: https://<project-ref>.supabase.co/storage/v1/object/public
 const AVATAR_PUBLIC_BASE = (
-  process.env.MINIO_PUBLIC_URL ?? STORAGE_ENDPOINT
+  process.env.SUPABASE_STORAGE_PUBLIC_URL ?? ""
 ).replace(/\/$/, "");
 const AVATAR_PREFIX = sanitizePrefix(
-  process.env.MINIO_AVATAR_PREFIX ?? process.env.MINIO_AVATAR_PATH ?? "public"
+  process.env.SUPABASE_STORAGE_AVATAR_PREFIX ?? ""
 );
 
 export {
@@ -29,6 +30,8 @@ export function buildAvatarPublicUrl(key: string) {
     .map((segment) => encodeURIComponent(segment))
     .join("/");
 
+  // Supabase public URL format: <public-base>/<bucket>/<key>
+  // e.g. https://<ref>.supabase.co/storage/v1/object/public/avatars/public/1/avatar.png
   return `${AVATAR_PUBLIC_BASE}/${AVATAR_BUCKET}/${encodedKey}`;
 }
 
@@ -45,12 +48,7 @@ export function resolveProfileImageUrl(raw?: string | null) {
     return trimmed;
   }
 
-  const sanitizedKey = trimmed.replace(/^\/+/, "");
-  const keyWithoutBucket = sanitizedKey.startsWith(`${AVATAR_BUCKET}/`)
-    ? sanitizedKey.slice(AVATAR_BUCKET.length + 1)
-    : sanitizedKey;
-
-  return buildAvatarPublicUrl(keyWithoutBucket);
+  return buildAvatarPublicUrl(trimmed.replace(/^\/+/, ""));
 }
 
 function sanitizePrefix(prefix: string) {

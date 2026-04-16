@@ -1,9 +1,4 @@
-import {
-  CreateBucketCommand,
-  HeadBucketCommand,
-  PutObjectCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { extname } from "node:path";
 
 import {
@@ -20,17 +15,16 @@ const BUCKET_NAME = AVATAR_BUCKET;
 const MAX_PROFILE_IMAGE_BYTES = 256 * 1024; // Keep avatars lightweight for quicker loads
 
 let cachedClient: S3Client | null = null;
-let bucketReady: Promise<void> | null = null;
 
-function getS3Client() {
+function getStorageClient() {
   if (cachedClient) return cachedClient;
 
-  const accessKeyId = process.env.MINIO_ACCESS_KEY || "minioadmin";
-  const secretAccessKey = process.env.MINIO_SECRET_KEY || "minioadmin";
+  const accessKeyId = process.env.SUPABASE_S3_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.SUPABASE_S3_SECRET_ACCESS_KEY;
 
   if (!accessKeyId || !secretAccessKey) {
     throw new Error(
-      "Missing MinIO credentials. Set MINIO_ACCESS_KEY and MINIO_SECRET_KEY."
+      "Missing Supabase S3 credentials. Set SUPABASE_S3_ACCESS_KEY_ID and SUPABASE_S3_SECRET_ACCESS_KEY."
     );
   }
 
@@ -47,43 +41,6 @@ function getS3Client() {
   return cachedClient;
 }
 
-async function ensureBucketExists() {
-  if (bucketReady) return bucketReady;
-
-  const client = getS3Client();
-  bucketReady = (async () => {
-    try {
-      await client.send(new HeadBucketCommand({ Bucket: BUCKET_NAME }));
-      return;
-    } catch (error: unknown) {
-      const statusCode =
-        (error as { $metadata?: { httpStatusCode?: number } })?.$metadata
-          ?.httpStatusCode ?? (error as { statusCode?: number })?.statusCode;
-
-      if (statusCode && statusCode !== 404) {
-        throw error;
-      }
-
-      try {
-        await client.send(new CreateBucketCommand({ Bucket: BUCKET_NAME }));
-      } catch (createError: unknown) {
-        const alreadyExists =
-          (createError as { name?: string }).name ===
-            "BucketAlreadyOwnedByYou" ||
-          (createError as { name?: string }).name === "BucketAlreadyExists" ||
-          (createError as { $metadata?: { httpStatusCode?: number } })
-            ?.$metadata?.httpStatusCode === 409;
-
-        if (!alreadyExists) {
-          throw createError;
-        }
-      }
-    }
-  })();
-
-  return bucketReady;
-}
-
 type UploadProfileImageArgs = {
   dataUrl: string;
   userId: number;
@@ -95,7 +52,7 @@ export async function uploadProfileImageFromDataUrl({
   userId,
   originalFileName,
 }: UploadProfileImageArgs) {
-  const client = getS3Client();
+  const client = getStorageClient();
   const { buffer, mimeType, extension } = decodeImageDataUrl(dataUrl);
   const normalizedExt = sanitizeExtension(
     extension || (originalFileName ? extname(originalFileName) : "") || "png"
@@ -104,8 +61,6 @@ export async function uploadProfileImageFromDataUrl({
     userId,
     `avatar-${Date.now()}.${normalizedExt}`
   );
-
-  await ensureBucketExists();
 
   await client.send(
     new PutObjectCommand({
@@ -119,7 +74,7 @@ export async function uploadProfileImageFromDataUrl({
 
   return {
     key,
-    url: buildPublicUrl(key),
+    url: buildAvatarPublicUrl(key),
     contentType: mimeType,
     size: buffer.byteLength,
   };
@@ -162,8 +117,4 @@ function decodeImageDataUrl(dataUrl: string) {
 function sanitizeExtension(ext: string) {
   const cleaned = ext.replace(/^\./, "").toLowerCase();
   return cleaned && /^[a-z0-9]+$/.test(cleaned) ? cleaned : "png";
-}
-
-function buildPublicUrl(key: string) {
-  return buildAvatarPublicUrl(key);
 }
