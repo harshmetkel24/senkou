@@ -13,7 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-type WatchlistStats = {
+export type WatchlistStats = {
   PLANNING: number;
   WATCHING: number;
   COMPLETED: number;
@@ -53,7 +53,7 @@ const STATUS_CONFIG: Record<
   },
 };
 
-const STATUS_ORDER: WatchStatus[] = [
+export const STATUS_ORDER: WatchStatus[] = [
   "WATCHING",
   "COMPLETED",
   "PLANNING",
@@ -61,7 +61,7 @@ const STATUS_ORDER: WatchStatus[] = [
   "DROPPED",
 ];
 
-function StatCard({
+export function StatCard({
   status,
   count,
   total,
@@ -92,9 +92,9 @@ function StatCard({
         </div>
       </div>
       <div className="mt-3">
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted/50">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-muted/50">
           <div
-            className={`h-full rounded-full bg-gradient-to-r ${config.gradient} transition-all duration-500`}
+            className={`h-full rounded-full bg-linear-to-r ${config.gradient} transition-all duration-500`}
             style={{ width: `${percentage}%` }}
           />
         </div>
@@ -106,7 +106,7 @@ function StatCard({
   );
 }
 
-function StatCardSkeleton() {
+export function StatCardSkeleton() {
   return (
     <div className="rounded-xl border border-border/50 bg-card/50 p-4">
       <div className="flex items-start justify-between">

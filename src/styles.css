@@ -279,4 +279,33 @@ code {
   .animate-placeholder-swap {
     animation: placeholder-swap 2800ms ease-in-out both;
   }
+
+  .animate-stagger-1 {
+    animation: fade-in 600ms ease-out both;
+    animation-delay: 0ms;
+  }
+
+  .animate-stagger-2 {
+    animation: fade-in 600ms ease-out both;
+    animation-delay: 100ms;
+  }
+
+  .animate-stagger-3 {
+    animation: fade-in 600ms ease-out both;
+    animation-delay: 200ms;
+  }
+
+  .animate-stagger-4 {
+    animation: fade-in 600ms ease-out both;
+    animation-delay: 300ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-stagger-1,
+  .animate-stagger-2,
+  .animate-stagger-3,
+  .animate-stagger-4 {
+    animation: none;
+  }
 }

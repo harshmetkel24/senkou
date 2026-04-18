@@ -9,6 +9,8 @@ export type ProfileAvatarProps = {
   userId?: number;
   fallbackInitial?: string;
   draftImage?: string | null;
+  size?: number;
+  onClick?: () => void;
   onUserLoaded?: (user: UserInfo) => void;
 };
 
@@ -19,20 +21,24 @@ export function ProfileAvatar({
   userId,
   fallbackInitial,
   draftImage,
+  size = 96,
+  onClick,
   onUserLoaded,
 }: ProfileAvatarProps) {
   if (!userId) {
-    return <ProfileAvatarFallback initial={fallbackInitial} />;
+    return <ProfileAvatarFallback initial={fallbackInitial} size={size} onClick={onClick} />;
   }
 
   return (
     <AvatarErrorBoundary
-      fallback={<ProfileAvatarFallback initial={fallbackInitial} />}
+      fallback={<ProfileAvatarFallback initial={fallbackInitial} size={size} onClick={onClick} />}
     >
-      <Suspense fallback={<ProfileAvatarFallback initial={fallbackInitial} />}>
+      <Suspense fallback={<ProfileAvatarFallback initial={fallbackInitial} size={size} onClick={onClick} />}>
         <ProfileAvatarContent
           userId={userId}
           draftImage={draftImage}
+          size={size}
+          onClick={onClick}
           fallbackInitial={fallbackInitial}
           onUserLoaded={onUserLoaded}
         />
@@ -44,6 +50,8 @@ export function ProfileAvatar({
 function ProfileAvatarContent({
   userId,
   draftImage,
+  size = 96,
+  onClick,
   fallbackInitial,
   onUserLoaded,
 }: Required<Pick<ProfileAvatarProps, "userId">> &
@@ -73,17 +81,32 @@ function ProfileAvatarContent({
   const profileImg = draftImage ?? data?.profileImg;
 
   if (!profileImg) {
-    return <ProfileAvatarFallback initial={fallbackInitial} />;
+    return <ProfileAvatarFallback initial={fallbackInitial} size={size} onClick={onClick} />;
   }
 
   return (
     <img
       src={profileImg}
       alt="Profile"
-      className="size-28 rounded-full object-cover shadow-lg"
-      width={112}
-      height={112}
+      className="rounded-full object-cover shadow-lg"
+      style={{ width: size, height: size }}
+      width={size}
+      height={size}
       loading="lazy"
+      onClick={onClick}
+      aria-label={onClick ? "Open profile photo preview" : undefined}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
     />
   );
 }
@@ -110,10 +133,35 @@ class AvatarErrorBoundary extends Component<
   }
 }
 
-export function ProfileAvatarFallback({ initial }: { initial?: string }) {
+export function ProfileAvatarFallback({
+  initial,
+  size = 96,
+  onClick,
+}: {
+  initial?: string;
+  size?: number;
+  onClick?: () => void;
+}) {
   const letter = initial?.charAt(0).toUpperCase() || "U";
   return (
-    <div className="w-28 h-28 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-4xl font-bold shadow-lg">
+    <div
+      className="rounded-full bg-linear-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground font-bold shadow-lg"
+      style={{ width: size, height: size, fontSize: size * 0.36 }}
+      onClick={onClick}
+      aria-label={onClick ? "Open profile photo preview" : undefined}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
+    >
       {letter}
     </div>
   );
