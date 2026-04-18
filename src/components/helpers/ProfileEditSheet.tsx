@@ -17,7 +17,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save } from "@/lib/icons";
 import { useEffect, useState } from "react";
 
 export type ProfileDraft = {

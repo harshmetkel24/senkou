@@ -6,7 +6,7 @@ import { ExperienceBadge } from "@/components/helpers/experience-badge";
 import { Button } from "@/components/ui/button";
 import { getExperienceLevelInfo } from "@/lib/constants/experience-levels";
 import type { UserInfo } from "@/types";
-import { Edit } from "lucide-react";
+import { Edit } from "@/lib/icons";
 
 type ProfileHeroProps = {
   userId?: number;

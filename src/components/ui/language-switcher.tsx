@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { supportedLanguages, type SupportedLanguage } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-import { Check, Globe } from "lucide-react";
+import { Check, Globe } from "@/lib/icons";
 import { useTranslation } from "react-i18next";
 
 interface LanguageSwitcherProps {

@@ -6,7 +6,7 @@ import {
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
 import Autoplay from "embla-carousel-autoplay";
-import { Heart, RefreshCw, Sparkles, Star } from "lucide-react";
+import { Heart, RefreshCw, Sparkles, Star } from "@/lib/icons";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 

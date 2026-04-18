@@ -1,5 +1,5 @@
 import { Link, type ErrorComponentProps } from "@tanstack/react-router";
-import { AlertTriangle, Home, RefreshCw } from "lucide-react";
+import { AlertTriangle, Home, RefreshCw } from "@/lib/icons";
 
 import { Button } from "@/components/ui/button";
 

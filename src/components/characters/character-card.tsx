@@ -1,5 +1,5 @@
 import { Image } from "@unpic/react";
-import { Flame, Heart, Sparkles } from "lucide-react";
+import { Flame, Heart, Sparkles } from "@/lib/icons";
 
 import type { CharacterListItem } from "@/data/queries/characters";
 import { cn } from "@/lib/utils";

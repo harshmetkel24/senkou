@@ -1,7 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
 import _includes from "lodash/includes";
-import { Menu, X } from "lucide-react";
+import { Menu, X } from "@/lib/icons";
 
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/ui/search-bar";

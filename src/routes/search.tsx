@@ -4,7 +4,7 @@ import {
   type UseQueryResult,
 } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AlertCircle, RefreshCw, Search as SearchIcon } from "lucide-react";
+import { AlertCircle, RefreshCw, Search as SearchIcon } from "@/lib/icons";
 import { useState, type ReactNode } from "react";
 import { z } from "zod";
 

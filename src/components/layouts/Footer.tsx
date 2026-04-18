@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Download, Github, Twitter, Zap } from "lucide-react";
+import { Download, Github, Twitter, Zap } from "@/lib/icons";
 
 import { Button } from "@/components/ui/button";
 import { usePWAInstall } from "@/lib/hooks/use-pwa-install";

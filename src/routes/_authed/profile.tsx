@@ -29,7 +29,7 @@ import type { UserInfo } from "@/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { BookMarked } from "lucide-react";
+import { BookMarked } from "@/lib/icons";
 import { useCallback, useState } from "react";
 
 export const Route = createFileRoute("/_authed/profile")({

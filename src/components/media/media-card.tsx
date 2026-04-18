@@ -1,5 +1,5 @@
 import { Image } from "@unpic/react";
-import { Calendar, Flame, Star } from "lucide-react";
+import { Calendar, Flame, Star } from "@/lib/icons";
 
 import { cn } from "@/lib/utils";
 

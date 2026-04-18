@@ -13,7 +13,7 @@ import {
   RefreshCw,
   ScrollText,
   Sparkles,
-} from "lucide-react";
+} from "@/lib/icons";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 

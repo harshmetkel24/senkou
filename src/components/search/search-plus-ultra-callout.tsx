@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import { Sparkles } from "@/lib/icons";
 import type { ReactNode } from "react";
 
 interface SearchPlusUltraCalloutProps {

@@ -1,5 +1,5 @@
 import { Image } from "@unpic/react";
-import { Calendar, Clock, Flame, Play, Sparkles, Star, X } from "lucide-react";
+import { Calendar, Clock, Flame, Play, Sparkles, Star, X } from "@/lib/icons";
 import { type ComponentType, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";

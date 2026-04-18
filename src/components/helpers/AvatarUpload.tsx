@@ -1,7 +1,7 @@
 import { ProfileAvatarFallback } from "@/components/helpers/ProfileAvatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
-import { Upload, X } from "lucide-react";
+import { Upload, X } from "@/lib/icons";
 import { useRef } from "react";
 
 type AvatarUploadProps = {
