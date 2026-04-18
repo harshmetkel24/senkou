@@ -1,24 +1,36 @@
-import { ProfileAnalytics } from "@/components/helpers/ProfileAnalytics";
 import {
-  ProfileAvatar,
+  ExperienceCard,
+  ExperienceCardSkeleton,
+} from "@/components/helpers/ExperienceCard";
+import {
+  StatCard,
+  StatCardSkeleton,
+  STATUS_ORDER,
+  type WatchlistStats,
+} from "@/components/helpers/ProfileAnalytics";
+import {
+  ProfileEditSheet,
+  type ProfileDraft,
+} from "@/components/helpers/ProfileEditSheet";
+import {
+  ProfileHero,
+  ProfileHeroSkeleton,
   getUserInfoQueryKey,
-} from "@/components/helpers/ProfileAvatar";
-import { ExperienceBadge } from "@/components/helpers/experience-badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/components/helpers/ProfileHero";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 import { toast } from "@/components/ui/sonner";
-import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
-import { getExperienceLevelInfo } from "@/lib/constants/experience-levels";
 import { updateUserFn } from "@/lib/server/user";
+import { getWatchlistStatsFn } from "@/lib/server/watchlist";
 import type { UserInfo } from "@/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Edit, Save, X } from "lucide-react";
-import { useState } from "react";
+import { BookMarked } from "lucide-react";
+import { useCallback, useState } from "react";
 
 export const Route = createFileRoute("/_authed/profile")({
   component: ProfilePage,
@@ -28,60 +40,59 @@ function ProfilePage() {
   const { user } = useAuth();
   const userId = user?.id;
   const updateUser = useServerFn(updateUserFn);
+  const getStats = useServerFn(getWatchlistStatsFn);
   const queryClient = useQueryClient();
-  const [editMode, setEditMode] = useState(false);
-  const [profileData, setProfileData] = useState(() => ({
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [avatarPreviewOpen, setAvatarPreviewOpen] = useState(false);
+  const [profileData, setProfileData] = useState({
     displayName: user?.displayName || "",
     email: user?.email || "",
     profileImg: null as string | null,
     experienceLevel: 0,
     bio: null as string | null,
     createdAt: null as Date | null,
-  }));
-  const [draftData, setDraftData] = useState(profileData);
+  });
+
   const fullUserQueryKey = getUserInfoQueryKey(userId);
 
-  const formatJoinedSince = (value?: Date | string | null) => {
-    if (!value) return "—";
-    const parsed = value instanceof Date ? value : new Date(value);
-    if (Number.isNaN(parsed.getTime())) return "N/A";
-    return new Intl.DateTimeFormat(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }).format(parsed);
-  };
+  const { data: stats, isLoading: statsLoading } =
+    useQuery<WatchlistStats | null>({
+      queryKey: ["watchlist-stats"],
+      queryFn: () => getStats(),
+      staleTime: 1000 * 60 * 5,
+    });
 
-  const handleUserLoaded = (fullUser: UserInfo) => {
-    if (editMode) return;
-    const nextProfile = {
-      displayName: fullUser.displayName || "",
-      email: fullUser.email || "",
-      profileImg: fullUser.profileImg || null,
-      experienceLevel: fullUser.experienceLevel ?? 0,
-      bio: fullUser.bio ?? null,
-      createdAt: fullUser.createdAt ?? null,
-    };
-    setProfileData(nextProfile);
-    setDraftData(nextProfile);
-  };
+  const handleUserLoaded = useCallback(
+    (fullUser: UserInfo) => {
+      if (editOpen) return;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 256 * 1024) {
-      toast.error("File too large", {
-        description: "Max allowed size is 256KB.",
+      const nextProfile = {
+        displayName: fullUser.displayName || "",
+        email: fullUser.email || "",
+        profileImg: fullUser.profileImg || null,
+        experienceLevel: fullUser.experienceLevel ?? 0,
+        bio: fullUser.bio ?? null,
+        createdAt: fullUser.createdAt ?? null,
+      };
+
+      setProfileData((prev) => {
+        if (
+          prev.displayName === nextProfile.displayName &&
+          prev.email === nextProfile.email &&
+          prev.profileImg === nextProfile.profileImg &&
+          prev.experienceLevel === nextProfile.experienceLevel &&
+          prev.bio === nextProfile.bio &&
+          prev.createdAt?.getTime() === nextProfile.createdAt?.getTime()
+        ) {
+          return prev;
+        }
+
+        return nextProfile;
       });
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result as string;
-      setDraftData({ ...draftData, profileImg: base64 });
-    };
-    reader.readAsDataURL(file);
-  };
+    },
+    [editOpen]
+  );
 
   const updateUserMutation = useMutation({
     mutationFn: async (payload: {
@@ -121,11 +132,8 @@ function ProfilePage() {
         );
       }
 
-      const nextProfile = updatedUserInfo;
-
-      setProfileData(nextProfile);
-      setDraftData(nextProfile);
-      setEditMode(false);
+      setProfileData(updatedUserInfo);
+      setEditOpen(false);
       toast.success("Profile updated", {
         description: "Your changes have been saved.",
       });
@@ -139,23 +147,12 @@ function ProfilePage() {
     },
   });
 
-  if (!user) {
-    return <div>Please log in to view your profile.</div>;
-  }
-
-  const activeExperienceLevel = editMode
-    ? draftData.experienceLevel
-    : profileData.experienceLevel;
-  const experienceInfo = getExperienceLevelInfo(activeExperienceLevel);
-  const draftExperienceInfo = getExperienceLevelInfo(draftData.experienceLevel);
-  const showExperienceLoading = !editMode && profileData.createdAt === null;
-
-  const handleSave = () => {
+  const handleSave = (draft: ProfileDraft) => {
     if (!userId || updateUserMutation.isPending) return;
 
-    const trimmedDisplayName = draftData.displayName.trim();
-    const trimmedEmail = draftData.email.trim();
-    const trimmedBio = draftData.bio?.trim() ?? "";
+    const trimmedDisplayName = draft.displayName.trim();
+    const trimmedEmail = draft.email.trim();
+    const trimmedBio = draft.bio?.trim() ?? "";
 
     if (!trimmedDisplayName || !trimmedEmail) {
       toast.error("Missing details", {
@@ -175,254 +172,149 @@ function ProfilePage() {
       id: userId,
       displayName: trimmedDisplayName,
       email: trimmedEmail,
-      profileImg: draftData.profileImg,
+      profileImg: draft.profileImg,
       bio: trimmedBio.length ? trimmedBio : null,
       experienceLevel: Math.min(
-        Math.max(Math.floor(draftData.experienceLevel), 0),
+        Math.max(Math.floor(draft.experienceLevel), 0),
         9
       ),
     });
   };
 
-  const handleCancel = () => {
-    setDraftData(profileData);
-    setEditMode(false);
-    updateUserMutation.reset();
-  };
+  if (!user) {
+    return <div>Please log in to view your profile.</div>;
+  }
+
+  const isLoading = profileData.createdAt === null;
 
   return (
-    <div className="w-full flex flex-col items-center justify-center gap-8 py-8 px-4">
-      <Card className="w-full max-w-lg">
-        <CardHeader>
-          <div className="flex flex-col items-center space-y-3 mb-4">
-            <div className="relative inline-flex h-28 w-28 items-center justify-center">
-              <ProfileAvatar
-                userId={userId}
-                draftImage={editMode ? draftData.profileImg : profileData.profileImg}
-                fallbackInitial={
-                  profileData.displayName || user?.displayName || ""
-                }
-                onUserLoaded={handleUserLoaded}
-              />
-              {showExperienceLoading ? (
-                <div
-                  className="absolute -bottom-1 -right-1 h-9 w-9 rounded-full bg-muted/40 animate-pulse ring-2 ring-background"
-                  aria-hidden="true"
-                />
-              ) : (
-                <ExperienceBadge
-                  level={activeExperienceLevel}
-                  className="absolute -bottom-1 -right-1"
-                />
-              )}
-            </div>
-            {showExperienceLoading ? (
-              <div className="text-center" aria-live="polite" aria-busy="true">
-                <div className="mx-auto h-4 w-40 rounded-full bg-muted/50 animate-pulse" />
-                <div className="mx-auto mt-2 h-3 w-28 rounded-full bg-muted/40 animate-pulse" />
-                <p className="mt-2 text-[11px] text-muted-foreground italic">
-                  Fetching your level... stay in the opening sequence.
-                </p>
-              </div>
-            ) : (
-              <div className="text-center">
-                <p className="text-sm font-semibold text-foreground">
-                  Level {experienceInfo.level + 1}: {experienceInfo.title}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {experienceInfo.subtitle}
-                </p>
-              </div>
-            )}
+    <div className="w-full max-w-4xl mx-auto flex flex-col gap-6 py-8 px-4">
+      {/* Hero Banner */}
+      <div className="animate-stagger-1">
+        {isLoading && !profileData.displayName ? (
+          <ProfileHeroSkeleton />
+        ) : (
+          <ProfileHero
+            userId={userId}
+            profileData={profileData}
+            onEdit={() => {
+              updateUserMutation.reset();
+              setEditOpen(true);
+            }}
+            onUserLoaded={handleUserLoaded}
+            onAvatarClick={() => {
+              if (profileData.profileImg) setAvatarPreviewOpen(true);
+            }}
+          />
+        )}
+      </div>
+
+      {/* Bento Grid: Experience + Stats Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-stagger-2">
+        {isLoading ? (
+          <ExperienceCardSkeleton />
+        ) : (
+          <ExperienceCard level={profileData.experienceLevel} />
+        )}
+
+        {/* Anime Stats Summary Card */}
+        <div className="group relative overflow-hidden rounded-xl border border-border/50 bg-card/50 p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-border hover:shadow-(--shadow-elevated)">
+          <div className="flex items-center gap-2 mb-4">
+            <BookMarked className="size-5 text-primary" />
+            <h2 className="text-xl font-bold">Anime Stats</h2>
           </div>
-          <CardTitle className="flex items-center justify-between">
-            Profile
-            {!editMode ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setDraftData(profileData);
-                  setEditMode(true);
-                  updateUserMutation.reset();
-                }}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  type="button"
-                  onClick={handleCancel}
-                  disabled={updateUserMutation.isPending}
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Cancel
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSave}
-                  disabled={updateUserMutation.isPending}
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {updateUserMutation.isPending ? "Saving..." : "Save"}
-                </Button>
-              </div>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {!editMode ? (
-            <>
-              <div>
-                <Label>Display Name</Label>
-                <p className="text-sm text-muted-foreground">
-                  {profileData.displayName}
-                </p>
-              </div>
-              <div>
-                <Label>Email</Label>
-                <p className="text-sm text-muted-foreground">
-                  {profileData.email}
-                </p>
-              </div>
-              <div>
-                <Label>Joined Since</Label>
-                <p className="text-sm text-muted-foreground">
-                  {formatJoinedSince(profileData.createdAt)}
-                </p>
-              </div>
-              <div>
-                <Label>Bio</Label>
-                {profileData.bio ? (
-                  <p className="text-sm text-foreground/90 leading-relaxed">
-                    {profileData.bio}
-                  </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground italic">
-                    No bio yet.
-                  </p>
-                )}
-              </div>
-            </>
+          {statsLoading ? (
+            <div className="space-y-2">
+              <div className="h-8 w-24 rounded bg-muted/50 animate-pulse" />
+              <div className="h-4 w-36 rounded bg-muted/40 animate-pulse" />
+            </div>
+          ) : !stats || stats.total === 0 ? (
+            <div className="flex flex-col items-center justify-center py-4 text-center">
+              <BookMarked className="size-10 text-muted-foreground/40" />
+              <p className="mt-2 text-sm text-muted-foreground">
+                No anime in your library yet.
+              </p>
+              <p className="text-xs text-muted-foreground/70">
+                Start adding anime to track your journey!
+              </p>
+            </div>
           ) : (
             <>
-              <div>
-                <Label htmlFor="displayName">Display Name</Label>
-                <Input
-                  id="displayName"
-                  required
-                  value={draftData.displayName}
-                  onChange={(e) =>
-                    setDraftData({ ...draftData, displayName: e.target.value })
-                  }
-                />
+              <div className="flex items-baseline gap-2">
+                <span className="text-[28px] font-bold tabular-nums tracking-[-0.02em] text-primary">
+                  {stats.total}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  Anime in Library
+                </span>
               </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  required
-                  value={draftData.email}
-                  onChange={(e) =>
-                    setDraftData({ ...draftData, email: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <Label>Joined Since</Label>
-                <p className="text-sm text-muted-foreground">
-                  {formatJoinedSince(profileData.createdAt)}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  System generated.
-                </p>
-              </div>
-              <div>
-                <Label htmlFor="bio">Bio</Label>
-                <Textarea
-                  id="bio"
-                  maxLength={128}
-                  value={draftData.bio ?? ""}
-                  onChange={(e) =>
-                    setDraftData({
-                      ...draftData,
-                      bio: e.target.value.slice(0, 128),
-                    })
-                  }
-                  placeholder="A short line about your anime taste."
-                />
-                <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Keep it short and punchy.</span>
-                  <span>{(draftData.bio ?? "").length}/128</span>
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="experienceLevel">Experience Level</Label>
-                <div className="mt-2 rounded-lg border border-border/60 bg-muted/30 p-3">
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="text-sm font-semibold text-foreground">
-                      Level {draftExperienceInfo.level + 1}:{" "}
-                      {draftExperienceInfo.title}
-                    </p>
-                    <span className="text-xs text-muted-foreground">
-                      {draftExperienceInfo.subtitle}
-                    </span>
-                  </div>
-                  <input
-                    id="experienceLevel"
-                    type="range"
-                    min={0}
-                    max={9}
-                    step={1}
-                    value={draftData.experienceLevel}
-                    onChange={(e) =>
-                      setDraftData({
-                        ...draftData,
-                        experienceLevel: Number(e.target.value),
-                      })
-                    }
-                    className="mt-3 w-full accent-primary"
-                  />
-                  <div className="mt-1 flex justify-between text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
-                    <span>1</span>
-                    <span>10</span>
-                  </div>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  We will auto-calc this from watch history later.
-                </p>
-              </div>
-              <div>
-                <Label htmlFor="profileImg">Profile Image</Label>
-                <Input
-                  id="profileImg"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-                <p className="text-xs text-muted-foreground">Max size: 256KB</p>
+              <div className="flex gap-4 mt-3 text-xs text-muted-foreground">
+                {STATUS_ORDER.slice(0, 3).map((status) => (
+                  <span key={status} className="flex items-center gap-1">
+                    <span className="font-bold text-foreground">
+                      {stats[status]}
+                    </span>{" "}
+                    {status.charAt(0) + status.slice(1).toLowerCase()}
+                  </span>
+                ))}
               </div>
             </>
           )}
-          {updateUserMutation.isError ? (
-            <p className="text-sm text-destructive" role="alert">
-              {updateUserMutation.error instanceof Error
-                ? updateUserMutation.error.message
-                : "Something went wrong while saving your profile."}
-            </p>
-          ) : null}
-        </CardContent>
-      </Card>
-      {!editMode ? (
-        <div className="w-full max-w-4xl">
-          <ProfileAnalytics />
         </div>
-      ) : null}
+      </div>
+
+      {/* Stat Cards Grid */}
+      <div className="animate-stagger-3">
+        {statsLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <StatCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : stats && stats.total > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {STATUS_ORDER.map((status) => (
+              <StatCard
+                key={status}
+                status={status}
+                count={stats[status]}
+                total={stats.total}
+              />
+            ))}
+          </div>
+        ) : null}
+      </div>
+
+      {/* Edit Sheet */}
+      <ProfileEditSheet
+        open={editOpen}
+        onOpenChange={(open) => {
+          if (!open) updateUserMutation.reset();
+          setEditOpen(open);
+        }}
+        initialData={{
+          displayName: profileData.displayName,
+          email: profileData.email,
+          profileImg: profileData.profileImg,
+          experienceLevel: profileData.experienceLevel,
+          bio: profileData.bio,
+        }}
+        onSave={handleSave}
+        isSaving={updateUserMutation.isPending}
+      />
+
+      {/* Avatar Preview Dialog */}
+      {profileData.profileImg && (
+        <Dialog open={avatarPreviewOpen} onOpenChange={setAvatarPreviewOpen}>
+          <DialogContent className="max-w-md p-2 bg-transparent border-none shadow-none">
+            <img
+              src={profileData.profileImg}
+              alt={`Profile photo of ${profileData.displayName}`}
+              className="w-full rounded-xl object-cover"
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
