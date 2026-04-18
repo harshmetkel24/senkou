@@ -12,7 +12,7 @@ import {
   Trash2,
   XCircle,
   type LucideIcon,
-} from "lucide-react";
+} from "@/lib/icons";
 import { useMemo, useState, type KeyboardEvent } from "react";
 
 import { Button, buttonVariants } from "@/components/ui/button";

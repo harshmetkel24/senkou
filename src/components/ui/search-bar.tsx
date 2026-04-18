@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import debounce from "lodash/debounce";
-import { AlertCircle, RefreshCw, Search as SearchIcon } from "lucide-react";
+import { AlertCircle, RefreshCw, Search as SearchIcon } from "@/lib/icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useSidebar } from "@/components/contexts/SidebarContext";

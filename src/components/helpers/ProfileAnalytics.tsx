@@ -11,7 +11,7 @@ import {
   Play,
   TrendingDown,
   type LucideIcon,
-} from "lucide-react";
+} from "@/lib/icons";
 
 export type WatchlistStats = {
   PLANNING: number;

@@ -1,4 +1,4 @@
-import { RefreshCw } from "lucide-react";
+import { RefreshCw } from "@/lib/icons";
 
 export function PendingComponent() {
   return (

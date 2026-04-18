@@ -1,4 +1,4 @@
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "@/lib/icons";
 import { useState, type InputHTMLAttributes } from "react";
 
 import { cn } from "@/lib/utils";

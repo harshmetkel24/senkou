@@ -1,4 +1,4 @@
-import { AlertCircle, RefreshCw, Search as SearchIcon } from "lucide-react";
+import { AlertCircle, RefreshCw, Search as SearchIcon } from "@/lib/icons";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";

@@ -6,7 +6,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle } from "@/lib/icons";
 
 interface ShortcutsModalProps {
   children: React.ReactNode;
