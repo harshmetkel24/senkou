@@ -1,7 +1,7 @@
 import {
-  keepPreviousData,
-  useQuery,
-  useSuspenseQuery,
+  infiniteQueryOptions,
+  useInfiniteQuery,
+  useSuspenseInfiniteQuery,
 } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
@@ -12,10 +12,8 @@ import { z } from "zod";
 
 import type { CharacterCardData } from "@/components/characters/character-card";
 import { CharacterDetailPanel } from "@/components/characters/character-detail-panel";
-import {
-  CharacterGrid,
-  CharacterGridSkeleton,
-} from "@/components/characters/character-grid";
+import { CharacterGridSkeleton } from "@/components/characters/character-grid";
+import { InfiniteCharacterGrid } from "@/components/characters/infinite-character-grid";
 import { PendingComponent } from "@/components/helpers/PendingComponent";
 import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
 import { SearchPlusUltraCallout } from "@/components/search/search-plus-ultra-callout";
@@ -35,12 +33,17 @@ import {
 import { useSpotlightDeck } from "@/hooks/use-spotlight-deck";
 import { deriveRelatedResults } from "@/lib/search-helpers";
 
-const trendingCharactersQueryOptions = () => ({
-  queryKey: ["characters", "trending", 1],
-  queryFn: () => fetchTrendingCharacters(1, 20),
-  staleTime: 1000 * 60 * 5,
-  placeholderData: keepPreviousData,
-});
+const trendingCharactersInfiniteQueryOptions = () =>
+  infiniteQueryOptions({
+    queryKey: ["characters", "trending", "infinite"],
+    queryFn: ({ pageParam }) => fetchTrendingCharacters(pageParam, 20),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.pageInfo.hasNextPage
+        ? lastPage.pageInfo.currentPage + 1
+        : undefined,
+    staleTime: 1000 * 60 * 5,
+  });
 
 const searchSchema = z.object({
   q: z
@@ -51,26 +54,33 @@ const searchSchema = z.object({
     .transform((value) => (value && value.length ? value : undefined)),
 });
 
-const searchCharacterQueryOptions = (query: string) => ({
-  queryKey: ["characters", "search", query],
-  queryFn: () => fetchCharacterSearch(query, 1, 24),
-  staleTime: 1000 * 60 * 2,
-  placeholderData: keepPreviousData,
-});
+const searchCharacterInfiniteQueryOptions = (query: string) =>
+  infiniteQueryOptions({
+    queryKey: ["characters", "search", query],
+    queryFn: ({ pageParam }) => fetchCharacterSearch(query, pageParam, 24),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.pageInfo.hasNextPage
+        ? lastPage.pageInfo.currentPage + 1
+        : undefined,
+    staleTime: 1000 * 60 * 2,
+  });
 
 export const Route = createFileRoute("/characters")({
   validateSearch: (search) => searchSchema.parse(search ?? {}),
   loader: ({ context, search }) => {
     const resolvedSearch = search ?? {};
     const tasks = [
-      context.queryClient.ensureQueryData(trendingCharactersQueryOptions()),
+      context.queryClient.prefetchInfiniteQuery(
+        trendingCharactersInfiniteQueryOptions(),
+      ),
     ];
 
     if (resolvedSearch.q) {
       tasks.push(
-        context.queryClient.ensureQueryData(
-          searchCharacterQueryOptions(resolvedSearch.q)
-        )
+        context.queryClient.prefetchInfiniteQuery(
+          searchCharacterInfiniteQueryOptions(resolvedSearch.q),
+        ),
       );
     }
 
@@ -89,9 +99,13 @@ export const Route = createFileRoute("/characters")({
 
 function CharactersRoute() {
   const navigate = useNavigate();
-  const { data, isFetching } = useSuspenseQuery(
-    trendingCharactersQueryOptions()
-  );
+  const {
+    data,
+    isFetching,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useSuspenseInfiniteQuery(trendingCharactersInfiniteQueryOptions());
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [activeCharacter, setActiveCharacter] = useState<
     CharacterCardData | undefined
@@ -111,40 +125,46 @@ function CharactersRoute() {
   const {
     data: searchData,
     status: searchStatus,
-    isFetching: isSearching,
+    isFetching: isSearchFetching,
+    isFetchingNextPage: isSearchFetchingNextPage,
+    fetchNextPage: fetchSearchNextPage,
+    hasNextPage: hasSearchNextPage,
     isError: isSearchError,
     error: searchError,
     refetch: refetchSearch,
-  } = useQuery({
-    ...searchCharacterQueryOptions(normalizedSearchQuery),
+  } = useInfiniteQuery({
+    ...searchCharacterInfiniteQueryOptions(normalizedSearchQuery),
     enabled: shouldShowSearch,
   });
 
-  const { spotlightItems, shuffleSpotlights } = useSpotlightDeck(data.items);
-  const searchResults = searchData?.items ?? [];
-  const searchTotal = searchData?.pageInfo.total ?? 0;
+  const { spotlightItems, shuffleSpotlights } = useSpotlightDeck(
+    data.pages[0]?.items ?? [],
+  );
+  const allSearchItems = searchData?.pages.flatMap((p) => p.items) ?? [];
+  const searchTotal = searchData?.pages[0]?.pageInfo.total ?? 0;
   const showSkeleton =
     shouldShowSearch && searchStatus === "pending" && !searchData;
   const showSearchResults =
     shouldShowSearch &&
     !showSkeleton &&
     !isSearchError &&
-    searchResults.length > 0;
+    allSearchItems.length > 0;
   const showEmptyState =
     shouldShowSearch &&
     !showSkeleton &&
     !isSearchError &&
-    searchResults.length === 0;
+    allSearchItems.length === 0;
 
   const { visible: curatedResults, suggestions: relatedSuggestions } = useMemo(
     () =>
       deriveRelatedResults(
-        searchResults,
+        allSearchItems,
         normalizedSearchQuery,
         (item) => [item.name, item.nativeName],
-        { limit: 6 }
+        { limit: 6 },
       ),
-    [searchResults, normalizedSearchQuery]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [searchData, normalizedSearchQuery],
   );
 
   const searchDescription = searchTotal
@@ -194,7 +214,7 @@ function CharactersRoute() {
           <SearchResultsPanel
             heading={`Character hits for "${normalizedSearchQuery}"`}
             description={searchDescription}
-            isSearching={isSearching}
+            isSearching={isSearchFetching && !isSearchFetchingNextPage}
             showSkeleton={showSkeleton}
             skeleton={<CharacterGridSkeleton />}
             isError={Boolean(searchQuery) && isSearchError}
@@ -211,9 +231,14 @@ function CharactersRoute() {
               </Button>
             }
             showResults={showSearchResults}
-            results={curatedResults}
-            renderGrid={(items) => (
-              <CharacterGrid items={items} onSelect={handleSelect} />
+            renderGrid={() => (
+              <InfiniteCharacterGrid
+                pages={searchData!.pages}
+                onSelect={handleSelect}
+                fetchNextPage={fetchSearchNextPage}
+                hasNextPage={hasSearchNextPage}
+                isFetchingNextPage={isSearchFetchingNextPage}
+              />
             )}
             suggestions={
               relatedSuggestions.length
@@ -244,7 +269,7 @@ function CharactersRoute() {
                 {spotlightItems.map((spotlight) => (
                   <CarouselItem key={spotlight.id} className="md:h-full">
                     <article className="relative overflow-hidden rounded-2xl md:h-full">
-                      <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/20" />
+                      <div className="absolute inset-0 bg-linear-to-r from-black/85 via-black/60 to-black/20" />
                       <div className="relative grid gap-10 px-8 py-10 md:h-full md:grid-cols-[minmax(0,1fr)_320px] md:px-12 md:py-14">
                         <div className="space-y-5 text-white">
                           <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.35em] text-white/70">
@@ -256,7 +281,7 @@ function CharactersRoute() {
                           </h1>
                           <p className="text-sm text-white/80 md:text-base line-clamp-5">
                             {spotlight.description ??
-                              "From cult favorites to chart-topping leads—meet AniList’s most beloved characters in real time."}
+                              "From cult favorites to chart-topping leads—meet AniList's most beloved characters in real time."}
                           </p>
 
                           <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.35em] text-white/80">
@@ -305,7 +330,7 @@ function CharactersRoute() {
                             className="h-full w-full object-cover"
                             loading="lazy"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                          <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
                           <div className="absolute bottom-4 left-4 flex gap-2 text-xs uppercase tracking-[0.35em] text-white/80">
                             {spotlight.gender ? (
                               <span className="rounded-full border border-white/20 bg-black/40 px-3 py-1">
@@ -350,7 +375,7 @@ function CharactersRoute() {
                   : "Your favorite voices, all in one canon"}
               </h2>
             </div>
-            {isFetching ? (
+            {isFetching && !isFetchingNextPage ? (
               <span className="inline-flex items-center gap-2 rounded-full border border-border/60 px-4 py-2 text-xs uppercase tracking-[0.35em] text-muted-foreground">
                 <RefreshCw className="h-4 w-4 animate-spin" />
                 Updating
@@ -358,7 +383,13 @@ function CharactersRoute() {
             ) : null}
           </div>
 
-          <CharacterGrid items={data.items} onSelect={handleSelect} />
+          <InfiniteCharacterGrid
+            pages={data.pages}
+            onSelect={handleSelect}
+            fetchNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+          />
         </section>
       </div>
 

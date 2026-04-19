@@ -26,8 +26,7 @@ interface SearchResultsPanelProps<T> {
   onClear: () => void;
   actions?: ReactNode;
   showResults: boolean;
-  results: T[];
-  renderGrid: (items: T[]) => ReactNode;
+  renderGrid: () => ReactNode;
   suggestions?: SearchSuggestion<T>;
 }
 
@@ -47,7 +46,6 @@ export function SearchResultsPanel<T>({
   onClear,
   actions,
   showResults,
-  results,
   renderGrid,
   suggestions,
 }: SearchResultsPanelProps<T>) {
@@ -86,7 +84,7 @@ export function SearchResultsPanel<T>({
         <div className="rounded-3xl border border-destructive/40 bg-destructive/5 p-6 text-destructive">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 flex-shrink-0" />
+              <AlertCircle className="h-5 w-5 shrink-0" />
               <div>
                 <h3 className="text-lg font-semibold text-foreground">
                   {errorTitle}
@@ -128,7 +126,7 @@ export function SearchResultsPanel<T>({
         </div>
       ) : null}
 
-      {showResults ? renderGrid(results) : null}
+      {showResults ? renderGrid() : null}
 
       {suggestions && suggestions.items.length ? (
         <div className="rounded-3xl border border-border/50 bg-background/40 p-5">

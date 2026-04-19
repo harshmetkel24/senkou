@@ -28,7 +28,7 @@ export class AniListError extends Error {
   }
 }
 
-export async function fetchAniList<TData, TVariables = Record<string, never>>(
+export async function fetchAniList<TData, TVariables = Record<string, unknown>>(
   payload: GraphQLRequestInput<TVariables>,
 ): Promise<TData> {
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {

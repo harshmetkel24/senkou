@@ -1,4 +1,4 @@
-import { keepPreviousData, useSuspenseQuery } from "@tanstack/react-query";
+import { infiniteQueryOptions, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
 import { Suspense, useState } from "react";
@@ -6,11 +6,11 @@ import { useTranslation } from "react-i18next";
 
 import { PendingComponent } from "@/components/helpers/PendingComponent";
 import { RouteErrorBoundary } from "@/components/helpers/RouteErrorBoundary";
+import { InfiniteMediaGrid } from "@/components/media/infinite-media-grid";
 import {
   MediaDetailPanel,
   type MediaDetailData,
 } from "@/components/media/media-detail-panel";
-import { MediaGrid } from "@/components/media/media-grid";
 import { SearchBar } from "@/components/ui/search-bar";
 import {
   WatchlistShelf,
@@ -20,16 +20,23 @@ import { fetchTrendingAnime, type AnimeListItem } from "@/data/queries/anime";
 import { useWatchlistAdd } from "@/hooks/use-watchlist-add";
 import { useAuth } from "@/hooks/useAuth";
 
-const trendingAnimeQueryOptions = () => ({
-  queryKey: ["anime", "trending", 1, 8],
-  queryFn: () => fetchTrendingAnime(1, 8),
-  staleTime: 1000 * 60 * 5,
-  placeholderData: keepPreviousData,
-});
+const trendingAnimeInfiniteQueryOptions = () =>
+  infiniteQueryOptions({
+    queryKey: ["anime", "trending", "infinite"],
+    queryFn: ({ pageParam }) => fetchTrendingAnime(pageParam, 20),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.pageInfo.hasNextPage
+        ? lastPage.pageInfo.currentPage + 1
+        : undefined,
+    staleTime: 1000 * 60 * 5,
+  });
 
 export const Route = createFileRoute("/")({
   loader: ({ context }) =>
-    context.queryClient.ensureQueryData(trendingAnimeQueryOptions()),
+    context.queryClient.prefetchInfiniteQuery(
+      trendingAnimeInfiniteQueryOptions(),
+    ),
   component: App,
   pendingComponent: PendingComponent,
   errorComponent: (props) => (
@@ -44,14 +51,17 @@ export const Route = createFileRoute("/")({
 function App() {
   const { t } = useTranslation("home");
   const { user } = useAuth();
-  const { data: trendingAnime } = useSuspenseQuery(trendingAnimeQueryOptions());
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useSuspenseInfiniteQuery(trendingAnimeInfiniteQueryOptions());
   const [activeMedia, setActiveMedia] = useState<MediaDetailData | undefined>();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const watchlistActions = useWatchlistAdd({
     kind: "ANIME",
     activeMediaId: activeMedia?.id,
   });
-  const heroPlaceholders = buildHeroSearchPlaceholders(trendingAnime.items);
+  const heroPlaceholders = buildHeroSearchPlaceholders(
+    data.pages[0]?.items ?? [],
+  );
 
   const handleSelect = (media: MediaDetailData) => {
     setActiveMedia(media);
@@ -70,7 +80,7 @@ function App() {
             height={1024}
             className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6"
           />
-          <h1 className="text-4xl md:text-6xl font-black mb-4 uppercase [letter-spacing:-0.08em]">
+          <h1 className="text-4xl md:text-6xl font-black mb-4 uppercase tracking-[-0.08em]">
             {t("welcome")}
           </h1>
           <p className="mx-auto max-w-2xl text-lg md:text-xl text-muted-foreground font-light">
@@ -96,9 +106,12 @@ function App() {
           <h2 className="text-2xl font-bold text-center mb-6">
             {t("trending")}
           </h2>
-          <MediaGrid
-            items={trendingAnime.items.slice(1)}
+          <InfiniteMediaGrid
+            pages={data.pages}
             onSelect={handleSelect}
+            fetchNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
           />
         </section>
       </div>

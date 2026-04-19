@@ -1,7 +1,7 @@
 import {
-  keepPreviousData,
-  useQuery,
-  useSuspenseQuery,
+  infiniteQueryOptions,
+  useInfiniteQuery,
+  useSuspenseInfiniteQuery,
 } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
@@ -24,7 +24,8 @@ import {
   MediaDetailPanel,
   type MediaDetailData,
 } from "@/components/media/media-detail-panel";
-import { MediaGrid, MediaGridSkeleton } from "@/components/media/media-grid";
+import { InfiniteMediaGrid } from "@/components/media/infinite-media-grid";
+import { MediaGridSkeleton } from "@/components/media/media-grid";
 import { SearchPlusUltraCallout } from "@/components/search/search-plus-ultra-callout";
 import { SearchResultsPanel } from "@/components/search/search-results-panel";
 import { Button } from "@/components/ui/button";
@@ -40,12 +41,17 @@ import { useSpotlightDeck } from "@/hooks/use-spotlight-deck";
 import { useWatchlistAdd } from "@/hooks/use-watchlist-add";
 import { deriveRelatedResults } from "@/lib/search-helpers";
 
-const trendingMangaQueryOptions = () => ({
-  queryKey: ["manga", "trending", 1],
-  queryFn: () => fetchTrendingManga(1, 20),
-  staleTime: 1000 * 60 * 5,
-  placeholderData: keepPreviousData,
-});
+const trendingMangaInfiniteQueryOptions = () =>
+  infiniteQueryOptions({
+    queryKey: ["manga", "trending", "infinite"],
+    queryFn: ({ pageParam }) => fetchTrendingManga(pageParam, 20),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.pageInfo.hasNextPage
+        ? lastPage.pageInfo.currentPage + 1
+        : undefined,
+    staleTime: 1000 * 60 * 5,
+  });
 
 const searchSchema = z.object({
   q: z
@@ -56,26 +62,34 @@ const searchSchema = z.object({
     .transform((value) => (value && value.length ? value : undefined)),
 });
 
-const searchMangaQueryOptions = (query: string) => ({
-  queryKey: ["manga", "search", query],
-  queryFn: () => fetchMangaSearch(query, 1, 24),
-  staleTime: 1000 * 60 * 2,
-  placeholderData: keepPreviousData,
-});
+const searchMangaInfiniteQueryOptions = (query: string) =>
+  infiniteQueryOptions({
+    queryKey: ["manga", "search", query],
+    queryFn: ({ pageParam }) => fetchMangaSearch(query, pageParam, 24),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.pageInfo.hasNextPage
+        ? lastPage.pageInfo.currentPage + 1
+        : undefined,
+    staleTime: 1000 * 60 * 2,
+  });
 
 export const Route = createFileRoute("/manga")({
   validateSearch: (search) => searchSchema.parse(search ?? {}),
-  loader: ({ context, search }) => {
-    const resolvedSearch = search ?? {};
+  loaderDeps: ({ search }) => search,
+  loader: ({ context, deps }) => {
+    const resolvedSearch = deps ?? {};
     const tasks = [
-      context.queryClient.ensureQueryData(trendingMangaQueryOptions()),
+      context.queryClient.prefetchInfiniteQuery(
+        trendingMangaInfiniteQueryOptions(),
+      ),
     ];
 
     if (resolvedSearch.q) {
       tasks.push(
-        context.queryClient.ensureQueryData(
-          searchMangaQueryOptions(resolvedSearch.q)
-        )
+        context.queryClient.prefetchInfiniteQuery(
+          searchMangaInfiniteQueryOptions(resolvedSearch.q),
+        ),
       );
     }
 
@@ -94,7 +108,13 @@ export const Route = createFileRoute("/manga")({
 
 function MangaRoute() {
   const navigate = useNavigate();
-  const { data, isFetching } = useSuspenseQuery(trendingMangaQueryOptions());
+  const {
+    data,
+    isFetching,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useSuspenseInfiniteQuery(trendingMangaInfiniteQueryOptions());
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [activeMedia, setActiveMedia] = useState<MediaDetailData | undefined>();
   const watchlistActions = useWatchlistAdd({
@@ -116,40 +136,46 @@ function MangaRoute() {
   const {
     data: searchData,
     status: searchStatus,
-    isFetching: isSearching,
+    isFetching: isSearchFetching,
+    isFetchingNextPage: isSearchFetchingNextPage,
+    fetchNextPage: fetchSearchNextPage,
+    hasNextPage: hasSearchNextPage,
     isError: isSearchError,
     error: searchError,
     refetch: refetchSearch,
-  } = useQuery({
-    ...searchMangaQueryOptions(normalizedSearchQuery),
+  } = useInfiniteQuery({
+    ...searchMangaInfiniteQueryOptions(normalizedSearchQuery),
     enabled: shouldShowSearch,
   });
 
-  const { spotlightItems, shuffleSpotlights } = useSpotlightDeck(data.items);
-  const searchResults = searchData?.items ?? [];
-  const searchTotal = searchData?.pageInfo.total ?? 0;
+  const { spotlightItems, shuffleSpotlights } = useSpotlightDeck(
+    data.pages[0]?.items ?? [],
+  );
+  const allSearchItems = searchData?.pages.flatMap((p) => p.items) ?? [];
+  const searchTotal = searchData?.pages[0]?.pageInfo.total ?? 0;
   const showSkeleton =
     shouldShowSearch && searchStatus === "pending" && !searchData;
   const showSearchResults =
     shouldShowSearch &&
     !showSkeleton &&
     !isSearchError &&
-    searchResults.length > 0;
+    allSearchItems.length > 0;
   const showEmptyState =
     shouldShowSearch &&
     !showSkeleton &&
     !isSearchError &&
-    searchResults.length === 0;
+    allSearchItems.length === 0;
 
-  const { visible: curatedResults, suggestions: relatedSuggestions } = useMemo(
+  const { suggestions: relatedSuggestions } = useMemo(
     () =>
       deriveRelatedResults(
-        searchResults,
+        allSearchItems,
         normalizedSearchQuery,
         (item) => [item.title],
-        { limit: 6 }
+        { limit: 6 },
       ),
-    [searchResults, normalizedSearchQuery]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [searchData, normalizedSearchQuery],
   );
 
   const searchDescription = searchTotal
@@ -199,7 +225,7 @@ function MangaRoute() {
           <SearchResultsPanel
             heading={`Library results for "${normalizedSearchQuery}"`}
             description={searchDescription}
-            isSearching={isSearching}
+            isSearching={isSearchFetching && !isSearchFetchingNextPage}
             showSkeleton={showSkeleton}
             skeleton={<MediaGridSkeleton />}
             isError={Boolean(searchQuery) && isSearchError}
@@ -216,9 +242,14 @@ function MangaRoute() {
               </Button>
             }
             showResults={showSearchResults}
-            results={curatedResults}
-            renderGrid={(items) => (
-              <MediaGrid items={items} onSelect={handleSelect} />
+            renderGrid={() => (
+              <InfiniteMediaGrid
+                pages={searchData!.pages}
+                onSelect={handleSelect}
+                fetchNextPage={fetchSearchNextPage}
+                hasNextPage={hasSearchNextPage}
+                isFetchingNextPage={isSearchFetchingNextPage}
+              />
             )}
             suggestions={
               relatedSuggestions.length
@@ -255,7 +286,7 @@ function MangaRoute() {
                           className="h-full w-full object-cover opacity-70"
                           loading="lazy"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/65 to-black/35" />
+                        <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/65 to-black/35" />
                       </div>
                       <div className="relative grid gap-8 px-8 py-10 md:h-full md:grid-cols-[1.1fr_minmax(0,0.9fr)] md:px-12 md:py-14">
                         <div className="space-y-5 text-white">
@@ -268,7 +299,7 @@ function MangaRoute() {
                           </h1>
                           <p className="text-sm text-white/80 md:text-base line-clamp-5">
                             {spotlight.description ??
-                              "Hand-picked graphic epics sourced directly from AniList’s live manga rankings."}
+                              "Hand-picked graphic epics sourced directly from AniList's live manga rankings."}
                           </p>
 
                           <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.35em] text-white/80">
@@ -365,7 +396,7 @@ function MangaRoute() {
                   : "Prestige manga made for binge reading"}
               </h2>
             </div>
-            {isFetching ? (
+            {isFetching && !isFetchingNextPage ? (
               <span className="inline-flex items-center gap-2 rounded-full border border-border/60 px-4 py-2 text-xs uppercase tracking-[0.35em] text-muted-foreground">
                 <RefreshCw className="h-4 w-4 animate-spin" />
                 Updating
@@ -373,7 +404,13 @@ function MangaRoute() {
             ) : null}
           </div>
 
-          <MediaGrid items={data.items} onSelect={handleSelect} />
+          <InfiniteMediaGrid
+            pages={data.pages}
+            onSelect={handleSelect}
+            fetchNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+          />
         </section>
       </div>
 
