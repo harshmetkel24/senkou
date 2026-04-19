@@ -1,7 +1,7 @@
 import {
-  keepPreviousData,
-  useQuery,
-  useSuspenseQuery,
+  infiniteQueryOptions,
+  useInfiniteQuery,
+  useSuspenseInfiniteQuery,
 } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Image } from "@unpic/react";
@@ -17,7 +17,8 @@ import {
   MediaDetailPanel,
   type MediaDetailData,
 } from "@/components/media/media-detail-panel";
-import { MediaGrid, MediaGridSkeleton } from "@/components/media/media-grid";
+import { InfiniteMediaGrid } from "@/components/media/infinite-media-grid";
+import { MediaGridSkeleton } from "@/components/media/media-grid";
 import { SearchPlusUltraCallout } from "@/components/search/search-plus-ultra-callout";
 import { SearchResultsPanel } from "@/components/search/search-results-panel";
 import { Button } from "@/components/ui/button";
@@ -33,12 +34,17 @@ import { useSpotlightDeck } from "@/hooks/use-spotlight-deck";
 import { useWatchlistAdd } from "@/hooks/use-watchlist-add";
 import { deriveRelatedResults } from "@/lib/search-helpers";
 
-const trendingAnimeQueryOptions = () => ({
-  queryKey: ["anime", "trending", 1],
-  queryFn: () => fetchTrendingAnime(1, 20),
-  staleTime: 1000 * 60 * 5,
-  placeholderData: keepPreviousData,
-});
+const trendingAnimeInfiniteQueryOptions = () =>
+  infiniteQueryOptions({
+    queryKey: ["anime", "trending", "infinite"],
+    queryFn: ({ pageParam }) => fetchTrendingAnime(pageParam, 20),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.pageInfo.hasNextPage
+        ? lastPage.pageInfo.currentPage + 1
+        : undefined,
+    staleTime: 1000 * 60 * 5,
+  });
 
 const searchSchema = z.object({
   q: z
@@ -49,26 +55,33 @@ const searchSchema = z.object({
     .transform((value) => (value && value.length ? value : undefined)),
 });
 
-const searchAnimeQueryOptions = (query: string) => ({
-  queryKey: ["anime", "search", query],
-  queryFn: () => fetchAnimeSearch(query, 1, 24),
-  staleTime: 1000 * 60 * 2,
-  placeholderData: keepPreviousData,
-});
+const searchAnimeInfiniteQueryOptions = (query: string) =>
+  infiniteQueryOptions({
+    queryKey: ["anime", "search", query],
+    queryFn: ({ pageParam }) => fetchAnimeSearch(query, pageParam, 24),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.pageInfo.hasNextPage
+        ? lastPage.pageInfo.currentPage + 1
+        : undefined,
+    staleTime: 1000 * 60 * 2,
+  });
 
 export const Route = createFileRoute("/anime")({
   validateSearch: (search) => searchSchema.parse(search ?? {}),
   loader: ({ context, search }) => {
     const resolvedSearch = search ?? {};
     const tasks = [
-      context.queryClient.ensureQueryData(trendingAnimeQueryOptions()),
+      context.queryClient.prefetchInfiniteQuery(
+        trendingAnimeInfiniteQueryOptions(),
+      ),
     ];
 
     if (resolvedSearch.q) {
       tasks.push(
-        context.queryClient.ensureQueryData(
-          searchAnimeQueryOptions(resolvedSearch.q)
-        )
+        context.queryClient.prefetchInfiniteQuery(
+          searchAnimeInfiniteQueryOptions(resolvedSearch.q),
+        ),
       );
     }
 
@@ -87,7 +100,13 @@ export const Route = createFileRoute("/anime")({
 
 function AnimeRoute() {
   const navigate = useNavigate();
-  const { data, isFetching } = useSuspenseQuery(trendingAnimeQueryOptions());
+  const {
+    data,
+    isFetching,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useSuspenseInfiniteQuery(trendingAnimeInfiniteQueryOptions());
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [activeMedia, setActiveMedia] = useState<MediaDetailData | undefined>();
   const watchlistActions = useWatchlistAdd({
@@ -109,18 +128,23 @@ function AnimeRoute() {
   const {
     data: searchData,
     status: searchStatus,
-    isFetching: isSearching,
+    isFetching: isSearchFetching,
+    isFetchingNextPage: isSearchFetchingNextPage,
+    fetchNextPage: fetchSearchNextPage,
+    hasNextPage: hasSearchNextPage,
     isError: isSearchError,
     error: searchError,
     refetch: refetchSearch,
-  } = useQuery({
-    ...searchAnimeQueryOptions(normalizedSearchQuery),
+  } = useInfiniteQuery({
+    ...searchAnimeInfiniteQueryOptions(normalizedSearchQuery),
     enabled: shouldShowSearch,
   });
 
-  const { spotlightItems, shuffleSpotlights } = useSpotlightDeck(data.items);
-  const searchResults = searchData?.items ?? [];
-  const searchTotal = searchData?.pageInfo.total ?? 0;
+  const { spotlightItems, shuffleSpotlights } = useSpotlightDeck(
+    data.pages[0]?.items ?? [],
+  );
+  const allSearchItems = searchData?.pages.flatMap((p) => p.items) ?? [];
+  const searchTotal = searchData?.pages[0]?.pageInfo.total ?? 0;
   const isInitialSearch =
     shouldShowSearch && searchStatus === "pending" && !searchData;
   const showSkeleton = isInitialSearch;
@@ -128,22 +152,23 @@ function AnimeRoute() {
     shouldShowSearch &&
     !showSkeleton &&
     !isSearchError &&
-    searchResults.length > 0;
+    allSearchItems.length > 0;
   const showEmptyState =
     shouldShowSearch &&
     !showSkeleton &&
     !isSearchError &&
-    searchResults.length === 0;
+    allSearchItems.length === 0;
 
   const { visible: curatedResults, suggestions: relatedSuggestions } = useMemo(
     () =>
       deriveRelatedResults(
-        searchResults,
+        allSearchItems,
         normalizedSearchQuery,
         (item) => [item.title],
-        { limit: 6 }
+        { limit: 6 },
       ),
-    [searchResults, normalizedSearchQuery]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [searchData, normalizedSearchQuery],
   );
 
   const searchDescription = searchTotal
@@ -197,7 +222,7 @@ function AnimeRoute() {
           <SearchResultsPanel
             heading={`Matches for "${normalizedSearchQuery}"`}
             description={searchDescription}
-            isSearching={isSearching}
+            isSearching={isSearchFetching && !isSearchFetchingNextPage}
             showSkeleton={showSkeleton}
             skeleton={<MediaGridSkeleton />}
             isError={Boolean(searchQuery) && isSearchError}
@@ -214,9 +239,14 @@ function AnimeRoute() {
               </Button>
             }
             showResults={showSearchResults}
-            results={curatedResults}
-            renderGrid={(items) => (
-              <MediaGrid items={items} onSelect={handleSelect} />
+            renderGrid={() => (
+              <InfiniteMediaGrid
+                pages={searchData!.pages}
+                onSelect={handleSelect}
+                fetchNextPage={fetchSearchNextPage}
+                hasNextPage={hasSearchNextPage}
+                isFetchingNextPage={isSearchFetchingNextPage}
+              />
             )}
             suggestions={
               relatedSuggestions.length
@@ -253,7 +283,7 @@ function AnimeRoute() {
                           className="h-full w-full object-cover opacity-70"
                           loading="lazy"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/30" />
+                        <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/60 to-black/30" />
                       </div>
                       <div className="relative grid gap-8 px-8 py-10 md:h-full md:grid-cols-[1.2fr_minmax(0,0.8fr)] md:px-12 md:py-14">
                         <div className="space-y-5 text-white">
@@ -266,7 +296,7 @@ function AnimeRoute() {
                           </h1>
                           <p className="text-sm text-white/80 md:text-base line-clamp-5">
                             {spotlight.description ??
-                              "Dive into the latest cinematic anime experiences curated straight from AniList’s live charts."}
+                              "Dive into the latest cinematic anime experiences curated straight from AniList's live charts."}
                           </p>
 
                           <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.35em] text-white/80">
@@ -367,7 +397,7 @@ function AnimeRoute() {
                   : "Cinematic cards built for binge planning"}
               </h2>
             </div>
-            {isFetching ? (
+            {isFetching && !isFetchingNextPage ? (
               <span className="inline-flex items-center gap-2 rounded-full border border-border/60 px-4 py-2 text-xs uppercase tracking-[0.35em] text-muted-foreground">
                 <RefreshCw className="h-4 w-4 animate-spin" />
                 Updating
@@ -375,7 +405,13 @@ function AnimeRoute() {
             ) : null}
           </div>
 
-          <MediaGrid items={data.items} onSelect={handleSelect} />
+          <InfiniteMediaGrid
+            pages={data.pages}
+            onSelect={handleSelect}
+            fetchNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+          />
         </section>
       </div>
 
